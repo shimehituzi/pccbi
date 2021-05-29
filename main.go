@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"sort"
 	"strconv"
@@ -51,11 +52,21 @@ func main() {
 
 	sort.Sort(&data)
 
+	min := [3]int{math.MaxInt32, math.MaxInt32, math.MaxInt32}
+	max := [3]int{math.MinInt32, math.MinInt32, math.MinInt32}
+
 	for i := range data {
-		if i < 30 {
-			fmt.Println(data[i])
+		for j := 0; j < 3; j++ {
+			if data[i][j] < min[j] {
+				min[j] = data[i][j]
+			}
+			if data[i][j] > max[j] {
+				max[j] = data[i][j]
+			}
 		}
 	}
+
+	fmt.Println(min, max)
 }
 
 type Data [][3]int
@@ -64,9 +75,6 @@ func (data Data) Len() int { return len(data) }
 
 func (data Data) Swap(i, j int) { data[i], data[j] = data[j], data[i] }
 
-// sort.SliceStable(data, func(i, j int) bool { return data[i][0] < data[j][0] })
-// sort.SliceStable(data, func(i, j int) bool { return data[i][2] < data[j][2] })
-// sort.SliceStable(data, func(i, j int) bool { return data[i][1] < data[j][1] })
 func (data Data) Less(i, j int) bool {
 	switch {
 	case data[i][1] < data[j][1]:
