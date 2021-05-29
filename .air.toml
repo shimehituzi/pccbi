@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 
 [build]
   # Binary file yields from `cmd`.
-  bin = "./tmp/main"
+  bin = "./tmp/main -s ./DATABASE/orig/loot/loot/Ply/loot_vox10_1000.ply"
   # Just plain old shell command. You could use `make` as well.
   cmd = "go build -o ./tmp/main ."
   # It's not necessary to trigger build each time file changes if it's too frequent.
