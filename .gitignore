@@ -1,4 +1,5 @@
 /DATABASE
 /tmp
+/dist
 
 .DS_Store

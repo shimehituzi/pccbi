@@ -11,7 +11,7 @@ tmp_dir = "tmp"
   # It's not necessary to trigger build each time file changes if it's too frequent.
   delay = 1000
   # Ignore these filename extensions or directories.
-  exclude_dir = ["tmp", "DATABASE"]
+  exclude_dir = ["tmp", "dist", "DATABASE"]
   # Exclude files.
   exclude_file = []
   # Exclude files that match a regular expression.
