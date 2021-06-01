@@ -2,28 +2,31 @@ package main
 
 import (
 	"flag"
-	"fmt"
 
 	"github.com/shimehituzi/pccbi/internal/plyio"
 )
 
 func main() {
-	var srcPath string
-	flag.StringVar(&srcPath, "s", "", "入力ファイルのパス")
+	var srcfile string
+	flag.StringVar(&srcfile, "s", "", "入力ファイルのパス")
 	flag.Parse()
 
 	ply := plyio.NewPly()
-	ply.Read(srcPath)
+	if err := ply.ReadPlyFile(srcfile); err != nil {
+		panic(err)
+	}
 
 	points, err := plyio.NewPoints([3]int{1, 2, 0})
 	if err != nil {
 		panic(err)
 	}
-	points.Read(ply)
-
-	for i := range ply.Data {
-		if i < 30 {
-			fmt.Println(points.Data[i])
-		}
+	if err := points.ReadPly(ply); err != nil {
+		panic(err)
 	}
+
+	frames := plyio.NewFrames()
+	frames.ReadPoints(points)
+
+	bm := plyio.NewBitMaps()
+	bm.ReadPoints(points)
 }

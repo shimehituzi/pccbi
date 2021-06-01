@@ -8,9 +8,9 @@ import (
 // ply ファイルを文字列の配列として取り込んだ構造体
 type Ply struct {
 	// ヘッダー部分
-	Header []string
+	header []string
 	// データ部分
-	Data []string
+	data []string
 }
 
 // Ply のコンストラクタ
@@ -20,7 +20,7 @@ func NewPly() *Ply {
 }
 
 // ply ファイルから構造体に読み込む
-func (ply *Ply) Read(filename string) error {
+func (ply *Ply) ReadPlyFile(filename string) error {
 	fp, err := os.Open(filename)
 	if err != nil {
 		return err
@@ -31,9 +31,9 @@ func (ply *Ply) Read(filename string) error {
 
 	for isData := false; sccaner.Scan(); {
 		if isData {
-			ply.Data = append(ply.Data, sccaner.Text())
+			ply.data = append(ply.data, sccaner.Text())
 		} else {
-			ply.Header = append(ply.Header, sccaner.Text())
+			ply.header = append(ply.header, sccaner.Text())
 		}
 
 		if "end_header" == sccaner.Text() {
@@ -45,6 +45,6 @@ func (ply *Ply) Read(filename string) error {
 }
 
 // 点の総数
-func (ply *Ply) Points() int {
-	return len(ply.Data)
+func (ply *Ply) NumOfPoints() int {
+	return len(ply.data)
 }
