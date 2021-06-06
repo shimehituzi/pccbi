@@ -1,17 +1,17 @@
 # Working directory
 # . or absolute path, please note that the directories following must be under root.
 root = "."
-tmp_dir = "tmp"
+tmp_dir = "air"
 
 [build]
   # Binary file yields from `cmd`.
-  bin = "./tmp/main"
+  bin = "./air/main -s ./DATABASE/orig/loot/loot/Ply/loot_vox10_1000.ply"
   # Just plain old shell command. You could use `make` as well.
-  cmd = "go build -o ./tmp/main ."
+  cmd = "go build -o ./air/main ./cmd/pccbi"
   # It's not necessary to trigger build each time file changes if it's too frequent.
   delay = 1000
   # Ignore these filename extensions or directories.
-  exclude_dir = ["tmp", "dist", "DATABASE"]
+  exclude_dir = ["air", "tmp", "DATABASE"]
   # Exclude files.
   exclude_file = []
   # Exclude files that match a regular expression.
