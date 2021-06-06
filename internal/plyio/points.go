@@ -16,7 +16,7 @@ type sortOrders [3]int
 type Points struct {
 	// ソート順
 	sortOrders sortOrders
-	// データ本体
+	// 座標データ
 	data [][3]int
 }
 
@@ -93,54 +93,25 @@ func (points *Points) generateLessFunc() lessFunc {
 	}
 }
 
-// 点の総数
-func (points *Points) NumOfPoints() int {
-	return len(points.data)
-}
-
-// フレーム数を返す関数
-func (points *Points) numFrame() int {
-	data := points.data
-	so := points.sortOrders
-	f := 1
-	for i := range points.data {
-		if i != 0 && data[i][so[0]] != data[i-1][so[0]] {
-			f++
+// ある次元の要素の幅とバイアスを返す関数
+func (points *Points) getLengthAndBias(sortOrderElem int) (length, bias int) {
+	switch sortOrderElem {
+	case 0, 1, 2:
+		max := math.MinInt32
+		min := math.MaxInt32
+		data := points.data
+		for i := range data {
+			if max < data[i][sortOrderElem] {
+				max = data[i][sortOrderElem]
+			}
+			if min > data[i][sortOrderElem] {
+				min = data[i][sortOrderElem]
+			}
 		}
+		length = max - min + 1
+		bias = min
+		return
+	default:
+		panic("sortOrderElem は 0, 1, 2 のいずれかを与えてください")
 	}
-	return f
-}
-
-// フレームの高さを返す関数
-func (points *Points) frameHeight() (int, int) {
-	max := math.MinInt32
-	min := math.MaxInt32
-	data := points.data
-	so := points.sortOrders
-	for i := range data {
-		if max < data[i][so[1]] {
-			max = data[i][so[1]]
-		}
-		if min > data[i][so[1]] {
-			min = data[i][so[1]]
-		}
-	}
-	return max - min + 1, min
-}
-
-// フレームの幅を返す関数
-func (points *Points) frameWidth() (int, int) {
-	max := math.MinInt32
-	min := math.MaxInt32
-	data := points.data
-	so := points.sortOrders
-	for i := range data {
-		if max < data[i][so[2]] {
-			max = data[i][so[2]]
-		}
-		if min > data[i][so[2]] {
-			min = data[i][so[2]]
-		}
-	}
-	return max - min + 1, min
 }
