@@ -2,9 +2,12 @@ package plyio
 
 // 2値画像の集合として点群の位置情報を表す構造体
 type BitMaps struct {
-	width, height, numFrame int
-	frameList               []int
-	Data                    [][][]int8
+	// ある次元の要素の値の幅
+	Length [3]int
+	// ある次元の要素の値のバイアス
+	Bias [3]int
+	// 2値画像の集合
+	Data [][][]byte
 }
 
 // BitMaps のコンストラクタ
@@ -15,49 +18,24 @@ func NewBitMaps() *BitMaps {
 
 // ply の構造体から BitMaps の構造体の形式で読み込む
 func (bm *BitMaps) ReadPoints(points *Points) {
-	var biasH, biasW int
-	bm.numFrame = points.numFrame()
-	bm.height, biasH = points.frameHeight()
-	bm.width, biasW = points.frameWidth()
+	so := points.sortOrders
+	for i := 0; i < 3; i++ {
+		bm.Length[i], bm.Bias[i] = points.getLengthAndBias(so[i])
+	}
 
-	bm.frameList = make([]int, bm.numFrame)
-	bm.Data = make([][][]int8, bm.numFrame)
+	bm.Data = make([][][]byte, bm.Length[0])
 	for i := range bm.Data {
-		bm.Data[i] = make([][]int8, bm.height)
+		bm.Data[i] = make([][]byte, bm.Length[1])
 		for j := range bm.Data[i] {
-			bm.Data[i][j] = make([]int8, bm.width)
+			bm.Data[i][j] = make([]byte, bm.Length[2])
 		}
 	}
 
 	pdata := points.data
-	so := points.sortOrders
-
 	for i := range points.data {
-		bm.frameList[pdata[i][so[0]]-pdata[0][so[0]]] = pdata[i][so[0]]
-		bm.Data[pdata[i][so[0]]-pdata[0][so[0]]][pdata[i][so[1]]-biasH][pdata[i][so[2]]-biasW] = 1
-	}
-}
-
-// Frames の構造体から BitMaps の構造体の形式で読み込む
-func (bm *BitMaps) ReadFrames(frames *Frames) {
-	bm.width = frames.width
-	bm.height = frames.height
-	bm.numFrame = frames.numFrame
-
-	bm.frameList = make([]int, bm.numFrame)
-	bm.Data = make([][][]int8, bm.numFrame)
-	for i := range bm.Data {
-		bm.Data[i] = make([][]int8, bm.height)
-		for j := range bm.Data[i] {
-			bm.Data[i][j] = make([]int8, bm.width)
-		}
-	}
-
-	for i := range frames.Data {
-		bm.frameList[i] = frames.Data[i].Index
-		data := frames.Data[i].Coordinates
-		for j := range data {
-			bm.Data[i][data[j][0]][data[j][1]] = 1
-		}
+		dim0 := pdata[i][so[0]] - bm.Bias[0]
+		dim1 := pdata[i][so[1]] - bm.Bias[1]
+		dim2 := pdata[i][so[2]] - bm.Bias[2]
+		bm.Data[dim0][dim1][dim2] = 1
 	}
 }
