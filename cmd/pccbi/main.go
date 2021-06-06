@@ -29,4 +29,10 @@ func main() {
 
 	bm := plyio.NewBitMaps()
 	bm.ReadPoints(points)
+
+	frames2 := plyio.NewFrames()
+	frames2.ReadBitmaps(bm)
+
+	bm2 := plyio.NewBitMaps()
+	bm2.ReadFrames(frames)
 }
