@@ -20,11 +20,14 @@ func FyneLoop(bms *plyio.BitMaps) {
 
 	f := 0.0
 	data := binding.BindFloat(&f)
+	scale := 3
+	size := fyne.NewSize(float32(bms.Length[2])*float32(scale), float32(bms.Length[1])*float32(scale))
 
 	raster := canvas.NewRaster(func(w, h int) image.Image {
 		return bms.Data[int(f)]
 	})
 	raster.ScaleMode = canvas.ImageScalePixels
+	raster.Resize(size)
 
 	slider := widget.NewSliderWithData(0, float64(bms.Length[0]-1), data)
 	slider.OnChanged = func(f float64) {
@@ -35,9 +38,7 @@ func FyneLoop(bms *plyio.BitMaps) {
 		raster.Refresh()
 	}
 
-	label := widget.NewLabelWithData(binding.FloatToStringWithFormat(data, "value: %0.0f"))
-
-	size := fyne.NewSize(float32(bms.Length[2]), float32(bms.Length[1]))
+	label := widget.NewLabelWithData(binding.FloatToStringWithFormat(data, "frame: %0.0f"))
 
 	bitmapContent := container.New(layout.NewGridWrapLayout(size), raster)
 	content := container.New(layout.NewVBoxLayout(), bitmapContent, slider, layout.NewSpacer(), label)
