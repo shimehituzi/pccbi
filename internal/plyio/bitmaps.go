@@ -1,12 +1,5 @@
 package plyio
 
-import (
-	"image"
-	"image/color"
-)
-
-type BitMap [][]byte
-
 // 2値画像の集合として点群の位置情報を表す構造体
 type BitMaps struct {
 	// ある次元の要素の値の幅
@@ -44,25 +37,5 @@ func (bms *BitMaps) ReadPoints(points *Points) {
 		dim1 := pdata[i][so[1]] - bms.Bias[1]
 		dim2 := pdata[i][so[2]] - bms.Bias[2]
 		bms.Data[dim0][dim1][dim2] = 1
-	}
-}
-
-func (bm BitMap) ColorModel() color.Model {
-	return color.GrayModel
-}
-
-func (bm BitMap) Bounds() image.Rectangle {
-	return image.Rect(0, 0, len(bm[0]), len(bm))
-}
-
-func (bm BitMap) At(x, y int) color.Color {
-	rect := image.Rect(0, 0, len(bm[0]), len(bm))
-	if !(image.Point{x, y}.In(rect)) {
-		return color.Gray{}
-	}
-	if bm[y][x] == 1 {
-		return color.Gray{0}
-	} else {
-		return color.Gray{255}
 	}
 }
