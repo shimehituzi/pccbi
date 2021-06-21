@@ -1,8 +1,24 @@
 package main
 
+import (
+	"github.com/shimehituzi/pccbi/internal/labeling"
+	"github.com/shimehituzi/pccbi/internal/plyio"
+)
+
 func main() {
-	relativePath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"
-	srcfile := relativePath[4:]
-	bms := LordPly(srcfile)
-	FyneLoop(bms)
+	var bm *plyio.BitMap
+	bm = &plyio.BitMap{
+		[]byte{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
+		[]byte{0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0},
+		[]byte{0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0},
+		[]byte{0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		[]byte{1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1},
+		[]byte{1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0},
+		[]byte{0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+		[]byte{0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0},
+		[]byte{0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0},
+		[]byte{0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0},
+		[]byte{0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
+	}
+	labeling.NewLabeledBitMap(bm)
 }
