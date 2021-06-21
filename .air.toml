@@ -5,9 +5,9 @@ tmp_dir = "air"
 
 [build]
   # Binary file yields from `cmd`.
-  bin = "./air/main -s ./DATABASE/orig/loot/loot/Ply/loot_vox10_1000.ply"
+  bin = "./air/pccbi"
   # Just plain old shell command. You could use `make` as well.
-  cmd = "go build -o ./air/main ./cmd/pccbi"
+  cmd = "./scripts/fyne_build_with_filter.sh"
   # It's not necessary to trigger build each time file changes if it's too frequent.
   delay = 1000
   # Ignore these filename extensions or directories.
