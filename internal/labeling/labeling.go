@@ -4,20 +4,6 @@ import (
 	"github.com/shimehituzi/pccbi/internal/plyio"
 )
 
-type Point struct {
-	X, Y int
-}
-
-func NewPoint(X, Y int) *Point {
-	return &Point{X, Y}
-}
-
-type ChainCode struct {
-	Start  Point
-	Code   []byte
-	Points []Point
-}
-
 type Countour struct {
 	ChainCode ChainCode
 	Label     int

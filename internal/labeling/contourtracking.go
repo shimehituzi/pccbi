@@ -1,6 +1,12 @@
 package labeling
 
-import "fmt"
+type Point struct {
+	X, Y int
+}
+
+func NewPoint(X, Y int) *Point {
+	return &Point{X, Y}
+}
 
 type Direction struct {
 	Dx, Dy int
@@ -11,6 +17,52 @@ func returnDirection() [8]Direction {
 		{1, 0}, {1, 1}, {0, 1}, {-1, 1},
 		{-1, 0}, {-1, -1}, {0, -1}, {1, -1},
 	}
+}
+
+type ChainCode struct {
+	Start  Point
+	Code   []byte
+	Points []Point
+}
+
+func CountourTracking(lbm *LabeledBitMap) *ChainCode {
+	cc := new(ChainCode)
+	for imageY := range lbm.Image {
+		for imageX := range lbm.Image[imageY] {
+			if lbm.Image[imageY][imageX] == 1 {
+				cc.Start = Point{imageX, imageY}
+
+				// ================ここが輪郭追跡================
+				direction := returnDirection()
+				currentPoint := NewPoint(cc.Start.X, cc.Start.Y)
+				prevDirection := direction[0]
+				cc.Points = []Point{*currentPoint}
+				for {
+					for _, v := range prevDirection.nextDirection() {
+						nextPoint := NewPoint(currentPoint.X+direction[v].Dx, currentPoint.Y+direction[v].Dy)
+						if nextPoint.Y < 0 || nextPoint.X < 0 || len(lbm.Image) <= nextPoint.Y || len(lbm.Image[0]) <= nextPoint.X {
+							continue
+						}
+						if lbm.Image[nextPoint.Y][nextPoint.X] == 1 {
+							currentPoint = nextPoint
+							prevDirection = direction[v]
+							cc.Points = append(cc.Points, *currentPoint)
+							cc.Code = append(cc.Code, prevDirection.toCode())
+							break
+						}
+					}
+					if cc.Start == *currentPoint {
+						break
+					}
+				}
+				// ==============================================
+
+				break
+			}
+		}
+		break
+	}
+	return cc
 }
 
 func (d Direction) toCode() byte {
@@ -58,49 +110,5 @@ func (d Direction) nextDirection() [8]int {
 		return [8]int{4, 5, 6, 7, 0, 1, 2, 3}
 	default:
 		panic("その direction は存在しません")
-	}
-}
-
-func CountourTracking(lbm *LabeledBitMap) *ChainCode {
-	cc := new(ChainCode)
-	for imageY := range lbm.Image {
-		for imageX := range lbm.Image[imageY] {
-			if lbm.Image[imageY][imageX] == 1 {
-				cc.Start = Point{imageX, imageY}
-				InnerCountourTracking(cc, lbm)
-				break
-			}
-		}
-		break
-	}
-	fmt.Println("cc.start", cc.Start)
-	fmt.Println("cc.Code", cc.Code)
-	fmt.Println("cc.Points", cc.Points)
-	return cc
-}
-
-func InnerCountourTracking(cc *ChainCode, lbm *LabeledBitMap) {
-	direction := returnDirection()
-	currentPoint := NewPoint(cc.Start.X, cc.Start.Y)
-	prevDirection := direction[0]
-	cc.Points = []Point{*currentPoint}
-	// cc.Code = []byte{prevDirection.toCode()}
-	for {
-		for _, v := range prevDirection.nextDirection() {
-			nextPoint := NewPoint(currentPoint.X+direction[v].Dx, currentPoint.Y+direction[v].Dy)
-			if nextPoint.Y < 0 || nextPoint.X < 0 || len(lbm.Image) <= nextPoint.Y || len(lbm.Image[0]) <= nextPoint.X {
-				continue
-			}
-			if lbm.Image[nextPoint.Y][nextPoint.X] == 1 {
-				currentPoint = nextPoint
-				prevDirection = direction[v]
-				cc.Points = append(cc.Points, *currentPoint)
-				cc.Code = append(cc.Code, prevDirection.toCode())
-				break
-			}
-		}
-		if cc.Start == *currentPoint {
-			break
-		}
 	}
 }
