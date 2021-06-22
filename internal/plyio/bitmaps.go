@@ -1,5 +1,7 @@
 package plyio
 
+import "github.com/shimehituzi/pccbi/internal/bitmap"
+
 // 2値画像の集合として点群の位置情報を表す構造体
 type BitMaps struct {
 	// ある次元の要素の値の幅
@@ -7,7 +9,7 @@ type BitMaps struct {
 	// ある次元の要素の値のバイアス
 	Bias [3]int
 	// 2値画像の集合
-	Data []BitMap
+	Data []bitmap.BitMap
 }
 
 // BitMaps のコンストラクタ
@@ -23,7 +25,7 @@ func (bms *BitMaps) ReadPoints(points *Points) {
 		bms.Length[i], bms.Bias[i] = points.getLengthAndBias(so[i])
 	}
 
-	bms.Data = make([]BitMap, bms.Length[0])
+	bms.Data = make([]bitmap.BitMap, bms.Length[0])
 	for i := range bms.Data {
 		bms.Data[i] = make([][]byte, bms.Length[1])
 		for j := range bms.Data[i] {
