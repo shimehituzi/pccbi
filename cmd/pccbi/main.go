@@ -1,22 +1,15 @@
 package main
 
 import (
-	"github.com/shimehituzi/pccbi/internal/labeling"
+	"github.com/shimehituzi/pccbi/internal/plyio"
 )
 
 func main() {
-	bm := [][]byte{
-		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-		{0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0},
-		{0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0},
-		{0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0},
-		{0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
-		{0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0},
-		{0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0},
-		{0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0},
-		{0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
+	relativePath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"
+	srcfile := relativePath[4:]
+	bms, err := plyio.LordPly(srcfile)
+	if err != nil {
+		panic(err)
 	}
-	labeling.NewLabeledBitMap(bm)
+	FyneLoop(bms.Data)
 }

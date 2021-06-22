@@ -20,10 +20,10 @@ type Points struct {
 	data [][3]int
 }
 
-// Points のコンストラクタ x y z のソートする順番を [1, 2, 0] のように与えて初期化
-func NewPoints(so sortOrders) (*Points, error) {
-	const message = "ソートする順番は 0, 1, 2 の範囲で重複の無いように与えてください"
+const message = "ソートする順番は 0, 1, 2 の範囲で重複の無いように与えてください"
 
+// Points のコンストラクタ x y z のソートする順番を [1, 2, 0] のように与えて初期化
+func NewPoints(ply *Ply, so sortOrders) (*Points, error) {
 	for i := range so {
 		if so[i] < 0 || 2 < so[i] {
 			return nil, errors.New(message)
@@ -35,21 +35,16 @@ func NewPoints(so sortOrders) (*Points, error) {
 	}
 
 	points := new(Points)
+
 	points.sortOrders = so
-
-	return points, nil
-}
-
-// ply の構造体からソートされた座標を読み込む
-func (points *Points) ReadPly(ply *Ply) error {
-	points.data = make([][3]int, ply.NumOfPoints())
+	points.data = make([][3]int, len(ply.data))
 
 	for i := range ply.data {
 		line := strings.Split(ply.data[i], " ")
 		for j := 0; j < 3; j++ {
 			data, err := strconv.Atoi(line[j])
 			if err != nil {
-				return err
+				return nil, err
 			}
 			points.data[i][j] = data
 		}
@@ -57,7 +52,7 @@ func (points *Points) ReadPly(ply *Ply) error {
 
 	sort.Slice(points.data, points.generateLessFunc())
 
-	return nil
+	return points, nil
 }
 
 // sort.Slice に渡す型

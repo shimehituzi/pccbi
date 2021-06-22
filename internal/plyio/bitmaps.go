@@ -13,13 +13,8 @@ type BitMaps struct {
 }
 
 // BitMaps のコンストラクタ
-func NewBitMaps() *BitMaps {
-	pbms := new(BitMaps)
-	return pbms
-}
-
-// ply の構造体から BitMaps の構造体の形式で読み込む
-func (bms *BitMaps) ReadPoints(points *Points) {
+func NewBitMaps(points *Points) *BitMaps {
+	bms := new(BitMaps)
 	so := points.sortOrders
 	for i := 0; i < 3; i++ {
 		bms.Length[i], bms.Bias[i] = points.getLengthAndBias(so[i])
@@ -40,4 +35,5 @@ func (bms *BitMaps) ReadPoints(points *Points) {
 		dim2 := pdata[i][so[2]] - bms.Bias[2]
 		bms.Data[dim0][dim1][dim2] = 1
 	}
+	return bms
 }
