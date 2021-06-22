@@ -25,11 +25,11 @@ type ChainCode struct {
 	Points []Point
 }
 
-func CountourTracking(lbm *LabeledBitMap) *ChainCode {
+func CountourTracking(bitmap [][]byte) *ChainCode {
 	cc := new(ChainCode)
-	for imageY := range lbm.Image {
-		for imageX := range lbm.Image[imageY] {
-			if lbm.Image[imageY][imageX] == 1 {
+	for imageY := range bitmap {
+		for imageX := range bitmap[imageY] {
+			if bitmap[imageY][imageX] == 1 {
 				cc.Start = Point{imageX, imageY}
 
 				// ================ここが輪郭追跡================
@@ -40,10 +40,10 @@ func CountourTracking(lbm *LabeledBitMap) *ChainCode {
 				for {
 					for _, v := range prevDirection.nextDirection() {
 						nextPoint := NewPoint(currentPoint.X+direction[v].Dx, currentPoint.Y+direction[v].Dy)
-						if nextPoint.Y < 0 || nextPoint.X < 0 || len(lbm.Image) <= nextPoint.Y || len(lbm.Image[0]) <= nextPoint.X {
+						if nextPoint.Y < 0 || nextPoint.X < 0 || len(bitmap) <= nextPoint.Y || len(bitmap[0]) <= nextPoint.X {
 							continue
 						}
-						if lbm.Image[nextPoint.Y][nextPoint.X] == 1 {
+						if bitmap[nextPoint.Y][nextPoint.X] == 1 {
 							currentPoint = nextPoint
 							prevDirection = direction[v]
 							cc.Points = append(cc.Points, *currentPoint)
