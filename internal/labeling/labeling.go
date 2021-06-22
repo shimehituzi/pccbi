@@ -11,8 +11,8 @@ type Contour struct {
 // }
 
 type LabeledBitMap struct {
-	Image    [][]byte
-	Countour []Contour
+	Image   [][]byte
+	Contour []Contour
 }
 
 func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
@@ -31,11 +31,11 @@ func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
 		for _, point := range cc.Points {
 			tmp[point.Y][point.X] = 0
 		}
-		lbm.Countour = append(
-			lbm.Countour,
+		lbm.Contour = append(
+			lbm.Contour,
 			Contour{ChainCode: *cc, Label: i},
 		)
-		if isExistPoint(tmp) {
+		if isNotExistPoint(tmp) {
 			break
 		}
 	}
@@ -43,13 +43,24 @@ func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
 	return lbm
 }
 
-func isExistPoint(bm [][]byte) bool {
+func isNotExistPoint(bm [][]byte) bool {
 	for y := range bm {
 		for x := range bm[y] {
 			if bm[y][x] == 1 {
-				return true
+				return false
 			}
 		}
 	}
-	return false
+	return true
+}
+
+func (lbm *LabeledBitMap) GetCounterLabel(x, y int) int {
+	for _, contour := range lbm.Contour {
+		for _, point := range contour.ChainCode.Points {
+			if point.X == x && point.Y == y {
+				return contour.Label
+			}
+		}
+	}
+	panic("Label がありませんでした")
 }

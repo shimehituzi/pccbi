@@ -57,10 +57,9 @@ func CountourTracking(bitmap [][]byte) *ChainCode {
 				}
 				// ==============================================
 
-				break
+				return cc
 			}
 		}
-		break
 	}
 	return cc
 }

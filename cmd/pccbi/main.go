@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/shimehituzi/pccbi/internal/labeling"
 	"github.com/shimehituzi/pccbi/internal/plyio"
 )
 
@@ -11,5 +12,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	FyneLoop(bms)
+	lbm := labeling.NewLabeledBitMap(bms.Data[1])
+	FyneLoop(lbm)
 }
