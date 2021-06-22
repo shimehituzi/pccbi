@@ -22,11 +22,29 @@ func (bm BitMap) Bounds() image.Rectangle {
 func (bm BitMap) At(x, y int) color.Color {
 	rect := image.Rect(0, 0, len(bm[0]), len(bm))
 	if !(image.Point{x, y}.In(rect)) {
-		return color.Gray{}
+		return color.Gray{0}
 	}
 	if bm[y][x] == 1 {
 		return color.Gray{0}
 	} else {
 		return color.Gray{255}
 	}
+}
+
+// Fyne の canvas で描画するときに必要なメソッド
+type FyneBitMap interface {
+	// フレームの枚数，縦幅，横幅
+	GetLength() DimensionLength
+	// 一枚画像を取り出すメソッド
+	GetImage(int) image.Image
+}
+
+// フレームの枚数，縦幅，横幅
+type DimensionLength struct {
+	// フレームの枚数
+	D0 int
+	// 縦幅
+	D1 int
+	// 横幅
+	D2 int
 }

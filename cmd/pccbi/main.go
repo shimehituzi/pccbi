@@ -11,5 +11,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	FyneLoop(bms.Data)
+	FyneLoop(bms)
 }

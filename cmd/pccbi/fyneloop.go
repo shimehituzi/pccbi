@@ -14,22 +14,23 @@ import (
 	"github.com/shimehituzi/pccbi/internal/bitmap"
 )
 
-func FyneLoop(bm []bitmap.BitMap) {
+func FyneLoop(fbm bitmap.FyneBitMap) {
 	myApp := app.New()
 	w := myApp.NewWindow("BitMap")
 
+	dim := fbm.GetLength()
 	f := 0.0
 	data := binding.BindFloat(&f)
 	scale := 3
-	size := fyne.NewSize(float32(len(bm[0][0]))*float32(scale), float32(len(bm[0]))*float32(scale))
+	size := fyne.NewSize(float32(dim.D2)*float32(scale), float32(dim.D1)*float32(scale))
 
 	raster := canvas.NewRaster(func(w, h int) image.Image {
-		return bm[int(f)]
+		return fbm.GetImage(int(f))
 	})
 	raster.ScaleMode = canvas.ImageScalePixels
 	raster.Resize(size)
 
-	slider := widget.NewSliderWithData(0, float64(len(bm)-1), data)
+	slider := widget.NewSliderWithData(0, float64(dim.D0-1), data)
 	slider.OnChanged = func(f float64) {
 		err := data.Set(f)
 		if err != nil {

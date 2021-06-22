@@ -1,6 +1,10 @@
 package plyio
 
-import "github.com/shimehituzi/pccbi/internal/bitmap"
+import (
+	"image"
+
+	"github.com/shimehituzi/pccbi/internal/bitmap"
+)
 
 // 2値画像の集合として点群の位置情報を表す構造体
 type BitMaps struct {
@@ -36,4 +40,16 @@ func NewBitMaps(points *Points) *BitMaps {
 		bms.Data[dim0][dim1][dim2] = 1
 	}
 	return bms
+}
+
+func (bms *BitMaps) GetImage(f int) image.Image {
+	return bms.Data[f]
+}
+
+func (bms *BitMaps) GetLength() bitmap.DimensionLength {
+	return bitmap.DimensionLength{
+		D0: bms.Length[0],
+		D1: bms.Length[1],
+		D2: bms.Length[2],
+	}
 }
