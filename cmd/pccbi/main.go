@@ -12,6 +12,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	lbm := labeling.NewLabeledBitMap(bms.Data[1])
-	FyneLoop(lbm)
+	lbms := labeling.NewLabeledBitMaps(bms)
+	FyneLoop(lbms)
 }

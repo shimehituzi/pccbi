@@ -7,16 +7,18 @@ import (
 	"github.com/shimehituzi/pccbi/internal/bitmap"
 )
 
-func (lbm *LabeledBitMap) GetLength() bitmap.DimensionLength {
+// FyneBitMap の interface の実装
+func (lbms *LabeledBitMaps) GetLength() bitmap.DimensionLength {
 	return bitmap.DimensionLength{
-		D0: 0,
-		D1: len(lbm.Image),
-		D2: len(lbm.Image[0]),
+		D0: len(*lbms),
+		D1: len((*lbms)[0].Image),
+		D2: len((*lbms)[0].Image[0]),
 	}
 }
 
-func (lbm *LabeledBitMap) GetImage(int) image.Image {
-	return lbm
+// FyneBitMap の interface の実装
+func (lbms *LabeledBitMaps) GetImage(f int) image.Image {
+	return &((*lbms)[f])
 }
 
 // imgae.Image の InterFace を実装
@@ -57,4 +59,16 @@ func (lbm *LabeledBitMap) At(x, y int) color.Color {
 	} else {
 		return color.RGBA{255, 255, 255, 255}
 	}
+}
+
+// ChainCode のラベルを返す
+func (lbm *LabeledBitMap) GetCounterLabel(x, y int) int {
+	for _, contour := range lbm.Contour {
+		for _, point := range contour.ChainCode.Points {
+			if point.X == x && point.Y == y {
+				return contour.Label
+			}
+		}
+	}
+	panic("Label がありませんでした")
 }

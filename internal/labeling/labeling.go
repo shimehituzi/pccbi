@@ -1,5 +1,7 @@
 package labeling
 
+import "github.com/shimehituzi/pccbi/internal/plyio"
+
 type Contour struct {
 	ChainCode ChainCode
 	Label     int
@@ -13,6 +15,19 @@ type Contour struct {
 type LabeledBitMap struct {
 	Image   [][]byte
 	Contour []Contour
+}
+
+type LabeledBitMaps []LabeledBitMap
+
+func NewLabeledBitMaps(bms *plyio.BitMaps) *LabeledBitMaps {
+	lbms := new(LabeledBitMaps)
+	*lbms = make([]LabeledBitMap, len(bms.Data))
+
+	for i, bm := range bms.Data {
+		(*lbms)[i] = *NewLabeledBitMap(bm)
+	}
+
+	return lbms
 }
 
 func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
@@ -52,15 +67,4 @@ func isNotExistPoint(bm [][]byte) bool {
 		}
 	}
 	return true
-}
-
-func (lbm *LabeledBitMap) GetCounterLabel(x, y int) int {
-	for _, contour := range lbm.Contour {
-		for _, point := range contour.ChainCode.Points {
-			if point.X == x && point.Y == y {
-				return contour.Label
-			}
-		}
-	}
-	panic("Label がありませんでした")
 }

@@ -42,10 +42,12 @@ func NewBitMaps(points *Points) *BitMaps {
 	return bms
 }
 
+// FyneBitMap のインターフェースの実装
 func (bms *BitMaps) GetImage(f int) image.Image {
 	return bms.Data[f]
 }
 
+// FyneBitMap のインターフェースの実装
 func (bms *BitMaps) GetLength() bitmap.DimensionLength {
 	return bitmap.DimensionLength{
 		D0: bms.Length[0],
