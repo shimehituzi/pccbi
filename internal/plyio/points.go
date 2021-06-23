@@ -10,12 +10,12 @@ import (
 
 // Ply の座標をソートする順番
 // 例えば [1, 2, 0] だと y → z → x の順に安定ソートする
-type sortOrders [3]int
+type SortOrders [3]int
 
 // Ply の座標部分を数値としてパースしてソートした型
 type Points struct {
 	// ソート順
-	sortOrders sortOrders
+	sortOrders SortOrders
 	// 座標データ
 	data [][3]int
 }
@@ -23,7 +23,7 @@ type Points struct {
 const message = "ソートする順番は 0, 1, 2 の範囲で重複の無いように与えてください"
 
 // Points のコンストラクタ x y z のソートする順番を [1, 2, 0] のように与えて初期化
-func NewPoints(ply *Ply, so sortOrders) (*Points, error) {
+func NewPoints(ply *Ply, so SortOrders) (*Points, error) {
 	for i := range so {
 		if so[i] < 0 || 2 < so[i] {
 			return nil, errors.New(message)
