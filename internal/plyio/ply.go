@@ -14,18 +14,14 @@ type Ply struct {
 }
 
 // Ply のコンストラクタ
-func NewPly() *Ply {
-	ply := new(Ply)
-	return ply
-}
-
-// ply ファイルから構造体に読み込む
-func (ply *Ply) ReadPlyFile(filename string) error {
-	fp, err := os.Open(filename)
+func NewPly(srcfile string) (*Ply, error) {
+	fp, err := os.Open(srcfile)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer fp.Close()
+
+	ply := new(Ply)
 
 	sccaner := bufio.NewScanner(fp)
 
@@ -40,11 +36,5 @@ func (ply *Ply) ReadPlyFile(filename string) error {
 			isData = true
 		}
 	}
-
-	return nil
-}
-
-// 点の総数
-func (ply *Ply) NumOfPoints() int {
-	return len(ply.data)
+	return ply, nil
 }

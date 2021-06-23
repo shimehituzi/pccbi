@@ -11,25 +11,26 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
-	"github.com/shimehituzi/pccbi/internal/plyio"
+	"github.com/shimehituzi/pccbi/internal/bitmap"
 )
 
-func FyneLoop(bms *plyio.BitMaps) {
+func FyneLoop(fbm bitmap.FyneBitMap) {
 	myApp := app.New()
 	w := myApp.NewWindow("BitMap")
 
+	dim := fbm.GetLength()
 	f := 0.0
 	data := binding.BindFloat(&f)
 	scale := 3
-	size := fyne.NewSize(float32(bms.Length[2])*float32(scale), float32(bms.Length[1])*float32(scale))
+	size := fyne.NewSize(float32(dim.D2)*float32(scale), float32(dim.D1)*float32(scale))
 
 	raster := canvas.NewRaster(func(w, h int) image.Image {
-		return bms.Data[int(f)]
+		return fbm.GetImage(int(f))
 	})
 	raster.ScaleMode = canvas.ImageScalePixels
 	raster.Resize(size)
 
-	slider := widget.NewSliderWithData(0, float64(bms.Length[0]-1), data)
+	slider := widget.NewSliderWithData(0, float64(dim.D0-1), data)
 	slider.OnChanged = func(f float64) {
 		err := data.Set(f)
 		if err != nil {
