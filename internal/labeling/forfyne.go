@@ -54,10 +54,10 @@ func (lbm *LabeledBitMap) At(x, y int) color.Color {
 		case 5:
 			return color.RGBA{l, 255, 255, 255}
 		default:
-			return color.RGBA{0, 0, 0, 0}
+			return color.RGBA{255, 255, 255, 255}
 		}
 	} else {
-		return color.RGBA{255, 255, 255, 255}
+		return color.RGBA{0, 0, 0, 0}
 	}
 }
 
