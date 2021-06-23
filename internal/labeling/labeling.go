@@ -1,6 +1,11 @@
 package labeling
 
-import "github.com/shimehituzi/pccbi/internal/plyio"
+import (
+	"sync"
+
+	"github.com/shimehituzi/pccbi/internal/bitmap"
+	"github.com/shimehituzi/pccbi/internal/plyio"
+)
 
 type Contour struct {
 	ChainCode ChainCode
@@ -23,9 +28,15 @@ func NewLabeledBitMaps(bms *plyio.BitMaps) *LabeledBitMaps {
 	lbms := new(LabeledBitMaps)
 	*lbms = make([]LabeledBitMap, len(bms.Data))
 
+	wg := &sync.WaitGroup{}
 	for i, bm := range bms.Data {
-		(*lbms)[i] = *NewLabeledBitMap(bm)
+		wg.Add(1)
+		go func(i int, bm bitmap.BitMap) {
+			(*lbms)[i] = *NewLabeledBitMap(bm)
+			wg.Done()
+		}(i, bm)
 	}
+	wg.Wait()
 
 	return lbms
 }
