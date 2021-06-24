@@ -12,14 +12,14 @@ type Contour struct {
 	Label     int
 }
 
-// type Segment struct {
-// 	Countour []Contour
-// 	Label    int
-// }
+type Segment struct {
+	Contours []Contour
+	Label    int
+}
 
 type LabeledBitMap struct {
 	Image   [][]byte
-	Contour []Contour
+	Segment []Segment
 }
 
 type LabeledBitMaps []LabeledBitMap
@@ -52,13 +52,14 @@ func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
 		copy(tmp[i], bm[i])
 	}
 
+	contours := []Contour{}
 	for i := 0; ; i++ {
 		cc := CountourTracking(tmp)
 		for _, point := range cc.Points {
 			tmp[point.Y][point.X] = 0
 		}
-		lbm.Contour = append(
-			lbm.Contour,
+		contours = append(
+			contours,
 			Contour{ChainCode: *cc, Label: i},
 		)
 		if isNotExistPoint(tmp) {
@@ -66,7 +67,52 @@ func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
 		}
 	}
 
+	lbm.Segment = NewSegments(contours)
+
 	return lbm
+}
+
+func NewSegments(contours []Contour) []Segment {
+	segments := []Segment{}
+
+	count := 0
+	for i := range contours {
+		if label := isAdjacentSegment(contours[i], segments); label == -1 {
+			segments = append(segments, Segment{
+				Contours: []Contour{contours[i]},
+				Label:    count,
+			})
+			count++
+		} else {
+			segments[label].Contours = append(segments[label].Contours, contours[i])
+		}
+	}
+
+	return segments
+}
+
+func isAdjacentSegment(contour Contour, segments []Segment) int {
+	if len(segments) == 0 {
+		return -1
+	}
+	for _, point := range contour.ChainCode.Points {
+		for _, d := range getDirection() {
+			adjacnet := Point{
+				point.X + d.Dx,
+				point.Y + d.Dy,
+			}
+			for _, segment := range segments {
+				for _, arroundContour := range segment.Contours {
+					for _, arroundPoint := range arroundContour.ChainCode.Points {
+						if adjacnet == arroundPoint {
+							return segment.Label
+						}
+					}
+				}
+			}
+		}
+	}
+	return -1
 }
 
 func isNotExistPoint(bm [][]byte) bool {
