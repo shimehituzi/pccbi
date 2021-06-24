@@ -17,8 +17,38 @@ func (lbms *LabeledBitMaps) GetLength() bitmap.DimensionLength {
 }
 
 // FyneBitMap の interface の実装
-func (lbms *LabeledBitMaps) GetImage(f int) image.Image {
-	return &((*lbms)[f])
+func (lbms *LabeledBitMaps) GetLabelLength(f int) int {
+	length := len((*lbms)[f].Segment)
+	labelLength := 0
+	if length != 0 {
+		labelLength = (*lbms)[f].Segment[length-1].Label
+	}
+	return labelLength
+}
+
+// FyneBitMap の interface の実装
+func (lbms *LabeledBitMaps) GetImage(f int, l int) image.Image {
+	lbm := (*lbms)[f]
+	if l == 0 {
+		return &lbm
+	}
+	if len(lbm.Segment) < l {
+		return &lbm
+	}
+
+	oneOfLabeled := new(LabeledBitMap)
+	oneOfLabeled.Segment = []Segment{lbm.Segment[l-1]}
+	oneOfLabeled.Image = make([][]byte, len(lbm.Image))
+	for i := range lbm.Image {
+		oneOfLabeled.Image[i] = make([]byte, len(lbm.Image[i]))
+	}
+	for _, contour := range oneOfLabeled.Segment[0].Contours {
+		for _, point := range contour.ChainCode.Points {
+			oneOfLabeled.Image[point.Y][point.X] = 1
+		}
+	}
+
+	return oneOfLabeled
 }
 
 // imgae.Image の InterFace を実装
@@ -41,17 +71,17 @@ func (lbm *LabeledBitMap) At(x, y int) color.Color {
 		label := uint8(lbm.GetCounterLabel(x, y))
 		l := uint8(label * 10)
 		switch label % 6 {
-		case 0:
-			return color.RGBA{255, l, l, 255}
 		case 1:
-			return color.RGBA{l, 255, l, 255}
+			return color.RGBA{255, l, l, 255}
 		case 2:
-			return color.RGBA{l, l, 255, 255}
+			return color.RGBA{l, 255, l, 255}
 		case 3:
-			return color.RGBA{255, l, 255, 255}
+			return color.RGBA{l, l, 255, 255}
 		case 4:
-			return color.RGBA{255, 255, l, 255}
+			return color.RGBA{255, l, 255, 255}
 		case 5:
+			return color.RGBA{255, 255, l, 255}
+		case 0:
 			return color.RGBA{l, 255, 255, 255}
 		default:
 			return color.RGBA{255, 255, 255, 255}

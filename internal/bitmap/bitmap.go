@@ -5,6 +5,26 @@ import (
 	"image/color"
 )
 
+// Fyne の canvas で描画するときに必要なメソッド
+type FyneBitMap interface {
+	// フレームの枚数，縦幅，横幅
+	GetLength() DimensionLength
+	// ラベリングされた個数を返すメソッド
+	GetLabelLength(int) int
+	// 一枚画像を取り出すメソッド
+	GetImage(int, int) image.Image
+}
+
+// フレームの枚数，縦幅，横幅
+type DimensionLength struct {
+	// フレームの枚数
+	D0 int
+	// 縦幅
+	D1 int
+	// 横幅
+	D2 int
+}
+
 // 2値画像を表す構造体
 type BitMap [][]byte
 
@@ -29,22 +49,4 @@ func (bm BitMap) At(x, y int) color.Color {
 	} else {
 		return color.Gray{255}
 	}
-}
-
-// Fyne の canvas で描画するときに必要なメソッド
-type FyneBitMap interface {
-	// フレームの枚数，縦幅，横幅
-	GetLength() DimensionLength
-	// 一枚画像を取り出すメソッド
-	GetImage(int) image.Image
-}
-
-// フレームの枚数，縦幅，横幅
-type DimensionLength struct {
-	// フレームの枚数
-	D0 int
-	// 縦幅
-	D1 int
-	// 横幅
-	D2 int
 }

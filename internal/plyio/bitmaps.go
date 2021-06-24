@@ -43,8 +43,13 @@ func NewBitMaps(points *Points) *BitMaps {
 }
 
 // FyneBitMap のインターフェースの実装
-func (bms *BitMaps) GetImage(f int) image.Image {
+func (bms *BitMaps) GetImage(f int, _ int) image.Image {
 	return bms.Data[f]
+}
+
+// FyneBitMap のインターフェースの実装
+func (bms *BitMaps) GetLabelLength(int) int {
+	return 0
 }
 
 // FyneBitMap のインターフェースの実装

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"image"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -20,29 +22,77 @@ func FyneLoop(fbm bitmap.FyneBitMap) {
 
 	dim := fbm.GetLength()
 	f := 0.0
-	data := binding.BindFloat(&f)
+	frame := binding.BindFloat(&f)
+	l := 0
+	labeling := binding.BindInt(&l)
 	scale := 3
 	size := fyne.NewSize(float32(dim.D2)*float32(scale), float32(dim.D1)*float32(scale))
 
 	raster := canvas.NewRaster(func(w, h int) image.Image {
-		return fbm.GetImage(int(f))
+		return fbm.GetImage(int(f), l)
 	})
 	raster.ScaleMode = canvas.ImageScalePixels
 	raster.Resize(size)
 
-	slider := widget.NewSliderWithData(0, float64(dim.D0-1), data)
-	slider.OnChanged = func(f float64) {
-		err := data.Set(f)
-		if err != nil {
+	labelLength := fbm.GetLabelLength(int(f))
+	labelingOptions := []string{"All"}
+	for i := 1; i <= labelLength; i++ {
+		labelingOptions = append(labelingOptions, fmt.Sprint(i))
+	}
+	labelingRadio := widget.NewRadioGroup(labelingOptions, func(s string) {
+		var (
+			i   int
+			err error
+		)
+		if s != "All" {
+			i, err = strconv.Atoi(s)
+			if err != nil {
+				fyne.LogError("Failed to convert string", err)
+			}
+		} else {
+			i = 0
+		}
+		if err = labeling.Set(i); err != nil {
 			fyne.LogError("Failed to set binding value", err)
 		}
 		raster.Refresh()
+	})
+	labelingRadio.Required = true
+	labelingRadio.Selected = "All"
+	labelingRadio.Horizontal = true
+
+	frameSlider := widget.NewSliderWithData(0, float64(dim.D0-1), frame)
+	frameSlider.OnChanged = func(f float64) {
+		err := frame.Set(f)
+		if err != nil {
+			fyne.LogError("Failed to set binding value", err)
+		}
+
+		labelLength := fbm.GetLabelLength(int(f))
+		labelingOptions := []string{"All"}
+		for i := 1; i <= labelLength; i++ {
+			labelingOptions = append(labelingOptions, fmt.Sprint(i))
+		}
+		labelingRadio.Options = labelingOptions
+		labelingRadio.Selected = "All"
+		if err := labeling.Set(0); err != nil {
+			fyne.LogError("Failed to set binding value", err)
+		}
+		labelingRadio.Refresh()
+
+		raster.Refresh()
 	}
 
-	label := widget.NewLabelWithData(binding.FloatToStringWithFormat(data, "frame: %0.0f"))
+	frameLabel := widget.NewLabelWithData(binding.FloatToStringWithFormat(frame, "frame: %0.0f"))
 
 	bitmapContent := container.New(layout.NewGridWrapLayout(size), raster)
-	content := container.New(layout.NewVBoxLayout(), bitmapContent, slider, layout.NewSpacer(), label)
+	content := container.New(
+		layout.NewVBoxLayout(),
+		bitmapContent, layout.NewSpacer(),
+		frameSlider, layout.NewSpacer(),
+		frameLabel, layout.NewSpacer(),
+		labelingRadio, layout.NewSpacer(),
+	)
 	w.SetContent(content)
 	w.ShowAndRun()
 }
