@@ -35,6 +35,8 @@ func (bm BitMap) At(x, y int) color.Color {
 type FyneBitMap interface {
 	// フレームの枚数，縦幅，横幅
 	GetLength() DimensionLength
+	// ラベリングされた個数を返すメソッド
+	GetLabelLength(int) int
 	// 一枚画像を取り出すメソッド
 	GetImage(int) image.Image
 }

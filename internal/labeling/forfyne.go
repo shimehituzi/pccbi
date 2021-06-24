@@ -17,6 +17,16 @@ func (lbms *LabeledBitMaps) GetLength() bitmap.DimensionLength {
 }
 
 // FyneBitMap の interface の実装
+func (lbms *LabeledBitMaps) GetLabelLength(f int) int {
+	length := len((*lbms)[f].Segment)
+	labelLength := 0
+	if length != 0 {
+		labelLength = (*lbms)[f].Segment[length-1].Label
+	}
+	return labelLength
+}
+
+// FyneBitMap の interface の実装
 func (lbms *LabeledBitMaps) GetImage(f int) image.Image {
 	return &((*lbms)[f])
 }
