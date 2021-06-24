@@ -22,11 +22,13 @@ func FyneLoop(fbm bitmap.FyneBitMap) {
 	dim := fbm.GetLength()
 	f := 0.0
 	frame := binding.BindFloat(&f)
+	l := 0
+	// labeling := binding.BindInt(&l)
 	scale := 3
 	size := fyne.NewSize(float32(dim.D2)*float32(scale), float32(dim.D1)*float32(scale))
 
 	raster := canvas.NewRaster(func(w, h int) image.Image {
-		return fbm.GetImage(int(f))
+		return fbm.GetImage(int(f), l)
 	})
 	raster.ScaleMode = canvas.ImageScalePixels
 	raster.Resize(size)
