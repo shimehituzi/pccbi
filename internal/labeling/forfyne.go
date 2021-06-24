@@ -63,10 +63,12 @@ func (lbm *LabeledBitMap) At(x, y int) color.Color {
 
 // ChainCode のラベルを返す
 func (lbm *LabeledBitMap) GetCounterLabel(x, y int) int {
-	for _, contour := range lbm.Contour {
-		for _, point := range contour.ChainCode.Points {
-			if point.X == x && point.Y == y {
-				return contour.Label
+	for _, segment := range lbm.Segment {
+		for _, contour := range segment.Contours {
+			for _, point := range contour.ChainCode.Points {
+				if point.X == x && point.Y == y {
+					return segment.Label
+				}
 			}
 		}
 	}
