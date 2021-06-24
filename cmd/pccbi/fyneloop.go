@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -23,7 +24,7 @@ func FyneLoop(fbm bitmap.FyneBitMap) {
 	f := 0.0
 	frame := binding.BindFloat(&f)
 	l := 0
-	// labeling := binding.BindInt(&l)
+	labeling := binding.BindInt(&l)
 	scale := 3
 	size := fyne.NewSize(float32(dim.D2)*float32(scale), float32(dim.D1)*float32(scale))
 
@@ -39,7 +40,22 @@ func FyneLoop(fbm bitmap.FyneBitMap) {
 		labelingOptions = append(labelingOptions, fmt.Sprint(i))
 	}
 	labelingRadio := widget.NewRadioGroup(labelingOptions, func(s string) {
-
+		var (
+			i   int
+			err error
+		)
+		if s != "All" {
+			i, err = strconv.Atoi(s)
+			if err != nil {
+				fyne.LogError("Failed to convert string", err)
+			}
+		} else {
+			i = 0
+		}
+		if err = labeling.Set(i); err != nil {
+			fyne.LogError("Failed to set binding value", err)
+		}
+		raster.Refresh()
 	})
 	labelingRadio.Required = true
 	labelingRadio.Selected = "All"
@@ -51,14 +67,20 @@ func FyneLoop(fbm bitmap.FyneBitMap) {
 		if err != nil {
 			fyne.LogError("Failed to set binding value", err)
 		}
-		raster.Refresh()
+
 		labelLength := fbm.GetLabelLength(int(f))
 		labelingOptions := []string{"All"}
 		for i := 1; i <= labelLength; i++ {
 			labelingOptions = append(labelingOptions, fmt.Sprint(i))
 		}
 		labelingRadio.Options = labelingOptions
+		labelingRadio.Selected = "All"
+		if err := labeling.Set(0); err != nil {
+			fyne.LogError("Failed to set binding value", err)
+		}
 		labelingRadio.Refresh()
+
+		raster.Refresh()
 	}
 
 	frameLabel := widget.NewLabelWithData(binding.FloatToStringWithFormat(frame, "frame: %0.0f"))

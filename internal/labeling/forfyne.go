@@ -27,8 +27,28 @@ func (lbms *LabeledBitMaps) GetLabelLength(f int) int {
 }
 
 // FyneBitMap の interface の実装
-func (lbms *LabeledBitMaps) GetImage(f int) image.Image {
-	return &((*lbms)[f])
+func (lbms *LabeledBitMaps) GetImage(f int, l int) image.Image {
+	lbm := (*lbms)[f]
+	if l == 0 {
+		return &lbm
+	}
+	if len(lbm.Segment) < l {
+		return &lbm
+	}
+
+	oneOfLabeled := new(LabeledBitMap)
+	oneOfLabeled.Segment = []Segment{lbm.Segment[l-1]}
+	oneOfLabeled.Image = make([][]byte, len(lbm.Image))
+	for i := range lbm.Image {
+		oneOfLabeled.Image[i] = make([]byte, len(lbm.Image[i]))
+	}
+	for _, contour := range oneOfLabeled.Segment[0].Contours {
+		for _, point := range contour.ChainCode.Points {
+			oneOfLabeled.Image[point.Y][point.X] = 1
+		}
+	}
+
+	return oneOfLabeled
 }
 
 // imgae.Image の InterFace を実装
