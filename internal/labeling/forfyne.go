@@ -69,10 +69,10 @@ func (lbm *LabeledBitMap) At(x, y int) color.Color {
 	}
 	if lbm.Image[y][x] == 1 {
 		label := lbm.GetCounterLabel(x, y)
-		if label == 0 {
-			return color.RGBA{255, 255, 255, 255}
-			// return color.RGBA{0, 0, 0, 0}
-		}
+		// if label == 0 {
+		// 	return color.RGBA{255, 255, 255, 255}
+		// 	// return color.RGBA{0, 0, 0, 0}
+		// }
 		l := uint8(label * 10)
 		switch label % 6 {
 		case 1:
@@ -90,6 +90,8 @@ func (lbm *LabeledBitMap) At(x, y int) color.Color {
 		default:
 			return color.RGBA{255, 255, 255, 255}
 		}
+	} else if lbm.Image[y][x] == 2 {
+		return color.RGBA{255, 255, 255, 255}
 	} else {
 		return color.RGBA{0, 0, 0, 0}
 	}
@@ -98,12 +100,12 @@ func (lbm *LabeledBitMap) At(x, y int) color.Color {
 // ChainCode のラベルを返す
 func (lbm *LabeledBitMap) GetCounterLabel(x, y int) int {
 	for _, segment := range lbm.Segment {
-		for i, contour := range segment.Contours {
+		for _, contour := range segment.Contours {
 			for _, point := range contour.ChainCode.Points {
 				if point.X == x && point.Y == y {
-					if i == 0 {
-						return 0
-					}
+					// if i == 0 {
+					// 	return 0
+					// }
 					return segment.Label
 				}
 			}

@@ -69,7 +69,46 @@ func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
 
 	lbm.Segment = NewSegments(contours)
 
+	lbm.FillInnerArea()
+
 	return lbm
+}
+
+func (lbm *LabeledBitMap) FillInnerArea() {
+
+	imgs := make([][][]byte, len(lbm.Segment))
+	wg := &sync.WaitGroup{}
+	for s, segment := range lbm.Segment {
+		wg.Add(1)
+		go func(s int, segment Segment) {
+			imgs[s] = make([][]byte, len(lbm.Image))
+			for i := range imgs[s] {
+				imgs[s][i] = make([]byte, len(lbm.Image[i]))
+			}
+			for _, contour := range segment.Contours {
+				for _, point := range contour.ChainCode.Points {
+					imgs[s][point.Y][point.X] = 1
+				}
+			}
+			for y := range imgs[s] {
+				for x := range imgs[s][y] {
+					FillArea(imgs[s], Point{x, y}, segment.Contours[0])
+				}
+			}
+			wg.Done()
+		}(s, segment)
+	}
+	wg.Wait()
+
+	for _, img := range imgs {
+		for y := range img {
+			for x := range img[y] {
+				if lbm.Image[y][x] == 0 && img[y][x] == 2 {
+					lbm.Image[y][x] = 2
+				}
+			}
+		}
+	}
 }
 
 func NewSegments(contours []Contour) []Segment {
