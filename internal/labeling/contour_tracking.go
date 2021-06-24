@@ -12,7 +12,7 @@ type Direction struct {
 	Dx, Dy int
 }
 
-func returnDirection() [8]Direction {
+func getDirection() [8]Direction {
 	return [8]Direction{
 		{1, 0}, {1, 1}, {0, 1}, {-1, 1},
 		{-1, 0}, {-1, -1}, {0, -1}, {1, -1},
@@ -33,7 +33,7 @@ func CountourTracking(bitmap [][]byte) *ChainCode {
 				cc.Start = Point{imageX, imageY}
 
 				// ================ここが輪郭追跡================
-				direction := returnDirection()
+				direction := getDirection()
 				currentPoint := NewPoint(cc.Start.X, cc.Start.Y)
 				prevDirection := direction[0]
 				cc.Points = []Point{*currentPoint}
@@ -65,7 +65,7 @@ func CountourTracking(bitmap [][]byte) *ChainCode {
 }
 
 func (d Direction) toCode() byte {
-	direction := returnDirection()
+	direction := getDirection()
 	switch d {
 	case direction[0]:
 		return 0
@@ -89,7 +89,7 @@ func (d Direction) toCode() byte {
 }
 
 func (d Direction) nextDirection() [8]int {
-	direction := returnDirection()
+	direction := getDirection()
 	switch d {
 	case direction[0]:
 		return [8]int{5, 6, 7, 0, 1, 2, 3, 4}

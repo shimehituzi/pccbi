@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/shimehituzi/pccbi/internal/labeling"
 	"github.com/shimehituzi/pccbi/internal/plyio"
 )
@@ -14,5 +16,8 @@ func main() {
 		panic(err)
 	}
 	lbms := labeling.NewLabeledBitMaps(bms)
+	contours := (*lbms)[0].Contour
+	segments := labeling.NewSegments(contours)
+	fmt.Println(segments[1].Label)
 	FyneLoop(lbms)
 }

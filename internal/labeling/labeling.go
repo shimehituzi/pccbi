@@ -12,10 +12,10 @@ type Contour struct {
 	Label     int
 }
 
-// type Segment struct {
-// 	Countour []Contour
-// 	Label    int
-// }
+type Segment struct {
+	Contours []Contour
+	Label    int
+}
 
 type LabeledBitMap struct {
 	Image   [][]byte
@@ -67,6 +67,49 @@ func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
 	}
 
 	return lbm
+}
+
+func NewSegments(contours []Contour) []Segment {
+	segments := []Segment{}
+
+	count := 0
+	for i := range contours {
+		if i == 0 {
+			segments = append(segments, Segment{
+				Contours: []Contour{contours[i]},
+				Label:    count,
+			})
+			continue
+		}
+		if isAdjacent(contours[i], contours[i-1]) {
+			segments[count].Contours = append(segments[count].Contours, contours[i])
+		} else {
+			count++
+			segments = append(segments, Segment{
+				Contours: []Contour{contours[i]},
+				Label:    count,
+			})
+		}
+	}
+
+	return segments
+}
+
+func isAdjacent(contour Contour, arroundContour Contour) bool {
+	for _, point := range contour.ChainCode.Points {
+		for _, d := range getDirection() {
+			adjacnet := Point{
+				point.X + d.Dx,
+				point.Y + d.Dy,
+			}
+			for _, arroundPoint := range arroundContour.ChainCode.Points {
+				if adjacnet == arroundPoint {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 func isNotExistPoint(bm [][]byte) bool {
