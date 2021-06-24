@@ -33,7 +33,7 @@ func FyneLoop(fbm bitmap.FyneBitMap) {
 
 	labelLength := fbm.GetLabelLength(int(f))
 	labelingOptions := []string{"All"}
-	for i := 0; i <= labelLength; i++ {
+	for i := 1; i <= labelLength; i++ {
 		labelingOptions = append(labelingOptions, fmt.Sprint(i))
 	}
 	labelingRadio := widget.NewRadioGroup(labelingOptions, func(s string) {
@@ -52,7 +52,7 @@ func FyneLoop(fbm bitmap.FyneBitMap) {
 		raster.Refresh()
 		labelLength := fbm.GetLabelLength(int(f))
 		labelingOptions := []string{"All"}
-		for i := 0; i <= labelLength; i++ {
+		for i := 1; i <= labelLength; i++ {
 			labelingOptions = append(labelingOptions, fmt.Sprint(i))
 		}
 		labelingRadio.Options = labelingOptions

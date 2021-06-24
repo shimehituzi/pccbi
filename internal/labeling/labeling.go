@@ -78,13 +78,13 @@ func NewSegments(contours []Contour) []Segment {
 	count := 0
 	for i := range contours {
 		if label := isAdjacentSegment(contours[i], segments); label == -1 {
+			count++
 			segments = append(segments, Segment{
 				Contours: []Contour{contours[i]},
 				Label:    count,
 			})
-			count++
 		} else {
-			segments[label].Contours = append(segments[label].Contours, contours[i])
+			segments[label-1].Contours = append(segments[label-1].Contours, contours[i])
 		}
 	}
 

@@ -51,17 +51,17 @@ func (lbm *LabeledBitMap) At(x, y int) color.Color {
 		label := uint8(lbm.GetCounterLabel(x, y))
 		l := uint8(label * 10)
 		switch label % 6 {
-		case 0:
-			return color.RGBA{255, l, l, 255}
 		case 1:
-			return color.RGBA{l, 255, l, 255}
+			return color.RGBA{255, l, l, 255}
 		case 2:
-			return color.RGBA{l, l, 255, 255}
+			return color.RGBA{l, 255, l, 255}
 		case 3:
-			return color.RGBA{255, l, 255, 255}
+			return color.RGBA{l, l, 255, 255}
 		case 4:
-			return color.RGBA{255, 255, l, 255}
+			return color.RGBA{255, l, 255, 255}
 		case 5:
+			return color.RGBA{255, 255, l, 255}
+		case 0:
 			return color.RGBA{l, 255, 255, 255}
 		default:
 			return color.RGBA{255, 255, 255, 255}
