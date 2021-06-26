@@ -20,25 +20,27 @@ func ClosedAreaDesicion(point Point, contour Contour) bool {
 	return wn != 0
 }
 
-func FillArea(img [][]byte, point Point, contour Contour, rect rectMinMax) {
+func FillArea(img [][]byte, point Point, contour Contour, rect rectMinMax) bool {
 	if img[point.Y][point.X] == 0 && ClosedAreaDesicion(point, contour) {
-		fillArea(img, point.X, point.Y, rect)
+		fillArea(img, point.X, point.Y, rect, 0, 2)
+		return true
 	}
+	return false
 }
 
-func fillArea(img [][]byte, x, y int, rect rectMinMax) {
-	img[y][x] = 2
+func fillArea(img [][]byte, x, y int, rect rectMinMax, prev, value byte) {
+	img[y][x] = value
 
-	if y-1 > rect.minY && img[y-1][x] == 0 {
-		fillArea(img, x, y-1, rect)
+	if y-1 > rect.minY && img[y-1][x] == prev {
+		fillArea(img, x, y-1, rect, prev, value)
 	}
-	if x-1 > rect.minX && img[y][x-1] == 0 {
-		fillArea(img, x-1, y, rect)
+	if x-1 > rect.minX && img[y][x-1] == prev {
+		fillArea(img, x-1, y, rect, prev, value)
 	}
-	if y+1 < rect.maxY && img[y+1][x] == 0 {
-		fillArea(img, x, y+1, rect)
+	if y+1 < rect.maxY && img[y+1][x] == prev {
+		fillArea(img, x, y+1, rect, prev, value)
 	}
-	if x+1 < rect.maxX && img[y][x+1] == 0 {
-		fillArea(img, x+1, y, rect)
+	if x+1 < rect.maxX && img[y][x+1] == prev {
+		fillArea(img, x+1, y, rect, prev, value)
 	}
 }

@@ -54,7 +54,7 @@ func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
 
 	contours := []Contour{}
 	for i := 0; ; i++ {
-		cc := CountourTracking(tmp)
+		cc := CountourTracking(tmp, 1)
 		for _, point := range cc.Points {
 			tmp[point.Y][point.X] = 0
 		}
@@ -81,6 +81,7 @@ type rectMinMax struct {
 func (lbm *LabeledBitMap) FillInnerArea() {
 
 	imgs := make([][][]byte, len(lbm.Segment))
+	ccs := make([][]ChainCode, len(lbm.Segment))
 	wg := &sync.WaitGroup{}
 	for s, segment := range lbm.Segment {
 		wg.Add(1)
@@ -113,25 +114,40 @@ func (lbm *LabeledBitMap) FillInnerArea() {
 					}
 				}
 			}
+			numOfSegment := 0
 			for y := rect.minY; y <= rect.maxY; y++ {
 				for x := rect.minX; x <= rect.maxX; x++ {
-					FillArea(imgs[s], Point{x, y}, segment.Contours[0], rect)
+					if FillArea(imgs[s], Point{x, y}, segment.Contours[0], rect) {
+						numOfSegment++
+					}
 				}
+			}
+			for i := 0; i < numOfSegment; i++ {
+				cc := CountourTracking(imgs[s], 2)
+				ccs[s] = append(ccs[s], *cc)
+				fillArea(imgs[s], cc.Start.X, cc.Start.Y, rect, 2, 0)
 			}
 			wg.Done()
 		}(s, segment)
 	}
 	wg.Wait()
 
-	for _, img := range imgs {
-		for y := range img {
-			for x := range img[y] {
-				if lbm.Image[y][x] == 0 && img[y][x] == 2 {
-					lbm.Image[y][x] = 2
-				}
+	for s := range ccs {
+		for _, cc := range ccs[s] {
+			for _, point := range cc.Points {
+				lbm.Image[point.Y][point.X] = 2
 			}
 		}
 	}
+}
+
+func notContainsPoint(p Point, stack []Point) bool {
+	for _, point := range stack {
+		if p == point {
+			return false
+		}
+	}
+	return true
 }
 
 func NewSegments(contours []Contour) []Segment {

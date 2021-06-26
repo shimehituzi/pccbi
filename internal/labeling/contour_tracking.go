@@ -25,11 +25,11 @@ type ChainCode struct {
 	Points []Point
 }
 
-func CountourTracking(bitmap [][]byte) *ChainCode {
+func CountourTracking(bitmap [][]byte, value byte) *ChainCode {
 	cc := new(ChainCode)
 	for imageY := range bitmap {
 		for imageX := range bitmap[imageY] {
-			if bitmap[imageY][imageX] == 1 {
+			if bitmap[imageY][imageX] == value {
 				cc.Start = Point{imageX, imageY}
 
 				// ================ここが輪郭追跡================
@@ -43,7 +43,7 @@ func CountourTracking(bitmap [][]byte) *ChainCode {
 						if nextPoint.Y < 0 || nextPoint.X < 0 || len(bitmap) <= nextPoint.Y || len(bitmap[0]) <= nextPoint.X {
 							continue
 						}
-						if bitmap[nextPoint.Y][nextPoint.X] == 1 {
+						if bitmap[nextPoint.Y][nextPoint.X] == value {
 							currentPoint = nextPoint
 							prevDirection = direction[v]
 							cc.Points = append(cc.Points, *currentPoint)
