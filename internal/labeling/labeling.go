@@ -74,6 +74,10 @@ func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
 	return lbm
 }
 
+type rectMinMax struct {
+	minX, maxX, minY, maxY int
+}
+
 func (lbm *LabeledBitMap) FillInnerArea() {
 
 	imgs := make([][][]byte, len(lbm.Segment))
@@ -85,14 +89,33 @@ func (lbm *LabeledBitMap) FillInnerArea() {
 			for i := range imgs[s] {
 				imgs[s][i] = make([]byte, len(lbm.Image[i]))
 			}
+			rect := rectMinMax{
+				minX: len(imgs[s][0]),
+				maxX: 0,
+				minY: len(imgs[s]),
+				maxY: 0,
+			}
 			for _, contour := range segment.Contours {
 				for _, point := range contour.ChainCode.Points {
 					imgs[s][point.Y][point.X] = 1
+
+					if rect.minX > point.X {
+						rect.minX = point.X
+					}
+					if rect.maxX < point.X {
+						rect.maxX = point.X
+					}
+					if rect.minY > point.Y {
+						rect.minY = point.Y
+					}
+					if rect.maxY < point.Y {
+						rect.maxY = point.Y
+					}
 				}
 			}
-			for y := range imgs[s] {
-				for x := range imgs[s][y] {
-					FillArea(imgs[s], Point{x, y}, segment.Contours[0])
+			for y := rect.minY; y <= rect.maxY; y++ {
+				for x := rect.minX; x <= rect.maxX; x++ {
+					FillArea(imgs[s], Point{x, y}, segment.Contours[0], rect)
 				}
 			}
 			wg.Done()
