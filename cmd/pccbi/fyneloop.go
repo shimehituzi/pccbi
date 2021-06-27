@@ -26,7 +26,7 @@ func FyneLoop(fbm [2]bitmap.FyneBitMap) {
 	frame := binding.BindFloat(&f)
 	l := 0
 	labeling := binding.BindInt(&l)
-	scale := 3
+	scale := 1.5
 	size := fyne.NewSize(float32(dim.D2)*float32(scale), float32(dim.D1)*float32(scale))
 
 	labeledRaster := canvas.NewRaster(func(w, h int) image.Image {

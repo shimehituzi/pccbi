@@ -54,7 +54,7 @@ func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
 
 	contours := []Contour{}
 	for i := 0; ; i++ {
-		cc := CountourTracking8(tmp, 1)
+		cc := CountourTracking(tmp, 1, true)
 		for _, point := range cc.Points {
 			tmp[point.Y][point.X] = 0
 		}
@@ -123,7 +123,7 @@ func (lbm *LabeledBitMap) FillInnerArea() {
 				}
 			}
 			for i := 0; i < numOfSegment; i++ {
-				cc := CountourTracking4(imgs[s], 2)
+				cc := CountourTracking(imgs[s], 2, false)
 				ccs[s] = append(ccs[s], *cc)
 				fillArea(imgs[s], cc.Start.X, cc.Start.Y, rect, 2, 0)
 			}
@@ -174,10 +174,14 @@ func isAdjacentSegment(contour Contour, segments []Segment) int {
 		return -1
 	}
 	for _, point := range contour.ChainCode.Points {
-		for _, d := range getDirection8() {
+		directions := [8]Direction{}
+		for i := range directions {
+			directions[i] = newDirection(byte(i), true)
+		}
+		for _, d := range directions {
 			adjacnet := Point{
-				point.X + d.Dx,
-				point.Y + d.Dy,
+				point.X + d.d.X,
+				point.Y + d.d.Y,
 			}
 			for _, segment := range segments {
 				for _, arroundContour := range segment.Contours {
