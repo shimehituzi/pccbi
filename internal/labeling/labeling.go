@@ -54,7 +54,7 @@ func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
 
 	contours := []Contour{}
 	for i := 0; ; i++ {
-		cc := CountourTracking(tmp, 1, true)
+		cc := ContourTracking(tmp, 1, true)
 		for _, point := range cc.Points {
 			tmp[point.Y][point.X] = 0
 		}
@@ -123,7 +123,7 @@ func (lbm *LabeledBitMap) FillInnerArea() {
 				}
 			}
 			for i := 0; i < numOfSegment; i++ {
-				cc := CountourTracking(imgs[s], 2, false)
+				cc := ContourTracking(imgs[s], 2, false)
 				ccs[s] = append(ccs[s], *cc)
 				fillArea(imgs[s], cc.Start.X, cc.Start.Y, rect, 2, 0)
 			}
@@ -139,15 +139,6 @@ func (lbm *LabeledBitMap) FillInnerArea() {
 			}
 		}
 	}
-}
-
-func notContainsPoint(p Point, stack []Point) bool {
-	for _, point := range stack {
-		if p == point {
-			return false
-		}
-	}
-	return true
 }
 
 func NewSegments(contours []Contour) []Segment {
