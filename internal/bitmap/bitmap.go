@@ -30,7 +30,7 @@ type BitMap [][]byte
 
 // imgae.Image の InterFace を実装
 func (bm BitMap) ColorModel() color.Model {
-	return color.GrayModel
+	return color.RGBAModel
 }
 
 // imgae.Image の InterFace を実装
@@ -42,11 +42,11 @@ func (bm BitMap) Bounds() image.Rectangle {
 func (bm BitMap) At(x, y int) color.Color {
 	rect := image.Rect(0, 0, len(bm[0]), len(bm))
 	if !(image.Point{x, y}.In(rect)) {
-		return color.Gray{0}
+		return color.RGBA{0, 0, 0, 0}
 	}
 	if bm[y][x] == 1 {
-		return color.Gray{0}
+		return color.RGBA{255, 255, 255, 255}
 	} else {
-		return color.Gray{255}
+		return color.RGBA{0, 0, 0, 0}
 	}
 }

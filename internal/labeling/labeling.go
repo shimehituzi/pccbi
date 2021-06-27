@@ -54,7 +54,7 @@ func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
 
 	contours := []Contour{}
 	for i := 0; ; i++ {
-		cc := CountourTracking(tmp)
+		cc := ContourTracking(tmp, 1, true)
 		for _, point := range cc.Points {
 			tmp[point.Y][point.X] = 0
 		}
@@ -69,7 +69,76 @@ func NewLabeledBitMap(bm [][]byte) *LabeledBitMap {
 
 	lbm.Segment = NewSegments(contours)
 
+	lbm.FillInnerArea()
+
 	return lbm
+}
+
+type rectMinMax struct {
+	minX, maxX, minY, maxY int
+}
+
+func (lbm *LabeledBitMap) FillInnerArea() {
+
+	imgs := make([][][]byte, len(lbm.Segment))
+	ccs := make([][]ChainCode, len(lbm.Segment))
+	wg := &sync.WaitGroup{}
+	for s, segment := range lbm.Segment {
+		wg.Add(1)
+		go func(s int, segment Segment) {
+			imgs[s] = make([][]byte, len(lbm.Image))
+			for i := range imgs[s] {
+				imgs[s][i] = make([]byte, len(lbm.Image[i]))
+			}
+			rect := rectMinMax{
+				minX: len(imgs[s][0]),
+				maxX: 0,
+				minY: len(imgs[s]),
+				maxY: 0,
+			}
+			for _, contour := range segment.Contours {
+				for _, point := range contour.ChainCode.Points {
+					imgs[s][point.Y][point.X] = 1
+
+					if rect.minX > point.X {
+						rect.minX = point.X
+					}
+					if rect.maxX < point.X {
+						rect.maxX = point.X
+					}
+					if rect.minY > point.Y {
+						rect.minY = point.Y
+					}
+					if rect.maxY < point.Y {
+						rect.maxY = point.Y
+					}
+				}
+			}
+			numOfSegment := 0
+			for y := rect.minY; y <= rect.maxY; y++ {
+				for x := rect.minX; x <= rect.maxX; x++ {
+					if FillArea(imgs[s], Point{x, y}, segment.Contours[0], rect) {
+						numOfSegment++
+					}
+				}
+			}
+			for i := 0; i < numOfSegment; i++ {
+				cc := ContourTracking(imgs[s], 2, false)
+				ccs[s] = append(ccs[s], *cc)
+				fillArea(imgs[s], cc.Start.X, cc.Start.Y, rect, 2, 0)
+			}
+			wg.Done()
+		}(s, segment)
+	}
+	wg.Wait()
+
+	for s := range ccs {
+		for _, cc := range ccs[s] {
+			for _, point := range cc.Points {
+				lbm.Image[point.Y][point.X] = 2
+			}
+		}
+	}
 }
 
 func NewSegments(contours []Contour) []Segment {
@@ -96,10 +165,14 @@ func isAdjacentSegment(contour Contour, segments []Segment) int {
 		return -1
 	}
 	for _, point := range contour.ChainCode.Points {
-		for _, d := range getDirection() {
+		directions := [8]Direction{}
+		for i := range directions {
+			directions[i] = newDirection(byte(i), true)
+		}
+		for _, d := range directions {
 			adjacnet := Point{
-				point.X + d.Dx,
-				point.Y + d.Dy,
+				point.X + d.d.X,
+				point.Y + d.d.Y,
 			}
 			for _, segment := range segments {
 				for _, arroundContour := range segment.Contours {
