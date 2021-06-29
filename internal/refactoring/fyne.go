@@ -102,25 +102,42 @@ func (lbm labeledBitMap) At(x, y int) color.Color {
 	if !(image.Point{x, y}.In(rect)) {
 		return color.RGBA{0, 0, 0, 0}
 	}
-	if lbm[y][x] == 0 {
+	value := lbm[y][x]
+	if value < 0 {
+		switch -value % 6 {
+		case 1:
+			return color.RGBA{255, 200, 200, 255}
+		case 2:
+			return color.RGBA{200, 255, 200, 255}
+		case 3:
+			return color.RGBA{200, 200, 255, 255}
+		case 4:
+			return color.RGBA{255, 200, 255, 255}
+		case 5:
+			return color.RGBA{200, 255, 255, 255}
+		case 0:
+			return color.RGBA{255, 255, 200, 255}
+		default:
+			return color.RGBA{0, 0, 0, 255}
+		}
+	}
+	if value == 0 {
 		return color.RGBA{0, 0, 0, 0}
-	} else if lbm[y][x] == 1 {
-		return color.RGBA{255, 255, 255, 255}
-	} else if lbm[y][x] == 2 {
-		return color.RGBA{0, 255, 255, 255}
-	} else if lbm[y][x] == 3 {
-		return color.RGBA{255, 0, 255, 255}
-	} else if lbm[y][x] == 4 {
-		return color.RGBA{255, 255, 0, 255}
-	} else if lbm[y][x] == 5 {
-		return color.RGBA{0, 255, 0, 255}
-	} else if lbm[y][x] == 6 {
+	}
+	switch value % 6 {
+	case 1:
 		return color.RGBA{255, 0, 0, 255}
-	} else if lbm[y][x] == 7 {
+	case 2:
+		return color.RGBA{0, 255, 0, 255}
+	case 3:
 		return color.RGBA{0, 0, 255, 255}
-	} else if lbm[y][x] == 8 {
+	case 4:
+		return color.RGBA{255, 0, 255, 255}
+	case 5:
+		return color.RGBA{0, 255, 255, 255}
+	case 0:
+		return color.RGBA{255, 255, 0, 255}
+	default:
 		return color.RGBA{0, 0, 0, 255}
-	} else {
-		return color.RGBA{255, 255, 255, 255}
 	}
 }
