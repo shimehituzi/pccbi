@@ -1,6 +1,6 @@
 package refactoring
 
-func getFilledSegments(lbm labeledBitMap, outer []chainCode) []labeledBitMap {
+func getFilledSegments(lbm labeledBitMap, outer []chainCode) ([]labeledBitMap, []rect, []int) {
 	segments := make([]labeledBitMap, len(outer))
 	rects := make([]rect, len(outer))
 	for i := 0; i < len(outer); i++ {
@@ -40,11 +40,13 @@ func getFilledSegments(lbm labeledBitMap, outer []chainCode) []labeledBitMap {
 		}
 	}
 
+	numOfInners := make([]int, len(outer))
 	for label, rect := range rects {
 		for y := rect.min.y; y <= rect.max.y; y++ {
 			for x := rect.min.x; x <= rect.max.x; x++ {
 				if segments[label][y][x] == 0 && closedAreaDesicion(point{x, y}, outer[label]) {
 					fillArea(segments[label], rect, x, y, 0, -(label + 1))
+					numOfInners[label]++
 				}
 			}
 		}
@@ -60,7 +62,7 @@ func getFilledSegments(lbm labeledBitMap, outer []chainCode) []labeledBitMap {
 		}
 	}
 
-	return segments
+	return segments, rects, numOfInners
 }
 
 func fillArea(img [][]int, rect rect, x, y, prev, value int) {

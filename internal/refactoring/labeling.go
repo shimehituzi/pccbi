@@ -13,9 +13,9 @@ type frame struct {
 }
 
 type contour struct {
-	outer  chainCode
-	innter []chainCode
-	label  int
+	outer chainCode
+	inner []chainCode
+	label int
 }
 
 type chainCode struct {
@@ -34,11 +34,16 @@ type rect struct {
 }
 
 func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps) {
-	lpc := new(labeledPointCloud)
-	lpc.length = bc.Length
-	lbms := make([]labeledBitMap, lpc.length[0])
-	outerMatrix := make([][]chainCode, lpc.length[0])
-	segmentMatrix := make([][]labeledBitMap, lpc.length[0])
+	numOfFrame := bc.Length[0]
+
+	lbms := make([]labeledBitMap, numOfFrame)
+	outerMatrix := make([][]chainCode, numOfFrame)
+
+	rectMatrix := make([][]rect, numOfFrame)
+	segmentMatrix := make([][]labeledBitMap, numOfFrame)
+	numOfInnerMatrix := make([][]int, numOfFrame)
+
+	inner3dMarix := make([][][]chainCode, numOfFrame)
 
 	wg := &sync.WaitGroup{}
 	for i := range bc.Data {
@@ -53,11 +58,37 @@ func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps) {
 	for i := range lbms {
 		wg.Add(1)
 		go func(i int) {
-			segmentMatrix[i] = getFilledSegments(lbms[i], outerMatrix[i])
+			segmentMatrix[i], rectMatrix[i], numOfInnerMatrix[i] = getFilledSegments(lbms[i], outerMatrix[i])
 			wg.Done()
 		}(i)
 	}
 	wg.Wait()
+
+	for i := range segmentMatrix {
+		wg.Add(1)
+		go func(i int) {
+			inner3dMarix[i] = getInnerContour(segmentMatrix[i], rectMatrix[i], numOfInnerMatrix[i])
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+
+	lpc := new(labeledPointCloud)
+	lpc.length = bc.Length
+	lpc.frame = make([]frame, lpc.length[0])
+	for f, frame := range lpc.frame {
+		frame.img = make([][]byte, lpc.length[1])
+		for i := range frame.img {
+			frame.img[i] = make([]byte, lpc.length[2])
+			copy(frame.img[i], bc.Data[f][i])
+		}
+		frame.contours = make([]contour, len(outerMatrix[f]))
+		for label, contour := range frame.contours {
+			contour.outer = outerMatrix[f][label]
+			contour.inner = inner3dMarix[f][label]
+			contour.label = label + 1
+		}
+	}
 
 	return lpc, lbms
 }
