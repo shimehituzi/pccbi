@@ -84,27 +84,28 @@ func newPly(srcPath string) (ply, error) {
 func newBitCube(ply ply, order order) *bitCube {
 	bc := new(bitCube)
 
-	bc.Length, bc.Bias = ply.getLengthAndbias()
-	bc.Data = make([]bitmap, bc.Length[order[0]])
+	bc.Length, bc.Bias = ply.getLengthAndbias(order)
+	bc.Data = make([]bitmap, bc.Length[0])
 	for i := range bc.Data {
-		bc.Data[i] = make(bitmap, bc.Length[order[1]])
+		bc.Data[i] = make(bitmap, bc.Length[1])
 		for j := range bc.Data[i] {
-			bc.Data[i][j] = make([]byte, bc.Length[order[2]])
+			bc.Data[i][j] = make([]byte, bc.Length[2])
 		}
 	}
 
 	for _, point := range ply {
-		dim0 := point[order[0]] - bc.Bias[order[0]]
-		dim1 := point[order[1]] - bc.Bias[order[1]]
-		dim2 := point[order[2]] - bc.Bias[order[2]]
+		dim0 := point[order[0]] - bc.Bias[0]
+		dim1 := point[order[1]] - bc.Bias[1]
+		dim2 := point[order[2]] - bc.Bias[2]
 		bc.Data[dim0][dim1][dim2] = 1
 	}
 
 	return bc
 }
 
-func (ply ply) getLengthAndbias() (length, bias [3]int) {
-	for dim := 0; dim < 3; dim++ {
+func (ply ply) getLengthAndbias(order order) (length, bias [3]int) {
+	for d := 0; d < 3; d++ {
+		dim := order[d]
 		max := math.MinInt32
 		min := math.MaxInt32
 		for _, point := range ply {
@@ -115,8 +116,8 @@ func (ply ply) getLengthAndbias() (length, bias [3]int) {
 				min = point[dim]
 			}
 		}
-		length[dim] = max - min + 1
-		bias[dim] = min
+		length[d] = max - min + 1
+		bias[d] = min
 	}
 	return length, bias
 }
