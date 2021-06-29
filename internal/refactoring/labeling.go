@@ -28,17 +28,23 @@ type point struct {
 	x, y int
 }
 
+type rect struct {
+	max point
+	min point
+}
+
 func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps) {
 	lpc := new(labeledPointCloud)
 	lpc.length = bc.Length
 	lbms := make([]labeledBitMap, lpc.length[0])
-	outers := make([][]chainCode, lpc.length[0])
+	outerMatrix := make([][]chainCode, lpc.length[0])
+	segmentMatrix := make([][]labeledBitMap, lpc.length[0])
 
 	wg := &sync.WaitGroup{}
 	for i := range bc.Data {
 		wg.Add(1)
 		go func(i int) {
-			lbms[i], outers[i] = newLabeledBitMap(bc.Data[i])
+			lbms[i], outerMatrix[i] = newLabeledBitMap(bc.Data[i])
 			wg.Done()
 		}(i)
 	}
@@ -47,7 +53,7 @@ func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps) {
 	for i := range lbms {
 		wg.Add(1)
 		go func(i int) {
-			fillLabeledBitMap(lbms[i], outers[i])
+			segmentMatrix[i] = getFilledSegments(lbms[i], outerMatrix[i])
 			wg.Done()
 		}(i)
 	}
