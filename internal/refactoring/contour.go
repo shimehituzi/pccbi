@@ -43,7 +43,7 @@ func (d direction) nextDirections() []direction {
 	return nextDirections
 }
 
-func contourTracking(bitmap [][]byte, value byte, oct bool) chainCode {
+func contourTracking(bitmap [][]int, value int, oct bool) chainCode {
 	cc := *new(chainCode)
 	for imageY := range bitmap {
 		for imageX := range bitmap[imageY] {
@@ -82,7 +82,7 @@ func contourTracking(bitmap [][]byte, value byte, oct bool) chainCode {
 	return cc
 }
 
-func newCheckPoint(x, y int, bitmap [][]byte, value byte, oct bool) point {
+func newCheckPoint(x, y int, bitmap [][]int, value int, oct bool) point {
 	if oct {
 		if 0 < x-1 && y+1 < len(bitmap) && bitmap[y+1][x-1] == value {
 			return newPoint(x-1, y+1)

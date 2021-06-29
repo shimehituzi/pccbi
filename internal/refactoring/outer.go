@@ -58,10 +58,12 @@ func getAdjacentPoint(cc chainCode, ccs []chainCode) *point {
 }
 
 func newChainCodes(img [][]byte) []chainCode {
-	tmp := make([][]byte, len(img))
-	for i := range tmp {
-		tmp[i] = make([]byte, len(img[i]))
-		copy(tmp, img)
+	tmp := make([][]int, len(img))
+	for y := range tmp {
+		tmp[y] = make([]int, len(img[y]))
+		for x := range tmp[y] {
+			tmp[y][x] = int(img[y][x])
+		}
 	}
 
 	ccs := []chainCode{}
@@ -78,7 +80,7 @@ func newChainCodes(img [][]byte) []chainCode {
 	return ccs
 }
 
-func isNotExistPoint(img [][]byte) bool {
+func isNotExistPoint(img [][]int) bool {
 	for y := range img {
 		for x := range img[y] {
 			if img[y][x] == 1 {
