@@ -1,4 +1,4 @@
-package refactoring
+package processing
 
 type labeledBitMap [][]int
 type labeledBitMaps []labeledBitMap

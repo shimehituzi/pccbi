@@ -1,4 +1,4 @@
-package refactoring
+package processing
 
 type direction struct {
 	d    point

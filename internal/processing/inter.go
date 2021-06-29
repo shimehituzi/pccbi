@@ -1,4 +1,4 @@
-package refactoring
+package processing
 
 func getInnerContour(segments []labeledBitMap, rects []rect, numOfInners []int) [][]chainCode {
 	innerMatrix := make([][]chainCode, len(segments))

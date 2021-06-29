@@ -1,4 +1,4 @@
-package refactoring
+package processing
 
 func getFilledSegments(lbm labeledBitMap, outer []chainCode) ([]labeledBitMap, []rect, []int) {
 	segments := make([]labeledBitMap, len(outer))
