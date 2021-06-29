@@ -1,18 +1,5 @@
 package refactoring
 
-func newPoint(X, Y int) point {
-	return point{X, Y}
-}
-
-func (p point) in(points []point) bool {
-	for _, point := range points {
-		if p == point {
-			return true
-		}
-	}
-	return false
-}
-
 type direction struct {
 	d    point
 	code byte
@@ -56,8 +43,8 @@ func (d direction) nextDirections() []direction {
 	return nextDirections
 }
 
-func contourTracking(bitmap [][]byte, value byte, oct bool) *chainCode {
-	cc := new(chainCode)
+func contourTracking(bitmap [][]byte, value byte, oct bool) chainCode {
+	cc := *new(chainCode)
 	for imageY := range bitmap {
 		for imageX := range bitmap[imageY] {
 			if bitmap[imageY][imageX] == value {
@@ -106,4 +93,17 @@ func newCheckPoint(x, y int, bitmap [][]byte, value byte, oct bool) point {
 		}
 	}
 	return newPoint(x, y)
+}
+
+func newPoint(X, Y int) point {
+	return point{X, Y}
+}
+
+func (p point) in(points []point) bool {
+	for _, point := range points {
+		if p == point {
+			return true
+		}
+	}
+	return false
 }
