@@ -5,30 +5,21 @@ import (
 	"image/color"
 )
 
-// Fyne の canvas で描画するときに必要なメソッド
 type FyneBitMap interface {
-	// フレームの枚数，縦幅，横幅
 	GetLength() DimensionLength
-	// 一枚画像を取り出すメソッド
 	GetImage(int) image.Image
 }
 
-// フレームの枚数，縦幅，横幅
 type DimensionLength struct {
-	// フレームの枚数
 	D0 int
-	// 縦幅
 	D1 int
-	// 横幅
 	D2 int
 }
 
-// FyneBitMap の InterFace の実装
 func (lpc *labeledPointCloud) GetImage(f int) image.Image {
 	return lpc.frames[f]
 }
 
-// FyneBitMap の InterFace の実装
 func (lpc *labeledPointCloud) GetLength() DimensionLength {
 	return DimensionLength{
 		D0: lpc.length[0],
@@ -37,17 +28,14 @@ func (lpc *labeledPointCloud) GetLength() DimensionLength {
 	}
 }
 
-// imgae.Image の InterFace を実装
 func (f frame) ColorModel() color.Model {
 	return color.RGBAModel
 }
 
-// imgae.Image の InterFace を実装
 func (f frame) Bounds() image.Rectangle {
 	return image.Rect(0, 0, len(f.img[0]), len(f.img))
 }
 
-// imgae.Image の InterFace を実装
 func (f frame) At(x, y int) color.Color {
 	rect := image.Rect(0, 0, len(f.img[0]), len(f.img))
 	if !(image.Point{x, y}.In(rect)) {
@@ -83,7 +71,6 @@ func (f frame) At(x, y int) color.Color {
 	}
 }
 
-// ChainCode のラベルを返す
 func (f frame) getOuterCounter(x, y int) int {
 	for _, contour := range f.contours {
 		for _, point := range contour.outer.points {
@@ -95,7 +82,6 @@ func (f frame) getOuterCounter(x, y int) int {
 	return -1
 }
 
-// ChainCode のラベルを返す
 func (f frame) getInnerCounter(x, y int) int {
 	for _, contour := range f.contours {
 		for _, inner := range contour.inner {
@@ -109,12 +95,10 @@ func (f frame) getInnerCounter(x, y int) int {
 	return -1
 }
 
-// FyneBitMap の InterFace の実装
 func (bc *bitCube) GetImage(f int) image.Image {
 	return bc.data[f]
 }
 
-// FyneBitMap の InterFace の実装
 func (bc *bitCube) GetLength() DimensionLength {
 	return DimensionLength{
 		D0: bc.length[0],
@@ -123,17 +107,14 @@ func (bc *bitCube) GetLength() DimensionLength {
 	}
 }
 
-// imgae.Image の InterFace を実装
 func (bm bitmap) ColorModel() color.Model {
 	return color.RGBAModel
 }
 
-// imgae.Image の InterFace を実装
 func (bm bitmap) Bounds() image.Rectangle {
 	return image.Rect(0, 0, len(bm[0]), len(bm))
 }
 
-// imgae.Image の InterFace を実装
 func (bm bitmap) At(x, y int) color.Color {
 	rect := image.Rect(0, 0, len(bm[0]), len(bm))
 	if !(image.Point{x, y}.In(rect)) {
@@ -146,12 +127,10 @@ func (bm bitmap) At(x, y int) color.Color {
 	}
 }
 
-// FyneBitMap の InterFace の実装
 func (lbms labeledBitMaps) GetImage(f int) image.Image {
 	return lbms[f]
 }
 
-// FyneBitMap の InterFace の実装
 func (lbms labeledBitMaps) GetLength() DimensionLength {
 	return DimensionLength{
 		D0: len(lbms),
@@ -160,17 +139,14 @@ func (lbms labeledBitMaps) GetLength() DimensionLength {
 	}
 }
 
-// imgae.Image の InterFace を実装
 func (lbm labeledBitMap) ColorModel() color.Model {
 	return color.RGBAModel
 }
 
-// imgae.Image の InterFace を実装
 func (lbm labeledBitMap) Bounds() image.Rectangle {
 	return image.Rect(0, 0, len(lbm[0]), len(lbm))
 }
 
-// imgae.Image の InterFace を実装
 func (lbm labeledBitMap) At(x, y int) color.Color {
 	rect := image.Rect(0, 0, len(lbm[0]), len(lbm))
 	if !(image.Point{x, y}.In(rect)) {
