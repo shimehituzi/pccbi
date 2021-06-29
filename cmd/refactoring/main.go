@@ -1,10 +1,18 @@
 package main
 
-import "github.com/shimehituzi/pccbi/internal/refactoring"
+import (
+	"fmt"
+
+	"github.com/shimehituzi/pccbi/internal/refactoring"
+)
 
 func main() {
-	refactoring.IO()
-	refactoring.Contour()
-	refactoring.FyneRefactor()
-	fyneLoop()
+	relativePath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"
+	srcPath := relativePath[4:]
+	bc, err := refactoring.LoadPly(srcPath, refactoring.XYZ.Order())
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(bc.Bias)
+	fmt.Println(bc.Length)
 }
