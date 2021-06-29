@@ -13,9 +13,9 @@ type ply [][3]int
 type bitmap [][]byte
 
 type bitCube struct {
-	Data   []bitmap
-	Bias   [3]int
-	Length [3]int
+	data   []bitmap
+	bias   [3]int
+	length [3]int
 }
 
 type order [3]int
@@ -84,20 +84,20 @@ func newPly(srcPath string) (ply, error) {
 func newBitCube(ply ply, order order) *bitCube {
 	bc := new(bitCube)
 
-	bc.Length, bc.Bias = ply.getLengthAndbias(order)
-	bc.Data = make([]bitmap, bc.Length[0])
-	for i := range bc.Data {
-		bc.Data[i] = make(bitmap, bc.Length[1])
-		for j := range bc.Data[i] {
-			bc.Data[i][j] = make([]byte, bc.Length[2])
+	bc.length, bc.bias = ply.getLengthAndbias(order)
+	bc.data = make([]bitmap, bc.length[0])
+	for i := range bc.data {
+		bc.data[i] = make(bitmap, bc.length[1])
+		for j := range bc.data[i] {
+			bc.data[i][j] = make([]byte, bc.length[2])
 		}
 	}
 
 	for _, point := range ply {
-		dim0 := point[order[0]] - bc.Bias[0]
-		dim1 := point[order[1]] - bc.Bias[1]
-		dim2 := point[order[2]] - bc.Bias[2]
-		bc.Data[dim0][dim1][dim2] = 1
+		dim0 := point[order[0]] - bc.bias[0]
+		dim1 := point[order[1]] - bc.bias[1]
+		dim2 := point[order[2]] - bc.bias[2]
+		bc.data[dim0][dim1][dim2] = 1
 	}
 
 	return bc

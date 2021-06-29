@@ -24,7 +24,7 @@ func fyneLoop(fbm refactoring.FyneBitMap) {
 	size := fyne.NewSize(float32(dim.D2)*float32(scale), float32(dim.D1)*float32(scale))
 
 	bitmapRaster := canvas.NewRaster(func(w, h int) image.Image {
-		return fbm.GetImage(int(f), 0)
+		return fbm.GetImage(int(f))
 	})
 	bitmapRaster.ScaleMode = canvas.ImageScalePixels
 	bitmapRaster.Resize(size)

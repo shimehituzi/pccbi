@@ -1,9 +1,11 @@
 package refactoring
 
-import "sync"
+import (
+	"sync"
+)
 
 type labeledPointCloud struct {
-	frame  []frame
+	frames []frame
 	length [3]int
 }
 
@@ -34,7 +36,7 @@ type rect struct {
 }
 
 func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps) {
-	numOfFrame := bc.Length[0]
+	numOfFrame := bc.length[0]
 
 	lbms := make([]labeledBitMap, numOfFrame)
 	outerMatrix := make([][]chainCode, numOfFrame)
@@ -46,10 +48,10 @@ func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps) {
 	inner3dMarix := make([][][]chainCode, numOfFrame)
 
 	wg := &sync.WaitGroup{}
-	for i := range bc.Data {
+	for i := range bc.data {
 		wg.Add(1)
 		go func(i int) {
-			lbms[i], outerMatrix[i] = newLabeledBitMap(bc.Data[i])
+			lbms[i], outerMatrix[i] = newLabeledBitMap(bc.data[i])
 			wg.Done()
 		}(i)
 	}
@@ -74,19 +76,27 @@ func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps) {
 	wg.Wait()
 
 	lpc := new(labeledPointCloud)
-	lpc.length = bc.Length
-	lpc.frame = make([]frame, lpc.length[0])
-	for f, frame := range lpc.frame {
-		frame.img = make([][]byte, lpc.length[1])
-		for i := range frame.img {
-			frame.img[i] = make([]byte, lpc.length[2])
-			copy(frame.img[i], bc.Data[f][i])
+	lpc.length = bc.length
+	lpc.frames = make([]frame, lpc.length[0])
+	for f := range lpc.frames {
+		lpc.frames[f].img = make([][]byte, lpc.length[1])
+		for i := range lpc.frames[f].img {
+			lpc.frames[f].img[i] = make([]byte, lpc.length[2])
 		}
-		frame.contours = make([]contour, len(outerMatrix[f]))
-		for label, contour := range frame.contours {
-			contour.outer = outerMatrix[f][label]
-			contour.inner = inner3dMarix[f][label]
-			contour.label = label + 1
+		lpc.frames[f].contours = make([]contour, len(outerMatrix[f]))
+		for label := range lpc.frames[f].contours {
+			lpc.frames[f].contours[label].outer = outerMatrix[f][label]
+			lpc.frames[f].contours[label].inner = inner3dMarix[f][label]
+			lpc.frames[f].contours[label].label = label + 1
+
+			for _, point := range lpc.frames[f].contours[label].outer.points {
+				lpc.frames[f].img[point.y][point.x] = 1
+			}
+			for _, inner := range lpc.frames[f].contours[label].inner {
+				for _, point := range inner.points {
+					lpc.frames[f].img[point.y][point.x] = 2
+				}
+			}
 		}
 	}
 
