@@ -3,7 +3,7 @@ package refactoring
 type labeledBitMap [][]int
 type labeledBitMaps []labeledBitMap
 
-func newLabeledBitMap(img [][]byte) labeledBitMap {
+func newLabeledBitMap(img [][]byte) (labeledBitMap, []chainCode) {
 	ccs := newChainCodes(img)
 
 	lbm := make(labeledBitMap, len(img))
@@ -11,6 +11,7 @@ func newLabeledBitMap(img [][]byte) labeledBitMap {
 		lbm[i] = make([]int, len(img[i]))
 	}
 
+	outer := []chainCode{}
 	label := 0
 	for i, cc := range ccs {
 		adjacentPoint := getAdjacentPoint(cc, ccs[:i])
@@ -23,10 +24,11 @@ func newLabeledBitMap(img [][]byte) labeledBitMap {
 			for _, point := range cc.points {
 				lbm[point.y][point.x] = label
 			}
+			outer = append(outer, cc)
 		}
 	}
 
-	return lbm
+	return lbm, outer
 }
 
 func getAdjacentPoint(cc chainCode, ccs []chainCode) *point {
