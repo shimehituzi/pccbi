@@ -11,6 +11,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	_, tmp, lbms := refactoring.NewLabeledPointCloud(bc)
-	fyneLoop(tmp, lbms)
+	_, lbms := refactoring.NewLabeledPointCloud(bc)
+	fyneLoop(lbms)
 }

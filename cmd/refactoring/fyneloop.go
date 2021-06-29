@@ -13,7 +13,7 @@ import (
 	"github.com/shimehituzi/pccbi/internal/refactoring"
 )
 
-func fyneLoop(fbm refactoring.FyneBitMap, fbm2 refactoring.FyneBitMap) {
+func fyneLoop(fbm refactoring.FyneBitMap) {
 	myApp := app.New()
 	w := myApp.NewWindow("BitMap")
 
@@ -29,12 +29,6 @@ func fyneLoop(fbm refactoring.FyneBitMap, fbm2 refactoring.FyneBitMap) {
 	bitmapRaster.ScaleMode = canvas.ImageScalePixels
 	bitmapRaster.Resize(size)
 
-	bitmapRaster2 := canvas.NewRaster(func(w, h int) image.Image {
-		return fbm2.GetImage(int(f), 0)
-	})
-	bitmapRaster2.ScaleMode = canvas.ImageScalePixels
-	bitmapRaster2.Resize(size)
-
 	frameSlider := widget.NewSliderWithData(0, float64(dim.D0-1), frame)
 	frameSlider.OnChanged = func(f float64) {
 		err := frame.Set(f)
@@ -43,18 +37,15 @@ func fyneLoop(fbm refactoring.FyneBitMap, fbm2 refactoring.FyneBitMap) {
 		}
 
 		bitmapRaster.Refresh()
-		bitmapRaster2.Refresh()
 	}
 
 	frameLabel := widget.NewLabelWithData(binding.FloatToStringWithFormat(frame, "frame: %0.0f"))
 
 	bitmapRasterContent := container.New(layout.NewGridWrapLayout(size), bitmapRaster)
-	bitmapRaster2Content := container.New(layout.NewGridWrapLayout(size), bitmapRaster2)
-	hbox := container.New(layout.NewHBoxLayout(), bitmapRasterContent, bitmapRaster2Content)
 
 	content := container.New(
 		layout.NewVBoxLayout(),
-		hbox, layout.NewSpacer(),
+		bitmapRasterContent, layout.NewSpacer(),
 		frameSlider, layout.NewSpacer(),
 		frameLabel, layout.NewSpacer(),
 	)

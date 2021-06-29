@@ -28,11 +28,10 @@ type point struct {
 	x, y int
 }
 
-func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps, labeledBitMaps) {
+func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps) {
 	lpc := new(labeledPointCloud)
 	lpc.length = bc.Length
 	lbms := make([]labeledBitMap, lpc.length[0])
-	tmp := make([]labeledBitMap, lpc.length[0])
 	outers := make([][]chainCode, lpc.length[0])
 
 	wg := &sync.WaitGroup{}
@@ -48,11 +47,11 @@ func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps, labe
 	for i := range lbms {
 		wg.Add(1)
 		go func(i int) {
-			tmp[i] = fillLabeledBitMap(lbms[i], outers[i])
+			fillLabeledBitMap(lbms[i], outers[i])
 			wg.Done()
 		}(i)
 	}
 	wg.Wait()
 
-	return lpc, tmp, lbms
+	return lpc, lbms
 }

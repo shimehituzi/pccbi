@@ -5,7 +5,7 @@ type rect struct {
 	min point
 }
 
-func fillLabeledBitMap(lbm labeledBitMap, outer []chainCode) labeledBitMap {
+func fillLabeledBitMap(lbm labeledBitMap, outer []chainCode) {
 	numOfOuter := len(outer)
 
 	imgs := make([]labeledBitMap, numOfOuter)
@@ -21,11 +21,8 @@ func fillLabeledBitMap(lbm labeledBitMap, outer []chainCode) labeledBitMap {
 		}
 	}
 
-	tmp := make([][]int, len(lbm))
 	for y := range lbm {
-		tmp[y] = make([]int, len(lbm[y]))
 		for x := range lbm[y] {
-			tmp[y][x] = lbm[y][x]
 
 			label := lbm[y][x] - 1
 
@@ -64,14 +61,12 @@ func fillLabeledBitMap(lbm labeledBitMap, outer []chainCode) labeledBitMap {
 	for _, img := range imgs {
 		for y := range img {
 			for x := range img[y] {
-				if img[y][x] < tmp[y][x] && tmp[y][x] <= 0 {
-					tmp[y][x] = img[y][x]
+				if img[y][x] < lbm[y][x] && lbm[y][x] <= 0 {
+					lbm[y][x] = img[y][x]
 				}
 			}
 		}
 	}
-
-	return tmp
 }
 
 func fillArea(img [][]int, point point, cc chainCode, rect rect, prev, value int) bool {
