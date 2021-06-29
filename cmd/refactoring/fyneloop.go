@@ -2,6 +2,7 @@ package main
 
 import (
 	"image"
+	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -13,21 +14,26 @@ import (
 	"github.com/shimehituzi/pccbi/internal/refactoring"
 )
 
-func fyneLoop(fbm refactoring.FyneBitMap) {
+func fyneLoop(fbm []refactoring.FyneBitMap) {
 	myApp := app.New()
 	w := myApp.NewWindow("BitMap")
 
-	dim := fbm.GetLength()
+	dim := fbm[0].GetLength()
 	f := 0.0
 	frame := binding.BindFloat(&f)
 	scale := 3
 	size := fyne.NewSize(float32(dim.D2)*float32(scale), float32(dim.D1)*float32(scale))
 
-	bitmapRaster := canvas.NewRaster(func(w, h int) image.Image {
-		return fbm.GetImage(int(f))
+	raster := canvas.NewRaster(func(w, h int) image.Image {
+		return fbm[0].GetImage(int(f))
 	})
-	bitmapRaster.ScaleMode = canvas.ImageScalePixels
-	bitmapRaster.Resize(size)
+	raster.ScaleMode = canvas.ImageScalePixels
+	raster.Resize(size)
+	raster2 := canvas.NewRaster(func(w, h int) image.Image {
+		return fbm[1].GetImage(int(f))
+	})
+	raster2.ScaleMode = canvas.ImageScalePixels
+	raster2.Resize(size)
 
 	frameSlider := widget.NewSliderWithData(0, float64(dim.D0-1), frame)
 	frameSlider.OnChanged = func(f float64) {
@@ -36,16 +42,22 @@ func fyneLoop(fbm refactoring.FyneBitMap) {
 			fyne.LogError("Failed to set binding value", err)
 		}
 
-		bitmapRaster.Refresh()
+		raster.Refresh()
+		raster2.Refresh()
 	}
 
 	frameLabel := widget.NewLabelWithData(binding.FloatToStringWithFormat(frame, "frame: %0.0f"))
 
-	bitmapRasterContent := container.New(layout.NewGridWrapLayout(size), bitmapRaster)
+	rasterContent := container.New(layout.NewGridWrapLayout(size), raster)
+	raster2Content := container.New(layout.NewGridWrapLayout(size), raster2)
+	line := canvas.NewLine(color.Opaque)
+	line.Position1 = fyne.NewPos(0, 0)
+	line.Position2 = fyne.NewPos(0, float32(dim.D1)*float32(scale))
+	hbox := container.New(layout.NewHBoxLayout(), rasterContent, line, raster2Content)
 
 	content := container.New(
 		layout.NewVBoxLayout(),
-		bitmapRasterContent, layout.NewSpacer(),
+		hbox, layout.NewSpacer(),
 		frameSlider, layout.NewSpacer(),
 		frameLabel, layout.NewSpacer(),
 	)
