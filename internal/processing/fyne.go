@@ -43,13 +43,7 @@ func (f frame) At(x, y int) color.Color {
 	}
 	switch f.img[y][x] {
 	case 1:
-		if f.getOuterCounter(x, y) != -1 {
-			return color.RGBA{255, 255, 255, 255}
-		} else {
-			return color.RGBA{128, 128, 128, 128}
-		}
-	case 2:
-		label := f.getInnerCounter(x, y)
+		label := f.getOuterCounter(x, y)
 		switch label % 6 {
 		case 1:
 			return color.RGBA{255, 0, 0, 255}
@@ -63,6 +57,24 @@ func (f frame) At(x, y int) color.Color {
 			return color.RGBA{0, 255, 255, 255}
 		case 0:
 			return color.RGBA{255, 255, 0, 255}
+		default:
+			return color.RGBA{0, 0, 0, 255}
+		}
+	case 2:
+		label := f.getInnerCounter(x, y)
+		switch label % 6 {
+		case 1:
+			return color.RGBA{255, 200, 200, 255}
+		case 2:
+			return color.RGBA{200, 255, 200, 255}
+		case 3:
+			return color.RGBA{200, 200, 255, 255}
+		case 4:
+			return color.RGBA{255, 200, 255, 255}
+		case 5:
+			return color.RGBA{200, 255, 255, 255}
+		case 0:
+			return color.RGBA{255, 255, 200, 255}
 		default:
 			return color.RGBA{0, 0, 0, 255}
 		}
