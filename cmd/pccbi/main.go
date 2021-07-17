@@ -12,5 +12,6 @@ func main() {
 	// lpc, lbms := processing.NewLabeledPointCloud(bc)
 	// fyneLoop([]processing.FyneBitMap{lpc, lbms, bc})
 
-	codec.Test()
+	codec.TestEnc()
+	codec.TestDec()
 }
