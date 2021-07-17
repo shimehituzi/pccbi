@@ -3,6 +3,7 @@ package codec
 import (
 	"fmt"
 	"math"
+	"os"
 )
 
 const size = 64
@@ -10,9 +11,9 @@ const top = uint64(1) << (size - 8)
 const bot = uint64(1) << (size - 16)
 
 func Test() {
-	numVals := 8
+	numVals := 2
 
-	val := []uint32{0, 1, 2, 3, 0, 1, 0, 0, 0, 0, 4, 5, 0, 7, 0, 0}
+	val := []uint32{0, 0, 1, 0, 0}
 
 	freq := make([]uint32, numVals)
 	for _, v := range val {
@@ -27,10 +28,11 @@ func Test() {
 
 	// エンコード
 
-	// fp, err := os.Create("compressed")
-	// if err != nil {
-	// 	panic(err)
-	// }
+	fp, err := os.Create("compressed")
+	if err != nil {
+		panic(err)
+	}
+	defer fp.Close()
 
 	var rcrange, low, code uint64
 
@@ -44,8 +46,8 @@ func Test() {
 		rcrange *= uint64(freq[v])
 
 		for (low ^ (low + rcrange)) < top {
-			stream := low >> (size - 8)
-			fmt.Printf("%b", stream)
+			stream := byte(low >> (size - 8))
+			fp.Write([]byte{stream})
 			code += 8
 			if code > 1e8 {
 				panic("L T")
@@ -54,8 +56,9 @@ func Test() {
 			low <<= 8
 		}
 		for rcrange < bot {
-			stream := low >> (size - 8)
-			fmt.Printf("%b", stream)
+			stream := byte(low >> (size - 8))
+			fp.Write([]byte{stream})
+			fmt.Printf("%b\n", stream)
 			code += 8
 			if code > 1e8 {
 				panic("L T")
@@ -66,9 +69,9 @@ func Test() {
 	}
 
 	for i := 0; i < size; i++ {
-		stream := low >> (size - 8)
-		if stream != 0 {
-			fmt.Printf("%b", stream)
+		stream := byte(low >> (size - 8))
+		if stream != 0x00 {
+			fp.Write([]byte{stream})
 		}
 		code += 8
 		low <<= 8
