@@ -12,10 +12,15 @@ type ply [][3]int
 
 type bitmap [][]byte
 
+type header struct {
+	length [3]int
+	axis   [3]int
+	bias   [3]int
+}
+
 type bitCube struct {
 	data   []bitmap
-	bias   [3]int
-	length [3]int
+	header header
 }
 
 type order [3]int
@@ -84,26 +89,30 @@ func newPly(srcPath string) (ply, error) {
 func newBitCube(ply ply, order order) *bitCube {
 	bc := new(bitCube)
 
-	bc.length, bc.bias = ply.getLengthAndbias(order)
-	bc.data = make([]bitmap, bc.length[0])
+	bc.header = ply.getHeader(order)
+	bc.data = make([]bitmap, bc.header.length[0])
 	for i := range bc.data {
-		bc.data[i] = make(bitmap, bc.length[1])
+		bc.data[i] = make(bitmap, bc.header.length[1])
 		for j := range bc.data[i] {
-			bc.data[i][j] = make([]byte, bc.length[2])
+			bc.data[i][j] = make([]byte, bc.header.length[2])
 		}
 	}
 
 	for _, point := range ply {
-		dim0 := point[order[0]] - bc.bias[0]
-		dim1 := point[order[1]] - bc.bias[1]
-		dim2 := point[order[2]] - bc.bias[2]
+		dim0 := point[order[0]] - bc.header.bias[0]
+		dim1 := point[order[1]] - bc.header.bias[1]
+		dim2 := point[order[2]] - bc.header.bias[2]
 		bc.data[dim0][dim1][dim2] = 1
 	}
 
 	return bc
 }
 
-func (ply ply) getLengthAndbias(order order) (length, bias [3]int) {
+func (ply ply) getHeader(order order) header {
+	var length, bias, axis [3]int
+	for i := range axis {
+		axis[order[i]] = i
+	}
 	for d := 0; d < 3; d++ {
 		dim := order[d]
 		max := math.MinInt32
@@ -119,7 +128,7 @@ func (ply ply) getLengthAndbias(order order) (length, bias [3]int) {
 		length[d] = max - min + 1
 		bias[d] = min
 	}
-	return length, bias
+	return header{length, axis, bias}
 }
 
 func LoadPly(srcPath string, order order) (*bitCube, error) {

@@ -5,8 +5,8 @@ import (
 )
 
 type labeledPointCloud struct {
+	header header
 	frames []frame
-	length [3]int
 }
 
 type frame struct {
@@ -36,7 +36,7 @@ type rect struct {
 }
 
 func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps) {
-	numOfFrame := bc.length[0]
+	numOfFrame := bc.header.length[0]
 
 	lbms := make([]labeledBitMap, numOfFrame)
 	outerMatrix := make([][]chainCode, numOfFrame)
@@ -76,12 +76,12 @@ func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps) {
 	wg.Wait()
 
 	lpc := new(labeledPointCloud)
-	lpc.length = bc.length
-	lpc.frames = make([]frame, lpc.length[0])
+	lpc.header = bc.header
+	lpc.frames = make([]frame, lpc.header.length[0])
 	for f := range lpc.frames {
-		lpc.frames[f].img = make([][]byte, lpc.length[1])
+		lpc.frames[f].img = make([][]byte, lpc.header.length[1])
 		for i := range lpc.frames[f].img {
-			lpc.frames[f].img[i] = make([]byte, lpc.length[2])
+			lpc.frames[f].img[i] = make([]byte, lpc.header.length[2])
 		}
 		lpc.frames[f].contours = make([]contour, len(outerMatrix[f]))
 		for label := range lpc.frames[f].contours {

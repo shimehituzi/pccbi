@@ -22,9 +22,9 @@ func (lpc *labeledPointCloud) GetImage(f int) image.Image {
 
 func (lpc *labeledPointCloud) GetLength() DimensionLength {
 	return DimensionLength{
-		D0: lpc.length[0],
-		D1: lpc.length[1],
-		D2: lpc.length[2],
+		D0: lpc.header.length[0],
+		D1: lpc.header.length[1],
+		D2: lpc.header.length[2],
 	}
 }
 
@@ -113,9 +113,9 @@ func (bc *bitCube) GetImage(f int) image.Image {
 
 func (bc *bitCube) GetLength() DimensionLength {
 	return DimensionLength{
-		D0: bc.length[0],
-		D1: bc.length[1],
-		D2: bc.length[2],
+		D0: bc.header.length[0],
+		D1: bc.header.length[1],
+		D2: bc.header.length[2],
 	}
 }
 
