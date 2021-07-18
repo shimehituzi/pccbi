@@ -63,7 +63,7 @@ func contourTracking(bitmap [][]int, value int, oct bool) chainCode {
 							continue
 						}
 						if bitmap[nextP.y][nextP.x] == value {
-							cc.code = append(cc.code, nextD.code)
+							cc.code = append(cc.code, (nextD.code-currentD.code)%8)
 							cc.points = append(cc.points, nextP)
 							currentD = nextD
 							currentP = nextP
