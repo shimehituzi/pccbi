@@ -9,15 +9,20 @@ type labeledPointCloud struct {
 	frames []frame
 }
 
+type header struct {
+	axis, length, bias                 [3]int
+	numOuterContours, numInnerContours int
+}
+
 type frame struct {
 	img      [][]byte
 	contours []contour
 }
 
 type contour struct {
-	outer chainCode
-	inner []chainCode
-	label int
+	outer  chainCode
+	inners []chainCode
+	label  int
 }
 
 type chainCode struct {
@@ -77,6 +82,8 @@ func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps) {
 
 	lpc := new(labeledPointCloud)
 	lpc.header = bc.header
+	numOuterContours := 0
+	numInnerContours := 0
 	lpc.frames = make([]frame, lpc.header.length[0])
 	for f := range lpc.frames {
 		lpc.frames[f].img = make([][]byte, lpc.header.length[1])
@@ -85,20 +92,24 @@ func NewLabeledPointCloud(bc *bitCube) (*labeledPointCloud, labeledBitMaps) {
 		}
 		lpc.frames[f].contours = make([]contour, len(outerMatrix[f]))
 		for label := range lpc.frames[f].contours {
+			numOuterContours++
 			lpc.frames[f].contours[label].outer = outerMatrix[f][label]
-			lpc.frames[f].contours[label].inner = inner3dMarix[f][label]
+			lpc.frames[f].contours[label].inners = inner3dMarix[f][label]
 			lpc.frames[f].contours[label].label = label + 1
 
 			for _, point := range lpc.frames[f].contours[label].outer.points {
 				lpc.frames[f].img[point.y][point.x] = 1
 			}
-			for _, inner := range lpc.frames[f].contours[label].inner {
+			for _, inner := range lpc.frames[f].contours[label].inners {
+				numInnerContours++
 				for _, point := range inner.points {
 					lpc.frames[f].img[point.y][point.x] = 2
 				}
 			}
 		}
 	}
+	lpc.header.numOuterContours = numOuterContours
+	lpc.header.numInnerContours = numInnerContours
 
 	return lpc, lbms
 }

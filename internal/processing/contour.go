@@ -60,6 +60,11 @@ func contourTracking(bitmap [][]int, value int, oct bool) chainCode {
 
 				checkP := newCheckPoint(cc.start.x, cc.start.y, bitmap, value, oct)
 
+				divisor := byte(8)
+				if !oct {
+					divisor = 4
+				}
+
 				for {
 					for _, nextD := range currentD.nextDirections() {
 						nextP := newPoint(currentP.x+nextD.d.x, currentP.y+nextD.d.y)
@@ -67,7 +72,7 @@ func contourTracking(bitmap [][]int, value int, oct bool) chainCode {
 							continue
 						}
 						if bitmap[nextP.y][nextP.x] == value {
-							cc.code = append(cc.code, (nextD.code-currentD.code)%8)
+							cc.code = append(cc.code, (nextD.code-currentD.code)%divisor)
 							cc.points = append(cc.points, nextP)
 							currentD = nextD
 							currentP = nextP

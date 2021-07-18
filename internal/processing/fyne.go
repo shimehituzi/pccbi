@@ -96,7 +96,7 @@ func (f frame) getOuterCounter(x, y int) int {
 
 func (f frame) getInnerCounter(x, y int) int {
 	for _, contour := range f.contours {
-		for _, inner := range contour.inner {
+		for _, inner := range contour.inners {
 			for _, point := range inner.points {
 				if point.x == x && point.y == y {
 					return contour.label

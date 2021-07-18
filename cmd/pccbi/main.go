@@ -1,6 +1,8 @@
 package main
 
-import "github.com/shimehituzi/pccbi/internal/processing"
+import (
+	"github.com/shimehituzi/pccbi/internal/processing"
+)
 
 func main() {
 	relativePath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"
@@ -10,5 +12,6 @@ func main() {
 		panic(err)
 	}
 	lpc, lbms := processing.NewLabeledPointCloud(bc)
+	lpc.MakeStreamStruct().GetStream().Write()
 	fyneLoop([]processing.FyneBitMap{lpc, lbms, bc})
 }

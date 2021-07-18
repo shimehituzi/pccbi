@@ -12,12 +12,6 @@ type ply [][3]int
 
 type bitmap [][]byte
 
-type header struct {
-	length [3]int
-	axis   [3]int
-	bias   [3]int
-}
-
 type bitCube struct {
 	data   []bitmap
 	header header
@@ -128,7 +122,13 @@ func (ply ply) getHeader(order order) header {
 		length[d] = max - min + 1
 		bias[d] = min
 	}
-	return header{length, axis, bias}
+	return header{
+		axis:             axis,
+		length:           length,
+		bias:             bias,
+		numOuterContours: 0,
+		numInnerContours: 0,
+	}
 }
 
 func LoadPly(srcPath string, order order) (*bitCube, error) {
