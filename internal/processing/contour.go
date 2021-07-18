@@ -27,7 +27,11 @@ func (d direction) nextDirections() []direction {
 	)
 	if d.oct {
 		numOfDirection = 8
-		firstDirection = d.code + 5
+		if d.code%2 == 0 {
+			firstDirection = d.code + 7
+		} else {
+			firstDirection = d.code + 6
+		}
 	} else {
 		numOfDirection = 4
 		firstDirection = d.code + 3
