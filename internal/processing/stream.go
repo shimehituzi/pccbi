@@ -7,14 +7,14 @@ import (
 )
 
 type streamStruct struct {
-	Header           header
-	OuterStartPoints []point
-	InnerStartPoints []point
-	OuterCodes       [][]byte
-	InnerCodes       [][]byte
+	header           header
+	outerStartPoints []point
+	innerStartPoints []point
+	outerCodes       [][]byte
+	innerCodes       [][]byte
 }
 
-type stream struct {
+type Stream struct {
 	Header           []int
 	OuterStartPoints []int
 	InnerStartPoints []int
@@ -55,45 +55,45 @@ func (lpc *labeledPointCloud) MakeStreamStruct() *streamStruct {
 	}
 }
 
-func (ss *streamStruct) GetStream() *stream {
+func (ss *streamStruct) GetStream() *Stream {
 	header := []int{
-		ss.Header.axis[0],   //axisX
-		ss.Header.axis[1],   //axisY
-		ss.Header.axis[2],   //axisZ
-		ss.Header.length[0], //frames
-		ss.Header.length[1], //height
-		ss.Header.length[2], //width
-		ss.Header.bias[0],   //biasFrames
-		ss.Header.bias[1],   //biasHeight
-		ss.Header.bias[2],   //biasWidth
-		ss.Header.numOuterContours,
-		ss.Header.numInnerContours,
+		ss.header.axis[0],   //axisX
+		ss.header.axis[1],   //axisY
+		ss.header.axis[2],   //axisZ
+		ss.header.length[0], //frames
+		ss.header.length[1], //height
+		ss.header.length[2], //width
+		ss.header.bias[0],   //biasFrames
+		ss.header.bias[1],   //biasHeight
+		ss.header.bias[2],   //biasWidth
+		ss.header.numOuterContours,
+		ss.header.numInnerContours,
 	}
 
-	outerStartPoints := make([]int, ss.Header.numOuterContours*2)
-	for i, point := range ss.OuterStartPoints {
+	outerStartPoints := make([]int, ss.header.numOuterContours*2)
+	for i, point := range ss.outerStartPoints {
 		outerStartPoints[i*2] = point.x
 		outerStartPoints[i*2+1] = point.y
 	}
-	innerStartPoints := make([]int, ss.Header.numInnerContours*2)
-	for i, point := range ss.InnerStartPoints {
+	innerStartPoints := make([]int, ss.header.numInnerContours*2)
+	for i, point := range ss.innerStartPoints {
 		innerStartPoints[i*2] = point.x
 		innerStartPoints[i*2+1] = point.y
 	}
 
 	outerCodes := []byte{}
-	for _, code := range ss.OuterCodes {
+	for _, code := range ss.outerCodes {
 		outerCodes = append(outerCodes, code...)
 		outerCodes = append(outerCodes, 8)
 	}
 
 	innerCodes := []byte{}
-	for _, code := range ss.InnerCodes {
+	for _, code := range ss.innerCodes {
 		innerCodes = append(innerCodes, code...)
 		innerCodes = append(innerCodes, 4)
 	}
 
-	return &stream{
+	return &Stream{
 		header,
 		outerStartPoints,
 		innerStartPoints,
@@ -102,7 +102,7 @@ func (ss *streamStruct) GetStream() *stream {
 	}
 }
 
-func (s *stream) Write() {
+func (s *Stream) Write() {
 	fp, err := os.Create("compressed")
 	if err != nil {
 		panic(err)
@@ -138,4 +138,6 @@ func (s *stream) Write() {
 	for _, code := range s.InnerCodes {
 		w.WriteString(fmt.Sprint(int(code)))
 	}
+
+	w.Flush()
 }

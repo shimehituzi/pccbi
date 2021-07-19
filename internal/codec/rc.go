@@ -12,8 +12,6 @@ const SIZE = 64
 const TOP = uint64(1) << (SIZE - 8)
 const BOT = uint64(1) << (SIZE - 16)
 
-const filename = "compressed"
-
 type RangeCoder struct {
 	range_, low, code uint64
 }
@@ -23,113 +21,7 @@ type Pmodel struct {
 	totfreq, offset uint64
 }
 
-func getTestData() (val, freq []uint64, min, max uint64, length int) {
-	val = []uint64{0, 0, 1, 0, 0}
-	length = len(val)
-
-	min = math.MaxUint64
-	max = 0
-	for _, v := range val {
-		if v > max {
-			max = v
-		}
-		if v < min {
-			min = v
-		}
-	}
-	freq = make([]uint64, max+1)
-	for _, v := range val {
-		freq[v]++
-	}
-
-	return
-}
-
-func TestEnc() {
-	val, _, _, _, _ := getTestData()
-
-	pm := NewEncPModel(val)
-	rc := NewRangeCoder()
-	fp, err := os.Create(filename)
-	if err != nil {
-		panic(err)
-	}
-	defer fp.Close()
-	w := bufio.NewWriter(fp)
-
-	for _, v := range val {
-		rc.encode(w, pm, v)
-	}
-
-	bits := rc.finishenc(w)
-
-	fmt.Println(bits)
-}
-
-func TestDec() {
-	_, freq, min, max, length := getTestData()
-
-	pm := NewDecPModel(freq, min, max)
-	rc := NewRangeCoder()
-	fp, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-	defer fp.Close()
-	r := bufio.NewReader(fp)
-
-	rc.startdec(r)
-
-	val := make([]uint64, length)
-	for i := 0; i < length; i++ {
-		val[i] = rc.decode(r, pm)
-	}
-
-	fmt.Println(val)
-}
-
-func NewEncPModel(val []uint64) *Pmodel {
-	var (
-		min uint64 = math.MaxUint64
-		max uint64 = 0
-	)
-	for _, v := range val {
-		if v > max {
-			max = v
-		}
-		if v < min {
-			min = v
-		}
-	}
-
-	freq := make([]uint64, max+1)
-	for _, v := range val {
-		freq[v]++
-	}
-	cumfreq := make([]uint64, max+2)
-	cumfreq[0] = 0
-	for i := range freq {
-		cumfreq[i+1] = cumfreq[i] + freq[i]
-	}
-	offset := cumfreq[min]
-	totfreq := cumfreq[max+1] - offset
-
-	return &Pmodel{freq, cumfreq, totfreq, offset}
-}
-
-func NewDecPModel(freq []uint64, min, max uint64) *Pmodel {
-	cumfreq := make([]uint64, max+2)
-	cumfreq[0] = 0
-	for i := range freq {
-		cumfreq[i+1] = cumfreq[i] + freq[i]
-	}
-	offset := cumfreq[min]
-	totfreq := cumfreq[max+1] - offset
-
-	return &Pmodel{freq, cumfreq, totfreq, offset}
-}
-
-func NewRangeCoder() *RangeCoder {
+func newRangeCoder() *RangeCoder {
 	return &RangeCoder{
 		range_: math.MaxUint64,
 		low:    0,
@@ -227,4 +119,116 @@ func (rc *RangeCoder) decode(r *bufio.Reader, pm *Pmodel) (val uint64) {
 	}
 
 	return val
+}
+
+// ------------Test------------
+
+func newTestEncPmodel(val []uint64) *Pmodel {
+	var (
+		min uint64 = math.MaxUint64
+		max uint64 = 0
+	)
+	for _, v := range val {
+		if v > max {
+			max = v
+		}
+		if v < min {
+			min = v
+		}
+	}
+
+	freq := make([]uint64, max+1)
+	for _, v := range val {
+		freq[v]++
+	}
+	cumfreq := make([]uint64, max+2)
+	cumfreq[0] = 0
+	for i := range freq {
+		cumfreq[i+1] = cumfreq[i] + freq[i]
+	}
+	offset := cumfreq[min]
+	totfreq := cumfreq[max+1] - offset
+
+	return &Pmodel{freq, cumfreq, totfreq, offset}
+}
+
+func newTestDecPmodel(freq []uint64, min, max uint64) *Pmodel {
+	cumfreq := make([]uint64, max+2)
+	cumfreq[0] = 0
+	for i := range freq {
+		cumfreq[i+1] = cumfreq[i] + freq[i]
+	}
+	offset := cumfreq[min]
+	totfreq := cumfreq[max+1] - offset
+
+	return &Pmodel{freq, cumfreq, totfreq, offset}
+}
+
+func getTestData() (val, freq []uint64, min, max uint64, length int) {
+	val = []uint64{0, 0, 1, 0, 0}
+	length = len(val)
+
+	min = math.MaxUint64
+	max = 0
+	for _, v := range val {
+		if v > max {
+			max = v
+		}
+		if v < min {
+			min = v
+		}
+	}
+	freq = make([]uint64, max+1)
+	for _, v := range val {
+		freq[v]++
+	}
+
+	return
+}
+
+func testEnc() {
+	val, _, _, _, _ := getTestData()
+
+	pm := newTestEncPmodel(val)
+	rc := newRangeCoder()
+
+	filename := "compressed"
+	fp, err := os.Create(filename)
+	if err != nil {
+		panic(err)
+	}
+	defer fp.Close()
+	w := bufio.NewWriter(fp)
+
+	for _, v := range val {
+		rc.encode(w, pm, v)
+	}
+
+	bits := rc.finishenc(w)
+
+	fmt.Println(bits)
+}
+
+func testDec() {
+	_, freq, min, max, length := getTestData()
+
+	pm := newTestDecPmodel(freq, min, max)
+	rc := newRangeCoder()
+
+	filename := "compressed"
+	fp, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	defer fp.Close()
+	r := bufio.NewReader(fp)
+
+	rc.startdec(r)
+
+	val := make([]uint64, length)
+	for i := 0; i < length; i++ {
+		val[i] = rc.decode(r, pm)
+	}
+
+	fmt.Println(val)
 }
