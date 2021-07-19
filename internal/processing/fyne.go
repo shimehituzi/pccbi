@@ -22,9 +22,9 @@ func (lpc *labeledPointCloud) GetImage(f int) image.Image {
 
 func (lpc *labeledPointCloud) GetLength() DimensionLength {
 	return DimensionLength{
-		D0: lpc.length[0],
-		D1: lpc.length[1],
-		D2: lpc.length[2],
+		D0: lpc.header.length[0],
+		D1: lpc.header.length[1],
+		D2: lpc.header.length[2],
 	}
 }
 
@@ -96,7 +96,7 @@ func (f frame) getOuterCounter(x, y int) int {
 
 func (f frame) getInnerCounter(x, y int) int {
 	for _, contour := range f.contours {
-		for _, inner := range contour.inner {
+		for _, inner := range contour.inners {
 			for _, point := range inner.points {
 				if point.x == x && point.y == y {
 					return contour.label
@@ -113,9 +113,9 @@ func (bc *bitCube) GetImage(f int) image.Image {
 
 func (bc *bitCube) GetLength() DimensionLength {
 	return DimensionLength{
-		D0: bc.length[0],
-		D1: bc.length[1],
-		D2: bc.length[2],
+		D0: bc.header.length[0],
+		D1: bc.header.length[1],
+		D2: bc.header.length[2],
 	}
 }
 

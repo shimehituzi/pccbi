@@ -27,7 +27,11 @@ func (d direction) nextDirections() []direction {
 	)
 	if d.oct {
 		numOfDirection = 8
-		firstDirection = d.code + 5
+		if d.code%2 == 0 {
+			firstDirection = d.code + 7
+		} else {
+			firstDirection = d.code + 6
+		}
 	} else {
 		numOfDirection = 4
 		firstDirection = d.code + 3
@@ -56,6 +60,11 @@ func contourTracking(bitmap [][]int, value int, oct bool) chainCode {
 
 				checkP := newCheckPoint(cc.start.x, cc.start.y, bitmap, value, oct)
 
+				divisor := byte(8)
+				if !oct {
+					divisor = 4
+				}
+
 				for {
 					for _, nextD := range currentD.nextDirections() {
 						nextP := newPoint(currentP.x+nextD.d.x, currentP.y+nextD.d.y)
@@ -63,7 +72,7 @@ func contourTracking(bitmap [][]int, value int, oct bool) chainCode {
 							continue
 						}
 						if bitmap[nextP.y][nextP.x] == value {
-							cc.code = append(cc.code, nextD.code)
+							cc.code = append(cc.code, (nextD.code-currentD.code)%divisor)
 							cc.points = append(cc.points, nextP)
 							currentD = nextD
 							currentP = nextP
