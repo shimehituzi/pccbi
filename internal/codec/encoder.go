@@ -8,8 +8,8 @@ import (
 	"github.com/shimehituzi/pccbi/internal/processing"
 )
 
-func Encode(stream processing.Stream) {
-	fp, err := os.Create("compressed")
+func Encode(stream processing.Stream, filename string) {
+	fp, err := os.Create(filename)
 	if err != nil {
 		panic(err)
 	}
@@ -18,8 +18,7 @@ func Encode(stream processing.Stream) {
 	w := bufio.NewWriter(fp)
 
 	bb := NewBitbuf(true)
-	outerPmodel := newEncPmodel(stream.OuterCodes)
-	innerPmodel := newEncPmodel(stream.InnerCodes)
+	codesPmodel := newEncPmodel(stream.Codes)
 
 	bitSize := 16
 	bigBitSize := 32
@@ -31,25 +30,15 @@ func Encode(stream processing.Stream) {
 	bb.putbits(w, bigBitSize, uint(len(stream.OuterCodes)))
 	bb.putbits(w, bigBitSize, uint(len(stream.InnerCodes)))
 
-	// 外輪郭チェーンコードの確率モデル
-	for _, freq := range outerPmodel.freq {
+	// チェーンコードの確率モデル
+	for _, freq := range codesPmodel.freq {
 		bb.putbits(w, bitSize, uint(freq))
 	}
-	for _, cumfreq := range outerPmodel.cumfreq {
+	for _, cumfreq := range codesPmodel.cumfreq {
 		bb.putbits(w, bitSize, uint(cumfreq))
 	}
-	bb.putbits(w, bigBitSize, uint(outerPmodel.totfreq))
-	bb.putbits(w, bitSize, uint(outerPmodel.offset))
-
-	// 内輪郭チェーンコードの確率モデル
-	for _, freq := range innerPmodel.freq {
-		bb.putbits(w, bitSize, uint(freq))
-	}
-	for _, cumfreq := range innerPmodel.cumfreq {
-		bb.putbits(w, bitSize, uint(cumfreq))
-	}
-	bb.putbits(w, bigBitSize, uint(innerPmodel.totfreq))
-	bb.putbits(w, bitSize, uint(innerPmodel.offset))
+	bb.putbits(w, bigBitSize, uint(codesPmodel.totfreq))
+	bb.putbits(w, bitSize, uint(codesPmodel.offset))
 
 	// チェーンコードのスタートポイントの符号化
 	for _, outerPoint := range stream.OuterStartPoints {
@@ -61,11 +50,8 @@ func Encode(stream processing.Stream) {
 
 	// チェーンコードの算術符号化
 	rc := newRangeCoder()
-	for _, outerCode := range stream.OuterCodes {
-		rc.encode(w, outerPmodel, uint64(outerCode))
-	}
-	for _, innerCode := range stream.InnerCodes {
-		rc.encode(w, innerPmodel, uint64(innerCode))
+	for _, code := range stream.Codes {
+		rc.encode(w, codesPmodel, uint64(code))
 	}
 	rc.finishenc(w)
 

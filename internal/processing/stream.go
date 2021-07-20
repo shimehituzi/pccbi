@@ -20,6 +20,7 @@ type Stream struct {
 	InnerStartPoints []int
 	OuterCodes       []byte
 	InnerCodes       []byte
+	Codes            []byte
 }
 
 func (lpc *labeledPointCloud) MakeStreamStruct() *streamStruct {
@@ -90,8 +91,30 @@ func (ss *streamStruct) GetStream() *Stream {
 	innerCodes := []byte{}
 	for _, code := range ss.innerCodes {
 		innerCodes = append(innerCodes, code...)
-		innerCodes = append(innerCodes, 4)
+		innerCodes = append(innerCodes, 8)
 	}
+
+	codes := []byte{}
+	// dummyO := make([]byte, len(outerCodes))
+	// for i := range dummyO {
+	// 	elem := byte(0)
+	// 	if i%10 == 1 {
+	// 		elem = byte(i%8) + byte(1)
+	// 	}
+	// 	dummyO[i] = elem
+	// }
+	// codes = append(codes, dummyO...)
+	// dummyI := make([]byte, len(innerCodes))
+	// for i := range dummyI {
+	// 	elem := byte(0)
+	// 	if i%10 == 1 {
+	// 		elem = byte(i%8) + byte(1)
+	// 	}
+	// 	dummyI[i] = elem
+	// }
+	// codes = append(codes, dummyI...)
+	codes = append(codes, outerCodes...)
+	codes = append(codes, innerCodes...)
 
 	return &Stream{
 		header,
@@ -99,6 +122,7 @@ func (ss *streamStruct) GetStream() *Stream {
 		innerStartPoints,
 		outerCodes,
 		innerCodes,
+		codes,
 	}
 }
 
