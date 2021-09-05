@@ -2,7 +2,6 @@ package main
 
 import (
 	"image"
-	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -11,10 +10,10 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	"github.com/shimehituzi/pccbi/internal/processing"
+	"github.com/shimehituzi/pccbi/internal/refactoring"
 )
 
-func fyneLoop(fbm []processing.FyneBitMap) {
+func fyneLoop(fbm []refactoring.FyneBitMap) {
 	myApp := app.New()
 	w := myApp.NewWindow("BitMap")
 
@@ -29,16 +28,6 @@ func fyneLoop(fbm []processing.FyneBitMap) {
 	})
 	raster.ScaleMode = canvas.ImageScalePixels
 	raster.Resize(size)
-	raster2 := canvas.NewRaster(func(w, h int) image.Image {
-		return fbm[1].GetImage(int(f))
-	})
-	raster2.ScaleMode = canvas.ImageScalePixels
-	raster2.Resize(size)
-	raster3 := canvas.NewRaster(func(w, h int) image.Image {
-		return fbm[2].GetImage(int(f))
-	})
-	raster3.ScaleMode = canvas.ImageScalePixels
-	raster3.Resize(size)
 
 	frameSlider := widget.NewSliderWithData(0, float64(dim.D0-1), frame)
 	frameSlider.OnChanged = func(f float64) {
@@ -48,24 +37,15 @@ func fyneLoop(fbm []processing.FyneBitMap) {
 		}
 
 		raster.Refresh()
-		raster2.Refresh()
-		raster3.Refresh()
 	}
 
 	frameLabel := widget.NewLabelWithData(binding.FloatToStringWithFormat(frame, "frame: %0.0f"))
 
 	raster1Content := container.New(layout.NewGridWrapLayout(size), raster)
-	raster2Content := container.New(layout.NewGridWrapLayout(size), raster2)
-	raster3Content := container.New(layout.NewGridWrapLayout(size), raster3)
-	line := canvas.NewLine(color.Opaque)
-	line2 := canvas.NewLine(color.Opaque)
-	line.Position1 = fyne.NewPos(0, 0)
-	line.Position2 = fyne.NewPos(0, float32(dim.D1)*float32(scale))
-	hbox := container.New(layout.NewHBoxLayout(), raster3Content, line, raster2Content, line2, raster1Content)
 
 	content := container.New(
 		layout.NewVBoxLayout(),
-		hbox, layout.NewSpacer(),
+		raster1Content, layout.NewSpacer(),
 		frameSlider, layout.NewSpacer(),
 		frameLabel, layout.NewSpacer(),
 	)

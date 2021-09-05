@@ -12,5 +12,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	refactoring.NewLabel(voxel.Data[5])
+	lv := refactoring.NewLabels(voxel)
+	fyneLoop([]refactoring.FyneBitMap{lv})
 }

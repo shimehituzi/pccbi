@@ -2,11 +2,29 @@ package refactoring
 
 import (
 	"math"
+	"sync"
 )
 
 type label intmap
 
-func NewLabel(bm bitmap) label {
+type labeledVoxel []label
+
+func NewLabels(voxel *voxel) labeledVoxel {
+	lv := make(labeledVoxel, voxel.header.length[0])
+	wg := &sync.WaitGroup{}
+	for i := range lv {
+		wg.Add(1)
+		go func(i int) {
+			lv[i] = newLabel(voxel.Data[i])
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+
+	return lv
+}
+
+func newLabel(bm bitmap) label {
 	label := make(label, len(bm))
 	for y := range label {
 		label[y] = make([]int, len(bm[0]))
