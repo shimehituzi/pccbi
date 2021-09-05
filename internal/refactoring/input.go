@@ -17,7 +17,7 @@ type header struct {
 }
 
 type voxel struct {
-	data   []bitmap
+	Data   []bitmap
 	header header
 }
 
@@ -88,11 +88,11 @@ func newVoxel(ply ply, order order) *voxel {
 	vox := new(voxel)
 
 	vox.header = ply.getHeader(order)
-	vox.data = make([]bitmap, vox.header.length[0])
-	for i := range vox.data {
-		vox.data[i] = make(bitmap, vox.header.length[1])
-		for j := range vox.data[i] {
-			vox.data[i][j] = make([]byte, vox.header.length[2])
+	vox.Data = make([]bitmap, vox.header.length[0])
+	for i := range vox.Data {
+		vox.Data[i] = make(bitmap, vox.header.length[1])
+		for j := range vox.Data[i] {
+			vox.Data[i][j] = make([]byte, vox.header.length[2])
 		}
 	}
 
@@ -100,7 +100,7 @@ func newVoxel(ply ply, order order) *voxel {
 		dim0 := point[order[0]] - vox.header.bias[0]
 		dim1 := point[order[1]] - vox.header.bias[1]
 		dim2 := point[order[2]] - vox.header.bias[2]
-		vox.data[dim0][dim1][dim2] = 1
+		vox.Data[dim0][dim1][dim2] = 1
 	}
 
 	return vox

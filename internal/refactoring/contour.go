@@ -7,8 +7,8 @@ type direction struct {
 	code byte
 }
 
-func contourTracking(img intmap, start point, value int) chainCode {
-	cc := *new(chainCode)
+func contourTracking(img intmap, start point, value int) *chainCode {
+	cc := new(chainCode)
 	cc.start = start
 	cc.points = []point{start}
 
