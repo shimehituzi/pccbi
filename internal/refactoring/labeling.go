@@ -1,7 +1,6 @@
 package refactoring
 
 import (
-	"fmt"
 	"math"
 	"sync"
 )
@@ -37,6 +36,7 @@ func newLabel(bm bitmap, debug int) label {
 	for y := range bm {
 		for x := range bm[y] {
 			if bm[y][x] == 1 {
+				// 周りの 0 以外の値を取得
 				al := arroundLavel(x, y, label)
 				if len(al) == 0 {
 					// 新規ラベル作成
@@ -44,15 +44,24 @@ func newLabel(bm bitmap, debug int) label {
 					lookupTable = append(lookupTable, counter)
 					label[y][x] = counter
 				} else {
+					// ルックアップテーブルをたどり一番小さい値を取得する
+					root := []int{}
+					for _, v := range al {
+						k := lookupTable[v-1] - 1
+						for k != lookupTable[k]-1 {
+							k = lookupTable[k] - 1
+						}
+						root = append(root, k+1)
+					}
 					// 最小値を算出
 					min := math.MaxInt32
-					for _, v := range al {
+					for _, v := range root {
 						if min > lookupTable[v-1] {
 							min = lookupTable[v-1]
 						}
 					}
 					// ルックアップテーブル更新
-					for _, v := range al {
+					for _, v := range root {
 						lookupTable[v-1] = min
 					}
 					// ラベリング
@@ -62,6 +71,7 @@ func newLabel(bm bitmap, debug int) label {
 		}
 	}
 
+	// ルックアップテーブルを更新
 	for i := range lookupTable {
 		if i == lookupTable[i]-1 {
 			continue
@@ -73,6 +83,7 @@ func newLabel(bm bitmap, debug int) label {
 		lookupTable[i] = k + 1
 	}
 
+	// ルックアップテーブルの値を詰める
 	updateTable := []int{}
 	for _, v := range lookupTable {
 		flag := true
@@ -93,12 +104,7 @@ func newLabel(bm bitmap, debug int) label {
 		}
 	}
 
-	if debug == 485 {
-		for i := range lookupTable {
-			fmt.Println("[", i+1, ",", lookupTable[i], "]")
-		}
-	}
-
+	// label を更新
 	for y := range label {
 		for x, v := range label[y] {
 			if v != 0 {
