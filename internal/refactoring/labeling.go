@@ -1,6 +1,7 @@
 package refactoring
 
 import (
+	"fmt"
 	"math"
 	"sync"
 )
@@ -15,7 +16,7 @@ func NewLabels(voxel *voxel) labeledVoxel {
 	for i := range lv {
 		wg.Add(1)
 		go func(i int) {
-			lv[i] = newLabel(voxel.Data[i])
+			lv[i] = newLabel(voxel.Data[i], i)
 			wg.Done()
 		}(i)
 	}
@@ -24,7 +25,7 @@ func NewLabels(voxel *voxel) labeledVoxel {
 	return lv
 }
 
-func newLabel(bm bitmap) label {
+func newLabel(bm bitmap, debug int) label {
 	label := make(label, len(bm))
 	for y := range label {
 		label[y] = make([]int, len(bm[0]))
@@ -46,8 +47,8 @@ func newLabel(bm bitmap) label {
 					// 最小値を算出
 					min := math.MaxInt32
 					for _, v := range al {
-						if min > v {
-							min = v
+						if min > lookupTable[v-1] {
+							min = lookupTable[v-1]
 						}
 					}
 					// ルックアップテーブル更新
@@ -58,6 +59,43 @@ func newLabel(bm bitmap) label {
 					label[y][x] = min
 				}
 			}
+		}
+	}
+
+	for i := range lookupTable {
+		if i == lookupTable[i]-1 {
+			continue
+		}
+		k := lookupTable[i] - 1
+		for k != lookupTable[k]-1 {
+			k = lookupTable[k] - 1
+		}
+		lookupTable[i] = k + 1
+	}
+
+	updateTable := []int{}
+	for _, v := range lookupTable {
+		flag := true
+		for _, u := range updateTable {
+			if u == v {
+				flag = false
+			}
+		}
+		if flag {
+			updateTable = append(updateTable, v)
+		}
+	}
+	for i, u := range updateTable {
+		for j, v := range lookupTable {
+			if v == u {
+				lookupTable[j] = i + 1
+			}
+		}
+	}
+
+	if debug == 485 {
+		for i := range lookupTable {
+			fmt.Println("[", i+1, ",", lookupTable[i], "]")
 		}
 	}
 
