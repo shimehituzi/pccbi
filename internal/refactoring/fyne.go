@@ -7,7 +7,8 @@ import (
 
 type FyneBitMap interface {
 	GetLength() DimensionLength
-	GetImage(int) image.Image
+	GetLabelLength(int) int
+	GetImage(int, int) image.Image
 }
 
 type DimensionLength struct {
@@ -24,7 +25,11 @@ func (lv labeledVoxel) GetLength() DimensionLength {
 	}
 }
 
-func (lv labeledVoxel) GetImage(i int) image.Image {
+func (lv labeledVoxel) GetLabelLength(int) int {
+	return 0
+}
+
+func (lv labeledVoxel) GetImage(i, _ int) image.Image {
 	return lv[i]
 }
 
@@ -60,5 +65,41 @@ func (l label) At(x, y int) color.Color {
 		return color.RGBA{255, 255, 0, 255}
 	default:
 		return color.RGBA{0, 0, 0, 255}
+	}
+}
+
+func (fs frames) GetLength() DimensionLength {
+	return DimensionLength{
+		D0: len(fs),
+		D1: len(fs[0][0]),
+		D2: len(fs[0][0][0]),
+	}
+}
+
+func (fs frames) GetLabelLength(f int) int {
+	return len(fs[f])
+}
+
+func (fs frames) GetImage(f, l int) image.Image {
+	return fs[f][l]
+}
+
+func (s segment) ColorModel() color.Model {
+	return color.RGBAModel
+}
+
+func (s segment) Bounds() image.Rectangle {
+	return image.Rect(0, 0, len(s[0]), len(s))
+}
+
+func (s segment) At(x, y int) color.Color {
+	rect := image.Rect(0, 0, len(s[0]), len(s))
+	if !(image.Point{x, y}.In(rect)) {
+		return color.RGBA{0, 0, 0, 0}
+	}
+	if s[y][x] == 1 {
+		return color.RGBA{255, 255, 255, 255}
+	} else {
+		return color.RGBA{0, 0, 0, 0}
 	}
 }

@@ -13,6 +13,6 @@ func main() {
 		panic(err)
 	}
 	lv, _ := refactoring.NewLabels(voxel)
-	refactoring.NewFrameBuffer(voxel)
-	fyneLoop([]refactoring.FyneBitMap{lv})
+	frames := refactoring.NewFrameBuffer(voxel)
+	fyneLoop([]refactoring.FyneBitMap{lv, frames})
 }
