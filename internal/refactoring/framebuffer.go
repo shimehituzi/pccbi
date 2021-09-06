@@ -1,7 +1,5 @@
 package refactoring
 
-import "sync"
-
 type frameBuffer [][]contour
 
 type contour []chainCode
@@ -15,15 +13,9 @@ func NewFrameBuffer(voxel *voxel) {
 	}
 
 	for f, frame := range frames {
-		wg := &sync.WaitGroup{}
 		for l, img := range frame {
-			wg.Add(1)
-			go func(f, l int, img bitmap) {
-				fb[f][l] = newContours(img)
-				wg.Done()
-			}(f, l, bitmap(img))
+			fb[f][l] = newContours(bitmap(img))
 		}
-		wg.Wait()
 	}
 }
 

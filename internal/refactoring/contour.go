@@ -1,5 +1,17 @@
 package refactoring
 
+func getChainCode(img bitmap, value byte) *chainCode {
+	for y := range img {
+		for x, v := range img[y] {
+			if v == value {
+				start := point{x, y}
+				return contourTracking(img, start, value)
+			}
+		}
+	}
+	return nil
+}
+
 func newContours(orig bitmap) contour {
 	img := make(bitmap, len(orig))
 	for i := range orig {
@@ -10,16 +22,11 @@ func newContours(orig bitmap) contour {
 	cont := contour{}
 
 	// 外輪郭
-	var outer chainCode
-	for y := range img {
-		for x, v := range img[y] {
-			if v == 1 {
-				start := point{x, y}
-				outer = *contourTracking(img, start, 1)
-				cont = append(cont, outer)
-			}
-		}
+	outer := getChainCode(img, 1)
+	if outer == nil {
+		panic("cannot produce chainCode")
 	}
+	cont = append(cont, *outer)
 
 	// 塗り潰し
 	// v == 0 だったら塗り潰し
@@ -40,7 +47,7 @@ func newContours(orig bitmap) contour {
 					fillArea(img, p, 0, label)
 					label++
 				} else {
-					if closedAreaDesicion(p, outer) {
+					if closedAreaDesicion(p, *outer) {
 						fillArea(img, p, 0, label)
 						label++
 					} else {
@@ -54,15 +61,11 @@ func newContours(orig bitmap) contour {
 
 	// 内輪郭
 	for l := byte(2); l < label; l++ {
-		for y := range img {
-			for x, v := range img[y] {
-				if v == l {
-					start := point{x, y}
-					cc := *contourTracking(img, start, l)
-					cont = append(cont, cc)
-				}
-			}
+		inner := getChainCode(img, l)
+		if outer == nil {
+			panic("cannot produce chainCode")
 		}
+		cont = append(cont, *inner)
 	}
 
 	return cont

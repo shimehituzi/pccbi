@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/shimehituzi/pccbi/internal/refactoring"
 )
 
@@ -12,7 +14,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	lv, _ := refactoring.NewLabels(voxel)
-	frames := refactoring.NewFrames(voxel)
-	fyneLoop([]refactoring.FyneBitMap{lv, frames})
+	fmt.Println("make frame buffer")
+	refactoring.NewFrameBuffer(voxel)
+	fmt.Println("done")
+	// lv, _ := refactoring.NewLabels(voxel)
+	// frames := refactoring.NewFrames(voxel)
+	// fyneLoop([]refactoring.FyneBitMap{lv, frames})
 }
