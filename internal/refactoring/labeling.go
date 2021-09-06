@@ -9,22 +9,23 @@ type label intmap
 
 type labeledVoxel []label
 
-func NewLabels(voxel *voxel) labeledVoxel {
+func NewLabels(voxel *voxel) (labeledVoxel, []int) {
 	lv := make(labeledVoxel, voxel.header.length[0])
+	numLabels := make([]int, voxel.header.length[0])
 	wg := &sync.WaitGroup{}
 	for i := range lv {
 		wg.Add(1)
 		go func(i int) {
-			lv[i] = newLabel(voxel.Data[i], i)
+			lv[i], numLabels[i] = newLabel(voxel.Data[i], i)
 			wg.Done()
 		}(i)
 	}
 	wg.Wait()
 
-	return lv
+	return lv, numLabels
 }
 
-func newLabel(bm bitmap, debug int) label {
+func newLabel(bm bitmap, debug int) (label, int) {
 	label := make(label, len(bm))
 	for y := range label {
 		label[y] = make([]int, len(bm[0]))
@@ -96,6 +97,8 @@ func newLabel(bm bitmap, debug int) label {
 			updateTable = append(updateTable, v)
 		}
 	}
+	numLabel := len(updateTable)
+
 	for i, u := range updateTable {
 		for j, v := range lookupTable {
 			if v == u {
@@ -114,7 +117,7 @@ func newLabel(bm bitmap, debug int) label {
 		}
 	}
 
-	return label
+	return label, numLabel
 }
 
 func arroundLavel(x, y int, label label) []int {
