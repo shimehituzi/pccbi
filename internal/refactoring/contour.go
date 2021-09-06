@@ -1,18 +1,6 @@
 package refactoring
 
-func getChainCode(img bitmap, value byte) *chainCode {
-	for y := range img {
-		for x, v := range img[y] {
-			if v == value {
-				start := point{x, y}
-				return contourTracking(img, start, value)
-			}
-		}
-	}
-	return nil
-}
-
-func newContours(orig bitmap) contour {
+func newContour(orig bitmap) contour {
 	img := make(bitmap, len(orig))
 	for i := range orig {
 		img[i] = make([]byte, len(orig[i]))
@@ -22,20 +10,13 @@ func newContours(orig bitmap) contour {
 	cont := contour{}
 
 	// 外輪郭
-	outer := getChainCode(img, 1)
+	outer := newChainCode(img, 1)
 	if outer == nil {
 		panic("cannot produce chainCode")
 	}
 	cont = append(cont, *outer)
 
 	// 塗り潰し
-	// v == 0 だったら塗り潰し
-	// 点群の外部 → 1 で塗り潰し
-	// 点群の点上 → 1 で塗り潰し ← すでに 1 になっている
-	// 点群の内部 → label >= 2 で塗り潰し
-	// 点群の内部にいるかは closedAreaDesicion で判定する．
-	// 計算コストがかかるので，filledOutside を準備する．
-	// まだ外部が塗りつぶされていなかったら closedAreaDesicion を実行する
 	filledOutside := false
 	label := byte(2)
 
@@ -61,7 +42,7 @@ func newContours(orig bitmap) contour {
 
 	// 内輪郭
 	for l := byte(2); l < label; l++ {
-		inner := getChainCode(img, l)
+		inner := newChainCode(img, l)
 		if outer == nil {
 			panic("cannot produce chainCode")
 		}

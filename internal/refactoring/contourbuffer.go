@@ -1,22 +1,24 @@
 package refactoring
 
-type frameBuffer [][]contour
+type contourBuffer [][]contour
 
 type contour []chainCode
 
-func NewFrameBuffer(voxel *voxel) {
+func NewContourBuffer(voxel *voxel) contourBuffer {
 	frames := NewFrames(voxel)
 
-	fb := make(frameBuffer, len(frames))
-	for i := range fb {
-		fb[i] = make([]contour, len(frames[i]))
+	cb := make(contourBuffer, len(frames))
+	for i := range cb {
+		cb[i] = make([]contour, len(frames[i]))
 	}
 
 	for f, frame := range frames {
 		for l, img := range frame {
-			fb[f][l] = newContours(bitmap(img))
+			cb[f][l] = newContour(bitmap(img))
 		}
 	}
+
+	return cb
 }
 
 type segment bitmap

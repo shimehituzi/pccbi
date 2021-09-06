@@ -15,6 +15,18 @@ type direction struct {
 	code byte
 }
 
+func newChainCode(img bitmap, value byte) *chainCode {
+	for y := range img {
+		for x, v := range img[y] {
+			if v == value {
+				start := point{x, y}
+				return contourTracking(img, start, value)
+			}
+		}
+	}
+	return nil
+}
+
 func contourTracking(img bitmap, start point, value byte) *chainCode {
 	cc := new(chainCode)
 	cc.start = start

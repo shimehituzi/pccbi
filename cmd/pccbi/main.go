@@ -16,7 +16,7 @@ func main() {
 		panic(err)
 	}
 	start := time.Now()
-	refactoring.NewFrameBuffer(voxel)
+	refactoring.NewContourBuffer(voxel)
 	end := time.Now()
 	fmt.Println((end.Sub(start)).Seconds())
 	// lv, _ := refactoring.NewLabels(voxel)
