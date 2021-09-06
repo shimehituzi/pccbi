@@ -1,7 +1,71 @@
 package refactoring
 
-func newContours(orig bitmap) []chainCode {
-	return []chainCode{}
+func newContours(orig bitmap) contour {
+	img := make(bitmap, len(orig))
+	for i := range orig {
+		img[i] = make([]byte, len(orig[i]))
+		copy(img[i], orig[i])
+	}
+
+	cont := contour{}
+
+	// 外輪郭
+	var outer chainCode
+	for y := range img {
+		for x, v := range img[y] {
+			if v == 1 {
+				start := point{x, y}
+				outer = *contourTracking(img, start, 1)
+				cont = append(cont, outer)
+			}
+		}
+	}
+
+	// 塗り潰し
+	// v == 0 だったら塗り潰し
+	// 点群の外部 → 1 で塗り潰し
+	// 点群の点上 → 1 で塗り潰し ← すでに 1 になっている
+	// 点群の内部 → label >= 2 で塗り潰し
+	// 点群の内部にいるかは closedAreaDesicion で判定する．
+	// 計算コストがかかるので，filledOutside を準備する．
+	// まだ外部が塗りつぶされていなかったら closedAreaDesicion を実行する
+	filledOutside := false
+	label := byte(2)
+
+	for y := range img {
+		for x, v := range img[y] {
+			if v == 0 {
+				p := point{x, y}
+				if filledOutside {
+					fillArea(img, p, 0, label)
+					label++
+				} else {
+					if closedAreaDesicion(p, outer) {
+						fillArea(img, p, 0, label)
+						label++
+					} else {
+						fillArea(img, p, 0, 1)
+						filledOutside = true
+					}
+				}
+			}
+		}
+	}
+
+	// 内輪郭
+	for l := byte(2); l < label; l++ {
+		for y := range img {
+			for x, v := range img[y] {
+				if v == l {
+					start := point{x, y}
+					cc := *contourTracking(img, start, l)
+					cont = append(cont, cc)
+				}
+			}
+		}
+	}
+
+	return cont
 }
 
 func closedAreaDesicion(p point, cc chainCode) bool {
