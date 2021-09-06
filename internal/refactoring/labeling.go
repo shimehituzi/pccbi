@@ -121,7 +121,7 @@ func newLabel(bm bitmap, debug int) (label, int) {
 }
 
 func arroundLavel(x, y int, label label) []int {
-	mask := []point{
+	mask := [4]point{
 		{-1, -1}, {0, -1}, {1, -1}, {-1, 0},
 	}
 

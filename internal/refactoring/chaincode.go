@@ -1,5 +1,15 @@
 package refactoring
 
+type chainCode struct {
+	start  point
+	code   []byte
+	points []point
+}
+
+type point struct {
+	x, y int
+}
+
 type direction struct {
 	d    point
 	code byte

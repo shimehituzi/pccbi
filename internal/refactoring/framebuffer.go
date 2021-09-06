@@ -6,15 +6,6 @@ type frameBuffer [][]contour
 
 type contour []chainCode
 
-type chainCode struct {
-	start  point
-	code   []byte
-	points []point
-}
-type point struct {
-	x, y int
-}
-
 func NewFrameBuffer(voxel *voxel) {
 	frames := NewFrames(voxel)
 
@@ -34,10 +25,6 @@ func NewFrameBuffer(voxel *voxel) {
 		}
 		wg.Wait()
 	}
-}
-
-func newContours(orig bitmap) []chainCode {
-	return []chainCode{}
 }
 
 type segment bitmap
