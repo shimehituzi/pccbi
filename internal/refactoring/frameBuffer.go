@@ -1,10 +1,11 @@
 package refactoring
 
+import "sync"
+
 type frameBuffer [][]contour
-type contour struct {
-	outer chainCode
-	inner []chainCode
-}
+
+type contour []chainCode
+
 type chainCode struct {
 	start  point
 	code   []byte
@@ -14,15 +15,36 @@ type point struct {
 	x, y int
 }
 
-func NewFrameBuffer(voxel *voxel) frames {
-	return newFrames(voxel)
+func NewFrameBuffer(voxel *voxel) {
+	frames := NewFrames(voxel)
+
+	fb := make(frameBuffer, len(frames))
+	for i := range fb {
+		fb[i] = make([]contour, len(frames[i]))
+	}
+
+	for f, frame := range frames {
+		wg := &sync.WaitGroup{}
+		for l, seg := range frame {
+			wg.Add(1)
+			go func(f, l int, seg segment) {
+				fb[f][l] = newContours(seg)
+				wg.Done()
+			}(f, l, seg)
+		}
+		wg.Wait()
+	}
+}
+
+func newContours(s segment) []chainCode {
+	return []chainCode{}
 }
 
 type segment bitmap
 type frame []segment
 type frames []frame
 
-func newFrames(voxel *voxel) frames {
+func NewFrames(voxel *voxel) frames {
 	lv, numLabels := NewLabels(voxel)
 
 	frames := make(frames, voxel.header.length[0])
