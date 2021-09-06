@@ -1,5 +1,7 @@
 package refactoring
 
+import "sync"
+
 type frameBuffer [][]contour
 
 type contour []chainCode
@@ -12,11 +14,22 @@ func NewFrameBuffer(voxel *voxel) {
 		fb[i] = make([]contour, len(frames[i]))
 	}
 
-	for f, frame := range frames {
-		for l, img := range frame {
-			fb[f][l] = newContours(bitmap(img))
+	limit := 5
+	slots := make(chan struct{}, limit)
+
+	wg := &sync.WaitGroup{}
+	for f := range frames {
+		for l := range frames[f] {
+			slots <- struct{}{}
+			wg.Add(1)
+			go func(f, l int) {
+				fb[f][l] = newContours(bitmap(frames[f][l]))
+				<-slots
+				wg.Done()
+			}(f, l)
 		}
 	}
+	wg.Wait()
 }
 
 type segment bitmap
