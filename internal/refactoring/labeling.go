@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-type label intmap
+type label [][]int
 
 type labeledVoxel []label
 
@@ -128,10 +128,17 @@ func arroundLavel(x, y int, label label) []int {
 	al := []int{}
 	for _, m := range mask {
 		p := point{x + m.x, y + m.y}
-		if validPoint(p, intmap(label)) && label[p.y][p.x] != 0 {
+		if validPointInt(p, label) && label[p.y][p.x] != 0 {
 			al = append(al, label[p.y][p.x])
 		}
 	}
 
 	return al
+}
+
+func validPointInt(p point, img label) bool {
+	if p.y < 0 || p.x < 0 || len(img) <= p.y || len(img[0]) <= p.x {
+		return false
+	}
+	return true
 }

@@ -25,18 +25,18 @@ func NewFrameBuffer(voxel *voxel) {
 
 	for f, frame := range frames {
 		wg := &sync.WaitGroup{}
-		for l, seg := range frame {
+		for l, img := range frame {
 			wg.Add(1)
-			go func(f, l int, seg segment) {
-				fb[f][l] = newContours(seg)
+			go func(f, l int, img bitmap) {
+				fb[f][l] = newContours(img)
 				wg.Done()
-			}(f, l, seg)
+			}(f, l, bitmap(img))
 		}
 		wg.Wait()
 	}
 }
 
-func newContours(s segment) []chainCode {
+func newContours(orig bitmap) []chainCode {
 	return []chainCode{}
 }
 

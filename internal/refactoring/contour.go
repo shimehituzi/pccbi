@@ -1,13 +1,11 @@
 package refactoring
 
-type intmap [][]int
-
 type direction struct {
 	d    point
 	code byte
 }
 
-func contourTracking(img intmap, start point, value int) *chainCode {
+func contourTracking(img bitmap, start point, value byte) *chainCode {
 	cc := new(chainCode)
 	cc.start = start
 	cc.points = []point{start}
@@ -64,7 +62,7 @@ func (d direction) nextDirections() []direction {
 	return nextDirections
 }
 
-func validPoint(p point, img intmap) bool {
+func validPoint(p point, img bitmap) bool {
 	if p.y < 0 || p.x < 0 || len(img) <= p.y || len(img[0]) <= p.x {
 		return false
 	}
