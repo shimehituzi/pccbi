@@ -15,19 +15,19 @@ type direction struct {
 	code byte
 }
 
-func newChainCode(img bitmap, value byte) *chainCode {
+func newChainCode(img bitmap, value byte, inner bool) *chainCode {
 	for y := range img {
 		for x, v := range img[y] {
 			if v == value {
 				start := point{x, y}
-				return contourTracking(img, start, value)
+				return contourTracking(img, start, value, inner)
 			}
 		}
 	}
 	return nil
 }
 
-func contourTracking(img bitmap, start point, value byte) *chainCode {
+func contourTracking(img bitmap, start point, value byte, inner bool) *chainCode {
 	cc := new(chainCode)
 	cc.start = start
 	cc.points = []point{start}
@@ -46,6 +46,15 @@ func contourTracking(img bitmap, start point, value byte) *chainCode {
 		for _, nextD := range currentD.nextDirections() {
 			nextP := point{currentP.x + nextD.d.x, currentP.y + nextD.d.y}
 			if validPoint(nextP, img) && img[nextP.y][nextP.x] == value {
+				if inner && (nextD.code%2) == 1 {
+					beforeD := newDirection((nextD.code - 1) % 8)
+					beforeP := point{currentP.x + beforeD.d.x, currentP.y + beforeD.d.y}
+					afterD := newDirection((nextD.code + 1) % 8)
+					afterP := point{currentP.x + afterD.d.x, currentP.y + afterD.d.y}
+					if img[beforeP.y][beforeP.x] == 1 && img[afterP.y][afterP.x] == 1 {
+						continue
+					}
+				}
 				cc.code = append(cc.code, (nextD.code-currentD.code)%divisor)
 				cc.points = append(cc.points, nextP)
 				currentD = nextD

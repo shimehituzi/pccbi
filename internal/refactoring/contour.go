@@ -10,7 +10,7 @@ func newContour(orig bitmap) contour {
 	cont := contour{}
 
 	// 外輪郭
-	outer := newChainCode(img, 1)
+	outer := newChainCode(img, 1, false)
 	if outer == nil {
 		panic("cannot produce chainCode")
 	}
@@ -42,7 +42,7 @@ func newContour(orig bitmap) contour {
 
 	// 内輪郭
 	for l := byte(2); l < label; l++ {
-		inner := newChainCode(img, l)
+		inner := newChainCode(img, l, true)
 		if outer == nil {
 			panic("cannot produce chainCode")
 		}
