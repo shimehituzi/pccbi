@@ -41,26 +41,30 @@ func fyneLoop(fbm []refactoring.FyneBitMap) {
 	raster2.Resize(size)
 
 	labelLength := fbm[1].GetLabelLength(int(f))
-	labelingOptions := []string{}
-	for i := 0; i < labelLength; i++ {
-		labelingOptions = append(labelingOptions, fmt.Sprint(i+1))
+	labelingOptions := []string{"All"}
+	for i := 1; i <= labelLength; i++ {
+		labelingOptions = append(labelingOptions, fmt.Sprint(i))
 	}
 	labelingRadio := widget.NewRadioGroup(labelingOptions, func(s string) {
 		var (
 			i   int
 			err error
 		)
-		i, err = strconv.Atoi(s)
-		if err != nil {
-			fyne.LogError("Failed to convert string", err)
+		if s != "All" {
+			i, err = strconv.Atoi(s)
+			if err != nil {
+				fyne.LogError("Failed to convert string", err)
+			}
+		} else {
+			i = 0
 		}
-		if err = labeling.Set(i - 1); err != nil {
+		if err = labeling.Set(i); err != nil {
 			fyne.LogError("Failed to set binding value", err)
 		}
 		raster2.Refresh()
 	})
 	labelingRadio.Required = true
-	labelingRadio.Selected = "1"
+	labelingRadio.Selected = "All"
 	labelingRadio.Horizontal = true
 
 	frameSlider := widget.NewSliderWithData(0, float64(dim.D0-1), frame)
@@ -71,12 +75,12 @@ func fyneLoop(fbm []refactoring.FyneBitMap) {
 		}
 
 		labelLength := fbm[1].GetLabelLength(int(f))
-		labelingOptions := []string{}
-		for i := 0; i < labelLength; i++ {
-			labelingOptions = append(labelingOptions, fmt.Sprint(i+1))
+		labelingOptions := []string{"All"}
+		for i := 1; i <= labelLength; i++ {
+			labelingOptions = append(labelingOptions, fmt.Sprint(i))
 		}
 		labelingRadio.Options = labelingOptions
-		labelingRadio.Selected = "1"
+		labelingRadio.Selected = "All"
 		if err := labeling.Set(0); err != nil {
 			fyne.LogError("Failed to set binding value", err)
 		}
@@ -92,7 +96,7 @@ func fyneLoop(fbm []refactoring.FyneBitMap) {
 	raster2Content := container.New(layout.NewGridWrapLayout(size), raster2)
 	line := canvas.NewLine(color.Opaque)
 	line.Position1 = fyne.NewPos(0, 0)
-	hbox := container.New(layout.NewHBoxLayout(), raster1Content, line, raster2Content)
+	hbox := container.New(layout.NewHBoxLayout(), raster2Content, line, raster1Content)
 
 	content := container.New(
 		layout.NewVBoxLayout(),

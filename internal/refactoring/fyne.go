@@ -81,7 +81,31 @@ func (fs frames) GetLabelLength(f int) int {
 }
 
 func (fs frames) GetImage(f, l int) image.Image {
-	return fs[f][l]
+	if l == 0 {
+		return fs[f]
+	}
+	return fs[f][l-1]
+}
+
+func (f frame) ColorModel() color.Model {
+	return color.RGBAModel
+}
+
+func (f frame) Bounds() image.Rectangle {
+	return image.Rect(0, 0, len(f[0][0]), len(f[0]))
+}
+
+func (f frame) At(x, y int) color.Color {
+	rect := image.Rect(0, 0, len(f[0][0]), len(f[0]))
+	if !(image.Point{x, y}.In(rect)) {
+		return color.RGBA{0, 0, 0, 0}
+	}
+	for l := range f {
+		if f[l][y][x] == 1 {
+			return color.RGBA{255, 255, 255, 255}
+		}
+	}
+	return color.RGBA{0, 0, 0, 0}
 }
 
 func (s segment) ColorModel() color.Model {
