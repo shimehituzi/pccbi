@@ -1,26 +1,5 @@
 package refactoring
 
-type contourBuffer [][]contour
-
-type contour []chainCode
-
-func NewContourBuffer(voxel *voxel) contourBuffer {
-	frames := NewFrames(voxel)
-
-	cb := make(contourBuffer, len(frames))
-	for i := range cb {
-		cb[i] = make([]contour, len(frames[i]))
-	}
-
-	for f, frame := range frames {
-		for l, img := range frame {
-			cb[f][l] = newContour(bitmap(img))
-		}
-	}
-
-	return cb
-}
-
 type segment bitmap
 type frame []segment
 type frames []frame
@@ -51,4 +30,46 @@ func NewFrames(voxel *voxel) frames {
 	}
 
 	return frames
+}
+
+type contourBuffer [][]contour
+type contour []chainCode
+
+func NewContourBuffer(voxel *voxel) contourBuffer {
+	frames := NewFrames(voxel)
+
+	cb := make(contourBuffer, len(frames))
+	for i := range cb {
+		cb[i] = make([]contour, len(frames[i]))
+	}
+
+	for f, frame := range frames {
+		for l, img := range frame {
+			cb[f][l] = newContour(bitmap(img))
+		}
+	}
+
+	return cb
+}
+
+func NewFyneContour(cb contourBuffer, voxel *voxel) labeledVoxel {
+	fc := make(labeledVoxel, voxel.header.length[0])
+	for f := range fc {
+		fc[f] = make(label, voxel.header.length[1])
+		for y := range fc[f] {
+			fc[f][y] = make([]int, voxel.header.length[2])
+		}
+	}
+
+	for f := range cb {
+		for l := range cb[f] {
+			for _, cc := range cb[f][l] {
+				for _, point := range cc.points {
+					fc[f][point.y][point.x] = l + 1
+				}
+			}
+		}
+	}
+
+	return fc
 }
