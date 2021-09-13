@@ -1,9 +1,5 @@
 package processing
 
-type segment bitmap
-type frame []segment
-type frames []frame
-
 func NewFrames(voxel *voxel) frames {
 	lv, numLabels := NewLabels(voxel)
 
@@ -31,9 +27,6 @@ func NewFrames(voxel *voxel) frames {
 
 	return frames
 }
-
-type contourBuffer [][]contour
-type contour []chainCode
 
 func NewContourBuffer(voxel *voxel) contourBuffer {
 	frames := NewFrames(voxel)

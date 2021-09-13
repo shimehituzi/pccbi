@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/shimehituzi/pccbi/internal/codec"
 	"github.com/shimehituzi/pccbi/internal/processing"
 )
 
@@ -14,6 +15,10 @@ func main() {
 	}
 	frames := processing.NewFrames(voxel)
 	cb := processing.NewContourBuffer(voxel)
+
+	stream := processing.NewStream(voxel, cb)
+	codec.Encode(stream)
+
 	fc := processing.NewFyneContour(cb, voxel)
 	fyneLoop([]processing.FyneBitMap{fc, frames})
 }
