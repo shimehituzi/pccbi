@@ -5,7 +5,7 @@ import (
 	"github.com/shimehituzi/pccbi/internal/processing"
 )
 
-func main() {
+func encode() {
 	relativePath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"
 	// 1062090 点のデータ
 	srcPath := relativePath[4:]
@@ -14,9 +14,6 @@ func main() {
 		panic(err)
 	}
 	cb := processing.NewContourBuffer(voxel)
-
 	stream := processing.NewStream(voxel, cb)
 	codec.Encode(stream)
-
-	codec.Decode()
 }

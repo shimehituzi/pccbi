@@ -11,15 +11,15 @@ func NewStream(voxel *voxel, cb contourBuffer) *Stream {
 
 	for f := range cb {
 		for _, contour := range cb[f] {
-			numOuter++
-			numInner += len(contour) - 1
 			for i, v := range contour {
 				if i == 0 {
 					outerStartPoints = append(outerStartPoints, v.start.x, v.start.y)
+					numOuter += 2
 					outerCodes = append(outerCodes, v.code...)
 					outerCodes = append(outerCodes, 8)
 				} else {
 					innerStartPoints = append(innerStartPoints, v.start.x, v.start.y)
+					numInner += 2
 					innerCodes = append(innerCodes, v.code...)
 					innerCodes = append(innerCodes, 8)
 				}
@@ -39,6 +39,8 @@ func NewStream(voxel *voxel, cb contourBuffer) *Stream {
 		voxel.header.bias[2],   //biasWidth
 		numOuter,
 		numInner,
+		len(outerCodes),
+		len(innerCodes),
 	}
 
 	stream := Stream{
