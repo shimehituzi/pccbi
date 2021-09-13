@@ -1,4 +1,4 @@
-package processing
+package encoder
 
 func newContour(orig bitmap) contour {
 	img := make(bitmap, len(orig))

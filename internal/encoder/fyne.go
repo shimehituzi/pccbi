@@ -1,4 +1,4 @@
-package processing
+package encoder
 
 import (
 	"image"

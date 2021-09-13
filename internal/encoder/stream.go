@@ -1,4 +1,4 @@
-package processing
+package encoder
 
 func NewStream(voxel *voxel, cb contourBuffer) *Stream {
 	numOuter := 0
