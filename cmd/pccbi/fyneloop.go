@@ -13,10 +13,10 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	"github.com/shimehituzi/pccbi/internal/processing"
+	"github.com/shimehituzi/pccbi/internal/encoder"
 )
 
-func fyneLoop(fbm []processing.FyneBitMap) {
+func fyneLoop(fbm []encoder.FyneBitMap) {
 	myApp := app.New()
 	w := myApp.NewWindow("BitMap")
 

@@ -1,4 +1,4 @@
-package processing
+package encoder
 
 func NewFrames(voxel *voxel) frames {
 	lv, numLabels := NewLabels(voxel)

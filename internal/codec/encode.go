@@ -5,10 +5,10 @@ import (
 	"math"
 	"os"
 
-	"github.com/shimehituzi/pccbi/internal/processing"
+	"github.com/shimehituzi/pccbi/internal/encoder"
 )
 
-func Encode(stream *processing.Stream) {
+func Encode(stream *encoder.Stream) {
 	fp, err := os.Create("compressed")
 	if err != nil {
 		panic(err)

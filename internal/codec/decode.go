@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"os"
 
-	"github.com/shimehituzi/pccbi/internal/processing"
+	"github.com/shimehituzi/pccbi/internal/decoder"
 )
 
-func Decode() *processing.Stream {
+func Decode() *decoder.Stream {
 	fp, err := os.Open("compressed")
 	if err != nil {
 		panic(err)
@@ -95,7 +95,7 @@ func Decode() *processing.Stream {
 		innerCodes[i] = byte(rc.decode(r, innerPmodel))
 	}
 
-	stream := &processing.Stream{
+	stream := &decoder.Stream{
 		Header:           header,
 		OuterStartPoints: outerStartPoints,
 		InnerStartPoints: innerStartPoints,
