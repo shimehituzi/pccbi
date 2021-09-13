@@ -13,12 +13,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	frames := processing.NewFrames(voxel)
 	cb := processing.NewContourBuffer(voxel)
 
 	stream := processing.NewStream(voxel, cb)
 	codec.Encode(stream)
 
-	fc := processing.NewFyneContour(cb, voxel)
-	fyneLoop([]processing.FyneBitMap{fc, frames})
+	codec.Decode()
 }

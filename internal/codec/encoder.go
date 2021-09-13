@@ -25,28 +25,30 @@ func Encode(stream *processing.Stream) {
 	bigBitSize := 32
 
 	// ヘッダー情報
-	for _, header := range stream.Header {
-		bb.putbits(w, bitSize, uint(header))
+	for i, header := range stream.Header {
+		if i > 10 {
+			bb.putbits(w, bigBitSize, uint(header))
+		} else {
+			bb.putbits(w, bitSize, uint(header))
+		}
 	}
-	bb.putbits(w, bigBitSize, uint(len(stream.OuterCodes)))
-	bb.putbits(w, bigBitSize, uint(len(stream.InnerCodes)))
 
 	// 外輪郭チェーンコードの確率モデル
 	for _, freq := range outerPmodel.freq {
-		bb.putbits(w, bitSize, uint(freq))
+		bb.putbits(w, bigBitSize, uint(freq))
 	}
 	for _, cumfreq := range outerPmodel.cumfreq {
-		bb.putbits(w, bitSize, uint(cumfreq))
+		bb.putbits(w, bigBitSize, uint(cumfreq))
 	}
 	bb.putbits(w, bigBitSize, uint(outerPmodel.totfreq))
 	bb.putbits(w, bitSize, uint(outerPmodel.offset))
 
 	// 内輪郭チェーンコードの確率モデル
 	for _, freq := range innerPmodel.freq {
-		bb.putbits(w, bitSize, uint(freq))
+		bb.putbits(w, bigBitSize, uint(freq))
 	}
 	for _, cumfreq := range innerPmodel.cumfreq {
-		bb.putbits(w, bitSize, uint(cumfreq))
+		bb.putbits(w, bigBitSize, uint(cumfreq))
 	}
 	bb.putbits(w, bigBitSize, uint(innerPmodel.totfreq))
 	bb.putbits(w, bitSize, uint(innerPmodel.offset))
