@@ -1,4 +1,4 @@
-package refactoring
+package processing
 
 func newContour(orig bitmap) contour {
 	img := make(bitmap, len(orig))

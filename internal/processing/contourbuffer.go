@@ -1,4 +1,4 @@
-package refactoring
+package processing
 
 type segment bitmap
 type frame []segment
