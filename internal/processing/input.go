@@ -8,23 +8,6 @@ import (
 	"strings"
 )
 
-type ply [][3]int
-
-type bitmap [][]byte
-
-type header struct {
-	axis, length, bias [3]int
-}
-
-type voxel struct {
-	Data   []bitmap
-	header header
-}
-
-type order [3]int
-
-type orderString int
-
 const (
 	XYZ orderString = iota
 	XZY

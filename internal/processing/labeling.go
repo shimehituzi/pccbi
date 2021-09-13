@@ -5,10 +5,6 @@ import (
 	"sync"
 )
 
-type label [][]int
-
-type labeledVoxel []label
-
 func NewLabels(voxel *voxel) (labeledVoxel, []int) {
 	lv := make(labeledVoxel, voxel.header.length[0])
 	numLabels := make([]int, voxel.header.length[0])

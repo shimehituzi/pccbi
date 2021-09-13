@@ -1,20 +1,5 @@
 package processing
 
-type chainCode struct {
-	start  point
-	code   []byte
-	points []point
-}
-
-type point struct {
-	x, y int
-}
-
-type direction struct {
-	d    point
-	code byte
-}
-
 func newChainCode(img bitmap, value byte, inner bool) *chainCode {
 	for y := range img {
 		for x, v := range img[y] {
