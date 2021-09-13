@@ -8,7 +8,7 @@ import (
 	"github.com/shimehituzi/pccbi/internal/processing"
 )
 
-func Encode(stream processing.Stream) {
+func Encode(stream *processing.Stream) {
 	fp, err := os.Create("compressed")
 	if err != nil {
 		panic(err)
