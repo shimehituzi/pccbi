@@ -1,4 +1,4 @@
-package processing
+package refactoring
 
 import (
 	"bufio"
@@ -12,8 +12,12 @@ type ply [][3]int
 
 type bitmap [][]byte
 
-type bitCube struct {
-	data   []bitmap
+type header struct {
+	axis, length, bias [3]int
+}
+
+type voxel struct {
+	Data   []bitmap
 	header header
 }
 
@@ -80,26 +84,26 @@ func newPly(srcPath string) (ply, error) {
 	return ply, nil
 }
 
-func newBitCube(ply ply, order order) *bitCube {
-	bc := new(bitCube)
+func newVoxel(ply ply, order order) *voxel {
+	vox := new(voxel)
 
-	bc.header = ply.getHeader(order)
-	bc.data = make([]bitmap, bc.header.length[0])
-	for i := range bc.data {
-		bc.data[i] = make(bitmap, bc.header.length[1])
-		for j := range bc.data[i] {
-			bc.data[i][j] = make([]byte, bc.header.length[2])
+	vox.header = ply.getHeader(order)
+	vox.Data = make([]bitmap, vox.header.length[0])
+	for i := range vox.Data {
+		vox.Data[i] = make(bitmap, vox.header.length[1])
+		for j := range vox.Data[i] {
+			vox.Data[i][j] = make([]byte, vox.header.length[2])
 		}
 	}
 
 	for _, point := range ply {
-		dim0 := point[order[0]] - bc.header.bias[0]
-		dim1 := point[order[1]] - bc.header.bias[1]
-		dim2 := point[order[2]] - bc.header.bias[2]
-		bc.data[dim0][dim1][dim2] = 1
+		dim0 := point[order[0]] - vox.header.bias[0]
+		dim1 := point[order[1]] - vox.header.bias[1]
+		dim2 := point[order[2]] - vox.header.bias[2]
+		vox.Data[dim0][dim1][dim2] = 1
 	}
 
-	return bc
+	return vox
 }
 
 func (ply ply) getHeader(order order) header {
@@ -123,21 +127,19 @@ func (ply ply) getHeader(order order) header {
 		bias[d] = min
 	}
 	return header{
-		axis:             axis,
-		length:           length,
-		bias:             bias,
-		numOuterContours: 0,
-		numInnerContours: 0,
+		axis:   axis,
+		length: length,
+		bias:   bias,
 	}
 }
 
-func LoadPly(srcPath string, order order) (*bitCube, error) {
+func LoadPly(srcPath string, order order) (*voxel, error) {
 	ply, err := newPly(srcPath)
 	if err != nil {
 		return nil, err
 	}
 
-	bc := newBitCube(ply, order)
+	vox := newVoxel(ply, order)
 
-	return bc, nil
+	return vox, nil
 }
