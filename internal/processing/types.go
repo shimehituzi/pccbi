@@ -38,3 +38,11 @@ type direction struct {
 
 type contourBuffer [][]contour
 type contour []chainCode
+
+type Stream struct {
+	Header           []int
+	OuterStartPoints []int
+	InnerStartPoints []int
+	OuterCodes       []byte
+	InnerCodes       []byte
+}
