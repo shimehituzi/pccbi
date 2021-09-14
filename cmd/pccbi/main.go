@@ -29,24 +29,19 @@ func main() {
 			fmt.Println("error header", i)
 		}
 	}
-	for i := range encStream.OuterStartPoints {
-		if encStream.OuterStartPoints[i] != decStream.OuterStartPoints[i] {
-			fmt.Println("error outerStartPoints", i)
+	for i := range encStream.StartPoints {
+		if encStream.StartPoints[i] != decStream.StartPoints[i] {
+			fmt.Println("error startPoints", i)
 		}
 	}
-	for i := range encStream.InnerStartPoints {
-		if encStream.InnerStartPoints[i] != decStream.InnerStartPoints[i] {
-			fmt.Println("error innerStartPoints", i)
+	for i := range encStream.Flags {
+		if encStream.Flags[i] != decStream.Flags[i] {
+			fmt.Println("error flags", i)
 		}
 	}
-	for i := range encStream.OuterCodes {
-		if encStream.OuterCodes[i] != decStream.OuterCodes[i] {
-			fmt.Println("error outerCodes", i)
-		}
-	}
-	for i := range encStream.InnerCodes {
-		if encStream.InnerCodes[i] != decStream.InnerCodes[i] {
-			fmt.Println("error innerCodes", i)
+	for i := range encStream.Codes {
+		if encStream.Codes[i] != decStream.Codes[i] {
+			fmt.Println("error codes", i)
 		}
 	}
 

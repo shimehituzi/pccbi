@@ -21,7 +21,7 @@ func Decode() *decoder.Stream {
 	bitSize := 16
 	bigBitSize := 32
 
-	headerLength := 13
+	headerLength := 12
 	header := make([]int, headerLength)
 	for i := range header {
 		if i > 10 {
@@ -30,78 +30,60 @@ func Decode() *decoder.Stream {
 			header[i] = int(bitbuf.getbits(r, bitSize))
 		}
 	}
-	numOuter := header[9]
-	numInner := header[10]
-	numOuterCodes := header[11]
-	numInnerCodes := header[11]
+	numPoints := header[9]
+	numFlags := header[10]
+	numCodes := header[11]
 
-	freqLength := 9
-	cumfreqLength := 10
-
-	outerFreq := make([]uint64, freqLength)
-	for i := range outerFreq {
-		outerFreq[i] = uint64(bitbuf.getbits(r, bigBitSize))
-	}
-	outerCumfreq := make([]uint64, cumfreqLength)
-	for i := range outerCumfreq {
-		outerCumfreq[i] = uint64(bitbuf.getbits(r, bigBitSize))
-	}
-	outerTotfreq := uint64(bitbuf.getbits(r, bigBitSize))
-	outerOffset := uint64(bitbuf.getbits(r, bitSize))
-
-	outerPmodel := &Pmodel{
-		freq:    outerFreq,
-		cumfreq: outerCumfreq,
-		totfreq: outerTotfreq,
-		offset:  outerOffset,
+	startPoints := make([]int, numPoints)
+	for i := range startPoints {
+		startPoints[i] = int(bitbuf.getbits(r, bitSize))
 	}
 
-	innerFreq := make([]uint64, freqLength)
-	for i := range innerFreq {
-		innerFreq[i] = uint64(bitbuf.getbits(r, bigBitSize))
-	}
-	innerCumfreq := make([]uint64, cumfreqLength)
-	for i := range innerCumfreq {
-		innerCumfreq[i] = uint64(bitbuf.getbits(r, bigBitSize))
-	}
-	innerTotfreq := uint64(bitbuf.getbits(r, bigBitSize))
-	innerOffset := uint64(bitbuf.getbits(r, bitSize))
+	flagFreqMax := 1
+	codeFreqMax := 8
 
-	innerPmodel := &Pmodel{
-		freq:    innerFreq,
-		cumfreq: innerCumfreq,
-		totfreq: innerTotfreq,
-		offset:  innerOffset,
+	flagFreq := make([]uint64, flagFreqMax+1)
+	for i := range flagFreq {
+		flagFreq[i] = uint64(bitbuf.getbits(r, bigBitSize))
 	}
+	flagPmodel := newDecPmodel(flagFreq, 0, uint(flagFreqMax))
 
-	outerStartPoints := make([]int, numOuter)
-	for i := range outerStartPoints {
-		outerStartPoints[i] = int(bitbuf.getbits(r, bitSize))
+	codeFreq := make([]uint64, codeFreqMax+1)
+	for i := range codeFreq {
+		codeFreq[i] = uint64(bitbuf.getbits(r, bigBitSize))
 	}
-	innerStartPoints := make([]int, numInner)
-	for i := range innerStartPoints {
-		innerStartPoints[i] = int(bitbuf.getbits(r, bitSize))
-	}
+	codePmodel := newDecPmodel(codeFreq, 0, uint(codeFreqMax))
 
 	rc := newRangeCoder()
 	rc.startdec(r)
 
-	outerCodes := make([]byte, numOuterCodes)
-	for i := 0; i < numOuterCodes; i++ {
-		outerCodes[i] = byte(rc.decode(r, outerPmodel))
+	flags := make([]byte, numFlags)
+	for i := range flags {
+		flags[i] = byte(rc.decode(r, flagPmodel))
 	}
-	innerCodes := make([]byte, numInnerCodes)
-	for i := 0; i < numInnerCodes; i++ {
-		innerCodes[i] = byte(rc.decode(r, innerPmodel))
+	codes := make([]byte, numCodes)
+	for i := range codes {
+		codes[i] = byte(rc.decode(r, codePmodel))
 	}
 
 	stream := &decoder.Stream{
-		Header:           header,
-		OuterStartPoints: outerStartPoints,
-		InnerStartPoints: innerStartPoints,
-		OuterCodes:       outerCodes,
-		InnerCodes:       innerCodes,
+		Header:      header,
+		StartPoints: startPoints,
+		Flags:       flags,
+		Codes:       codes,
 	}
 
 	return stream
+}
+
+func newDecPmodel(freq []uint64, min, max uint) *Pmodel {
+	cumfreq := make([]uint64, max+2)
+	cumfreq[0] = 0
+	for i := range freq {
+		cumfreq[i+1] = cumfreq[i] + freq[i]
+	}
+	offset := cumfreq[min]
+	totfreq := cumfreq[max+1] - offset
+
+	return &Pmodel{freq, cumfreq, totfreq, offset}
 }

@@ -1,27 +1,20 @@
 package encoder
 
 func NewStream(voxel *voxel, cb contourBuffer) *Stream {
-	numOuter := 0
-	numInner := 0
-
-	outerStartPoints := []int{}
-	outerCodes := []byte{}
-	innerStartPoints := []int{}
-	innerCodes := []byte{}
+	startPoints := []int{}
+	flags := []byte{}
+	codes := []byte{}
 
 	for f := range cb {
 		for _, contour := range cb[f] {
 			for i, v := range contour {
+				startPoints = append(startPoints, f, v.start.y, v.start.x)
+				codes = append(codes, v.code...)
+				codes = append(codes, 8)
 				if i == 0 {
-					outerStartPoints = append(outerStartPoints, f, v.start.y, v.start.x)
-					numOuter += 3
-					outerCodes = append(outerCodes, v.code...)
-					outerCodes = append(outerCodes, 8)
+					flags = append(flags, 0)
 				} else {
-					innerStartPoints = append(innerStartPoints, f, v.start.y, v.start.x)
-					numInner += 3
-					innerCodes = append(innerCodes, v.code...)
-					innerCodes = append(innerCodes, 8)
+					flags = append(flags, 1)
 				}
 			}
 		}
@@ -37,18 +30,16 @@ func NewStream(voxel *voxel, cb contourBuffer) *Stream {
 		voxel.header.bias[0],   //biasFrames
 		voxel.header.bias[1],   //biasHeight
 		voxel.header.bias[2],   //biasWidth
-		numOuter,
-		numInner,
-		len(outerCodes),
-		len(innerCodes),
+		len(startPoints),
+		len(flags),
+		len(codes),
 	}
 
 	stream := Stream{
-		Header:           header,
-		OuterStartPoints: outerStartPoints,
-		InnerStartPoints: innerStartPoints,
-		OuterCodes:       outerCodes,
-		InnerCodes:       innerCodes,
+		Header:      header,
+		StartPoints: startPoints,
+		Flags:       flags,
+		Codes:       codes,
 	}
 
 	return &stream

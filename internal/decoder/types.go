@@ -40,9 +40,8 @@ type contourBuffer [][]contour
 type contour []chainCode
 
 type Stream struct {
-	Header           []int
-	OuterStartPoints []int
-	InnerStartPoints []int
-	OuterCodes       []byte
-	InnerCodes       []byte
+	Header      []int
+	StartPoints []int
+	Flags       []byte
+	Codes       []byte
 }
