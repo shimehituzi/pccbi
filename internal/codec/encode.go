@@ -2,7 +2,6 @@ package codec
 
 import (
 	"bufio"
-	"math"
 	"os"
 
 	"github.com/shimehituzi/pccbi/internal/encoder"
@@ -18,8 +17,8 @@ func Encode(stream *encoder.Stream) {
 	w := bufio.NewWriter(fp)
 
 	bb := NewBitbuf(true)
-	outerPmodel := newEncPmodel(stream.OuterCodes)
-	innerPmodel := newEncPmodel(stream.InnerCodes)
+	flagPmodel := newEncPmodel(stream.Flags, 0, 1)
+	codePmodel := newEncPmodel(stream.Codes, 0, 8)
 
 	bitSize := 16
 	bigBitSize := 32
@@ -33,61 +32,35 @@ func Encode(stream *encoder.Stream) {
 		}
 	}
 
-	// 外輪郭チェーンコードの確率モデル
-	for _, freq := range outerPmodel.freq {
-		bb.putbits(w, bigBitSize, uint(freq))
-	}
-	for _, cumfreq := range outerPmodel.cumfreq {
-		bb.putbits(w, bigBitSize, uint(cumfreq))
-	}
-	bb.putbits(w, bigBitSize, uint(outerPmodel.totfreq))
-	bb.putbits(w, bitSize, uint(outerPmodel.offset))
-
-	// 内輪郭チェーンコードの確率モデル
-	for _, freq := range innerPmodel.freq {
-		bb.putbits(w, bigBitSize, uint(freq))
-	}
-	for _, cumfreq := range innerPmodel.cumfreq {
-		bb.putbits(w, bigBitSize, uint(cumfreq))
-	}
-	bb.putbits(w, bigBitSize, uint(innerPmodel.totfreq))
-	bb.putbits(w, bitSize, uint(innerPmodel.offset))
-
 	// チェーンコードのスタートポイントの符号化
-	for _, outerPoint := range stream.OuterStartPoints {
-		bb.putbits(w, bitSize, uint(outerPoint))
-	}
-	for _, innerPoint := range stream.InnerStartPoints {
-		bb.putbits(w, bitSize, uint(innerPoint))
+	for _, point := range stream.StartPoints {
+		bb.putbits(w, bitSize, uint(point))
 	}
 
-	// チェーンコードの算術符号化
-	rc := newRangeCoder()
-	for _, outerCode := range stream.OuterCodes {
-		rc.encode(w, outerPmodel, uint64(outerCode))
+	// ビットフラグの確率モデル
+	for _, freq := range flagPmodel.freq {
+		bb.putbits(w, bigBitSize, uint(freq))
 	}
-	for _, innerCode := range stream.InnerCodes {
-		rc.encode(w, innerPmodel, uint64(innerCode))
+	// チェーンコードの確率モデル
+	for _, freq := range codePmodel.freq {
+		bb.putbits(w, bigBitSize, uint(freq))
+	}
+
+	rc := newRangeCoder()
+	// ビットフラグの算術符号化
+	for _, flag := range stream.Flags {
+		rc.encode(w, flagPmodel, uint64(flag))
+	}
+	// チェーンコードの算術符号化
+	for _, code := range stream.Codes {
+		rc.encode(w, codePmodel, uint64(code))
 	}
 	rc.finishenc(w)
 
 	w.Flush()
 }
 
-func newEncPmodel(val []byte) *Pmodel {
-	var (
-		min byte = math.MaxUint8
-		max byte = 0
-	)
-	for _, v := range val {
-		if v > max {
-			max = v
-		}
-		if v < min {
-			min = v
-		}
-	}
-
+func newEncPmodel(val []byte, min, max uint) *Pmodel {
 	freq := make([]uint64, max+1)
 	for _, v := range val {
 		freq[v]++
