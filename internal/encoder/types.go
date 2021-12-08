@@ -1,18 +1,16 @@
 package encoder
 
-type bitmap [][]byte
-
 type ply [][3]int
-type order [3]int
-type orderString int
 
-type header struct {
-	axis, length, bias [3]int
+type Axis int
+
+type Header struct {
+	Axis         Axis
+	Length, Bias [3]int
 }
-type voxel struct {
-	Data   []bitmap
-	header header
-}
+
+type bitmap [][]byte
+type Voxel []bitmap
 
 type label [][]int
 type labeledVoxel []label
@@ -40,7 +38,6 @@ type contourBuffer [][]contour
 type contour []chainCode
 
 type Stream struct {
-	Header      []int
 	StartPoints []int
 	Flags       []byte
 	Codes       []byte

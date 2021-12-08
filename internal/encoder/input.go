@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	XYZ orderString = iota
+	XYZ Axis = iota
 	XZY
 	YXZ
 	ZXY
@@ -17,8 +17,8 @@ const (
 	YZX
 )
 
-func (o orderString) Order() order {
-	switch o {
+func (axis Axis) getOrder() [3]int {
+	switch axis {
 	case 0:
 		return [3]int{0, 1, 2}
 	case 1:
@@ -36,10 +36,10 @@ func (o orderString) Order() order {
 	}
 }
 
-func newPly(srcPath string) (ply, error) {
+func NewPly(srcPath string) ply {
 	fp, err := os.Open(srcPath)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	defer fp.Close()
 
@@ -54,7 +54,7 @@ func newPly(srcPath string) (ply, error) {
 			for i := 0; i < 3; i++ {
 				data[i], err = strconv.Atoi(line[i])
 				if err != nil {
-					return nil, err
+					panic(err)
 				}
 			}
 			ply = append(ply, data)
@@ -64,36 +64,32 @@ func newPly(srcPath string) (ply, error) {
 			isData = true
 		}
 	}
-	return ply, nil
+	return ply
 }
 
-func newVoxel(ply ply, order order) *voxel {
-	vox := new(voxel)
-
-	vox.header = ply.getHeader(order)
-	vox.Data = make([]bitmap, vox.header.length[0])
-	for i := range vox.Data {
-		vox.Data[i] = make(bitmap, vox.header.length[1])
-		for j := range vox.Data[i] {
-			vox.Data[i][j] = make([]byte, vox.header.length[2])
+func NewVoxel(ply ply, header *Header) Voxel {
+	voxel := make([]bitmap, header.Length[0])
+	for i := range voxel {
+		voxel[i] = make(bitmap, header.Length[1])
+		for j := range voxel[i] {
+			voxel[i][j] = make([]byte, header.Length[2])
 		}
 	}
+	order := header.Axis.getOrder()
 
 	for _, point := range ply {
-		dim0 := point[order[0]] - vox.header.bias[0]
-		dim1 := point[order[1]] - vox.header.bias[1]
-		dim2 := point[order[2]] - vox.header.bias[2]
-		vox.Data[dim0][dim1][dim2] = 1
+		dim0 := point[order[0]] - header.Bias[0]
+		dim1 := point[order[1]] - header.Bias[1]
+		dim2 := point[order[2]] - header.Bias[2]
+		voxel[dim0][dim1][dim2] = 1
 	}
 
-	return vox
+	return voxel
 }
 
-func (ply ply) getHeader(order order) header {
-	var length, bias, axis [3]int
-	for i := range axis {
-		axis[order[i]] = i
-	}
+func NewHeader(ply ply, axis Axis) *Header {
+	var length, bias [3]int
+	order := axis.getOrder()
 	for d := 0; d < 3; d++ {
 		dim := order[d]
 		max := math.MinInt32
@@ -109,20 +105,10 @@ func (ply ply) getHeader(order order) header {
 		length[d] = max - min + 1
 		bias[d] = min
 	}
-	return header{
-		axis:   axis,
-		length: length,
-		bias:   bias,
+
+	return &Header{
+		Axis:   axis,
+		Length: length,
+		Bias:   bias,
 	}
-}
-
-func LoadPly(srcPath string, order order) (*voxel, error) {
-	ply, err := newPly(srcPath)
-	if err != nil {
-		return nil, err
-	}
-
-	vox := newVoxel(ply, order)
-
-	return vox, nil
 }

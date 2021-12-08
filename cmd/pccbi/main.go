@@ -10,23 +10,31 @@ import (
 
 func main() {
 	start := time.Now()
-	relativePath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"
-	// 1062090 点のデータ
-	srcPath := relativePath[4:]
-	voxel, err := encoder.LoadPly(srcPath, encoder.YZX.Order())
-	if err != nil {
-		panic(err)
+
+	srcPath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"[4:] // 1062090 点のデータ
+	axis := encoder.YZX
+	distPath := "compressed"
+
+	encPly := encoder.NewPly(srcPath)
+	encHeader := encoder.NewHeader(encPly, axis)
+	encVoxel := encoder.NewVoxel(encPly, encHeader)
+	encContourBuffer := encoder.NewContourBuffer(encVoxel, encHeader)
+	encStream := encoder.NewStream(encContourBuffer)
+	codec.Encode(encStream, encHeader, distPath)
+
+	decStream, decHeader := codec.Decode(distPath)
+
+	if int(encHeader.Axis) != int(decHeader.Axis) {
+		fmt.Println("error header axis")
 	}
-	cb := encoder.NewContourBuffer(voxel)
-
-	encStream := encoder.NewStream(voxel, cb)
-	codec.Encode(encStream)
-
-	decStream := codec.Decode()
-
-	for i := range encStream.Header {
-		if encStream.Header[i] != decStream.Header[i] {
-			fmt.Println("error header", i)
+	for i := range encHeader.Length {
+		if encHeader.Length[i] != decHeader.Length[i] {
+			fmt.Println("error header axis", i)
+		}
+	}
+	for i := range encHeader.Bias {
+		if encHeader.Bias[i] != decHeader.Bias[i] {
+			fmt.Println("error header axis", i)
 		}
 	}
 	for i := range encStream.StartPoints {
@@ -47,4 +55,8 @@ func main() {
 
 	end := time.Now()
 	fmt.Println(end.Sub(start).Seconds())
+
+	frames := encoder.NewFrames(encVoxel, encHeader)
+	fc := encoder.NewFyneContour(encContourBuffer, encHeader)
+	fyneLoop([]encoder.FyneBitMap{fc, frames})
 }

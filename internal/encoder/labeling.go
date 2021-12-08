@@ -5,14 +5,14 @@ import (
 	"sync"
 )
 
-func NewLabels(voxel *voxel) (labeledVoxel, []int) {
-	lv := make(labeledVoxel, voxel.header.length[0])
-	numLabels := make([]int, voxel.header.length[0])
+func NewLabels(voxel Voxel, header *Header) (labeledVoxel, []int) {
+	lv := make(labeledVoxel, header.Length[0])
+	numLabels := make([]int, header.Length[0])
 	wg := &sync.WaitGroup{}
 	for i := range lv {
 		wg.Add(1)
 		go func(i int) {
-			lv[i], numLabels[i] = newLabel(voxel.Data[i], i)
+			lv[i], numLabels[i] = newLabel(voxel[i], i)
 			wg.Done()
 		}(i)
 	}
