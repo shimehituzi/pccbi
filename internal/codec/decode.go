@@ -29,23 +29,25 @@ func Decode(distPath string) (*decoder.Stream, *decoder.Header) {
 	for i := range header.Bias {
 		header.Bias[i] = int(bitbuf.getbits(r, bitSize))
 	}
-	numPoints := bitbuf.getbits(r, bigBitSize)
-	numFlags := bitbuf.getbits(r, bigBitSize)
-	numCodes := bitbuf.getbits(r, bigBitSize)
+	codesLength := bitbuf.getbits(r, bigBitSize)
+	startPointsLength := bitbuf.getbits(r, bitSize)
+	numCodesArrayLength := bitbuf.getbits(r, bitSize)
+	numCodesArrayFreqMax := bitbuf.getbits(r, bitsize)
 
-	startPoints := make([]int, numPoints)
+	startPoints := make([][3]uint, startPointsLength)
 	for i := range startPoints {
-		startPoints[i] = int(bitbuf.getbits(r, bitSize))
+		for j := 0; j < 3; j++ {
+			startPoints[i][j] = bitbuf.getbits(r, bitSize)
+		}
 	}
 
-	flagFreqMax := 1
 	codeFreqMax := 8
 
-	flagFreq := make([]uint64, flagFreqMax+1)
-	for i := range flagFreq {
-		flagFreq[i] = uint64(bitbuf.getbits(r, bigBitSize))
+	numCodesArrayFreq := make([]uint64, numCodesArrayFreqMax+1)
+	for i := range numCodesArrayFreq {
+		numCodesArrayFreq[i] = uint64(bitbuf.getbits(r, bigBitSize))
 	}
-	flagPmodel := newDecPmodel(flagFreq, 0, uint(flagFreqMax))
+	numCodesArrayPmodel := newDecPmodel(numCodesArrayFreq, 0, uint(numCodesArrayFreqMax))
 
 	codeFreq := make([]uint64, codeFreqMax+1)
 	for i := range codeFreq {
@@ -56,19 +58,19 @@ func Decode(distPath string) (*decoder.Stream, *decoder.Header) {
 	rc := newRangeCoder()
 	rc.startdec(r)
 
-	flags := make([]byte, numFlags)
-	for i := range flags {
-		flags[i] = byte(rc.decode(r, flagPmodel))
+	numCodesArray := make([]uint, numCodesArrayLength)
+	for i := range numCodesArray {
+		numCodesArray[i] = uint(rc.decode(r, numCodesArrayPmodel))
 	}
-	codes := make([]byte, numCodes)
+	codes := make([]uint, codesLength)
 	for i := range codes {
-		codes[i] = byte(rc.decode(r, codePmodel))
+		codes[i] = uint(rc.decode(r, codePmodel))
 	}
 
 	stream := &decoder.Stream{
-		StartPoints: startPoints,
-		Flags:       flags,
-		Codes:       codes,
+		StartPoints:   startPoints,
+		NumCodesArray: numCodesArray,
+		Codes:         codes,
 	}
 
 	return stream, header
