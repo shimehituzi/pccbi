@@ -5,9 +5,9 @@ import (
 	"sync"
 )
 
-func NewLabels(voxel Voxel, header *VoxelHeader) (labeledVoxel, []int) {
-	lv := make(labeledVoxel, header.length[0])
-	numLabels := make([]int, header.length[0])
+func NewLabels(voxel Voxel, header *Header) (labeledVoxel, []int) {
+	lv := make(labeledVoxel, header.Length[0])
+	numLabels := make([]int, header.Length[0])
 	wg := &sync.WaitGroup{}
 	for i := range lv {
 		wg.Add(1)

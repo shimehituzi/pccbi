@@ -7,7 +7,7 @@ import (
 	"github.com/shimehituzi/pccbi/internal/encoder"
 )
 
-func Encode(stream *encoder.Stream, streamHeader encoder.StreamHeader, distPath string) {
+func Encode(stream *encoder.Stream, header *encoder.Header, distPath string) {
 	fp, err := os.Create(distPath)
 	if err != nil {
 		panic(err)
@@ -24,13 +24,18 @@ func Encode(stream *encoder.Stream, streamHeader encoder.StreamHeader, distPath 
 	bigBitSize := 32
 
 	// ヘッダー情報
-	for i, header := range streamHeader {
-		if i > 10 {
-			bb.putbits(w, bigBitSize, uint(header))
-		} else {
-			bb.putbits(w, bitSize, uint(header))
-		}
+	for _, v := range header.Axis {
+		bb.putbits(w, bitSize, uint(v))
 	}
+	for _, v := range header.Length {
+		bb.putbits(w, bitSize, uint(v))
+	}
+	for _, v := range header.Bias {
+		bb.putbits(w, bitSize, uint(v))
+	}
+	bb.putbits(w, bigBitSize, uint(len(stream.StartPoints)))
+	bb.putbits(w, bigBitSize, uint(len(stream.Flags)))
+	bb.putbits(w, bigBitSize, uint(len(stream.Codes)))
 
 	// チェーンコードのスタートポイントの符号化
 	for _, point := range stream.StartPoints {

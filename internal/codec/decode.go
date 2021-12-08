@@ -7,7 +7,7 @@ import (
 	"github.com/shimehituzi/pccbi/internal/decoder"
 )
 
-func Decode(distPath string) (*decoder.Stream, decoder.StreamHeader) {
+func Decode(distPath string) (*decoder.Stream, *decoder.Header) {
 	fp, err := os.Open(distPath)
 	if err != nil {
 		panic(err)
@@ -21,18 +21,19 @@ func Decode(distPath string) (*decoder.Stream, decoder.StreamHeader) {
 	bitSize := 16
 	bigBitSize := 32
 
-	headerLength := 12
-	header := make([]int, headerLength)
-	for i := range header {
-		if i > 10 {
-			header[i] = int(bitbuf.getbits(r, bigBitSize))
-		} else {
-			header[i] = int(bitbuf.getbits(r, bitSize))
-		}
+	header := new(decoder.Header)
+	for i := range header.Axis {
+		header.Axis[i] = int(bitbuf.getbits(r, bitSize))
 	}
-	numPoints := header[9]
-	numFlags := header[10]
-	numCodes := header[11]
+	for i := range header.Length {
+		header.Length[i] = int(bitbuf.getbits(r, bitSize))
+	}
+	for i := range header.Bias {
+		header.Bias[i] = int(bitbuf.getbits(r, bitSize))
+	}
+	numPoints := bitbuf.getbits(r, bigBitSize)
+	numFlags := bitbuf.getbits(r, bigBitSize)
+	numCodes := bitbuf.getbits(r, bigBitSize)
 
 	startPoints := make([]int, numPoints)
 	for i := range startPoints {

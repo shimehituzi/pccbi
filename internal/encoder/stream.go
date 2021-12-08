@@ -1,6 +1,6 @@
 package encoder
 
-func NewStream(cb contourBuffer, voxelHeader *VoxelHeader) (*Stream, StreamHeader) {
+func NewStream(cb contourBuffer) *Stream {
 	startPoints := []int{}
 	flags := []byte{}
 	codes := []byte{}
@@ -20,26 +20,11 @@ func NewStream(cb contourBuffer, voxelHeader *VoxelHeader) (*Stream, StreamHeade
 		}
 	}
 
-	header := []int{
-		voxelHeader.axis[0],   //axisX
-		voxelHeader.axis[1],   //axisY
-		voxelHeader.axis[2],   //axisZ
-		voxelHeader.length[0], //frames
-		voxelHeader.length[1], //height
-		voxelHeader.length[2], //width
-		voxelHeader.bias[0],   //biasFrames
-		voxelHeader.bias[1],   //biasHeight
-		voxelHeader.bias[2],   //biasWidth
-		len(startPoints),
-		len(flags),
-		len(codes),
-	}
-
 	stream := Stream{
 		StartPoints: startPoints,
 		Flags:       flags,
 		Codes:       codes,
 	}
 
-	return &stream, header
+	return &stream
 }
