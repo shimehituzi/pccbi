@@ -24,9 +24,7 @@ func Encode(stream *encoder.Stream, header *encoder.Header, distPath string) {
 	bigBitSize := 32
 
 	// ヘッダー情報
-	for _, v := range header.Axis {
-		bb.putbits(w, bitSize, uint(v))
-	}
+	bb.putbits(w, bitSize, uint(header.Axis))
 	for _, v := range header.Length {
 		bb.putbits(w, bitSize, uint(v))
 	}

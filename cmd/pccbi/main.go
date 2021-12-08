@@ -12,20 +12,20 @@ func main() {
 	start := time.Now()
 
 	srcPath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"[4:] // 1062090 点のデータ
-	order := encoder.YZX.Order()
+	axis := encoder.YZX
 	distPath := "compressed"
 
-	encVoxel, encHeader := encoder.LoadPly(srcPath, order)
+	encPly := encoder.NewPly(srcPath)
+	encHeader := encoder.NewHeader(encPly, axis)
+	encVoxel := encoder.NewVoxel(encPly, encHeader)
 	encContourBuffer := encoder.NewContourBuffer(encVoxel, encHeader)
 	encStream := encoder.NewStream(encContourBuffer)
 	codec.Encode(encStream, encHeader, distPath)
 
 	decStream, decHeader := codec.Decode(distPath)
 
-	for i := range encHeader.Axis {
-		if encHeader.Axis[i] != decHeader.Axis[i] {
-			fmt.Println("error header axis", i)
-		}
+	if int(encHeader.Axis) != int(decHeader.Axis) {
+		fmt.Println("error header axis")
 	}
 	for i := range encHeader.Length {
 		if encHeader.Length[i] != decHeader.Length[i] {
@@ -55,4 +55,8 @@ func main() {
 
 	end := time.Now()
 	fmt.Println(end.Sub(start).Seconds())
+
+	frames := encoder.NewFrames(encVoxel, encHeader)
+	fc := encoder.NewFyneContour(encContourBuffer, encHeader)
+	fyneLoop([]encoder.FyneBitMap{fc, frames})
 }

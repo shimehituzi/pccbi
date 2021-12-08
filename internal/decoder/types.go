@@ -2,11 +2,11 @@ package decoder
 
 type ply [][3]int
 
-type order [3]int
-type orderString int
+type Axis int
 
 type Header struct {
-	Axis, Length, Bias [3]int
+	Axis         Axis
+	Length, Bias [3]int
 }
 
 type bitmap [][]byte

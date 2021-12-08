@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	XYZ orderString = iota
+	XYZ Axis = iota
 	XZY
 	YXZ
 	ZXY
@@ -17,8 +17,8 @@ const (
 	YZX
 )
 
-func (o orderString) Order() order {
-	switch o {
+func (axis Axis) getOrder() [3]int {
+	switch axis {
 	case 0:
 		return [3]int{0, 1, 2}
 	case 1:
@@ -36,10 +36,10 @@ func (o orderString) Order() order {
 	}
 }
 
-func newPly(srcPath string) (ply, error) {
+func NewPly(srcPath string) ply {
 	fp, err := os.Open(srcPath)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	defer fp.Close()
 
@@ -54,7 +54,7 @@ func newPly(srcPath string) (ply, error) {
 			for i := 0; i < 3; i++ {
 				data[i], err = strconv.Atoi(line[i])
 				if err != nil {
-					return nil, err
+					panic(err)
 				}
 			}
 			ply = append(ply, data)
@@ -64,11 +64,10 @@ func newPly(srcPath string) (ply, error) {
 			isData = true
 		}
 	}
-	return ply, nil
+	return ply
 }
 
-func newVoxel(ply ply, order order) (Voxel, *Header) {
-	header := ply.getHeader(order)
+func NewVoxel(ply ply, header *Header) Voxel {
 	voxel := make([]bitmap, header.Length[0])
 	for i := range voxel {
 		voxel[i] = make(bitmap, header.Length[1])
@@ -76,6 +75,7 @@ func newVoxel(ply ply, order order) (Voxel, *Header) {
 			voxel[i][j] = make([]byte, header.Length[2])
 		}
 	}
+	order := header.Axis.getOrder()
 
 	for _, point := range ply {
 		dim0 := point[order[0]] - header.Bias[0]
@@ -84,14 +84,12 @@ func newVoxel(ply ply, order order) (Voxel, *Header) {
 		voxel[dim0][dim1][dim2] = 1
 	}
 
-	return voxel, header
+	return voxel
 }
 
-func (ply ply) getHeader(order order) *Header {
-	var length, bias, axis [3]int
-	for i := range axis {
-		axis[order[i]] = i
-	}
+func NewHeader(ply ply, axis Axis) *Header {
+	var length, bias [3]int
+	order := axis.getOrder()
 	for d := 0; d < 3; d++ {
 		dim := order[d]
 		max := math.MinInt32
@@ -107,20 +105,10 @@ func (ply ply) getHeader(order order) *Header {
 		length[d] = max - min + 1
 		bias[d] = min
 	}
+
 	return &Header{
 		Axis:   axis,
 		Length: length,
 		Bias:   bias,
 	}
-}
-
-func LoadPly(srcPath string, order order) (Voxel, *Header) {
-	ply, err := newPly(srcPath)
-	if err != nil {
-		panic(err)
-	}
-
-	voxel, header := newVoxel(ply, order)
-
-	return voxel, header
 }

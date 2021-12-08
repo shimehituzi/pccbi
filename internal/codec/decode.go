@@ -22,9 +22,7 @@ func Decode(distPath string) (*decoder.Stream, *decoder.Header) {
 	bigBitSize := 32
 
 	header := new(decoder.Header)
-	for i := range header.Axis {
-		header.Axis[i] = int(bitbuf.getbits(r, bitSize))
-	}
+	header.Axis = decoder.Axis(bitbuf.getbits(r, bitSize))
 	for i := range header.Length {
 		header.Length[i] = int(bitbuf.getbits(r, bitSize))
 	}
