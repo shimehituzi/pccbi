@@ -7,8 +7,8 @@ import (
 	"github.com/shimehituzi/pccbi/internal/decoder"
 )
 
-func Decode() *decoder.Stream {
-	fp, err := os.Open("compressed")
+func Decode(distPath string) (*decoder.Stream, decoder.StreamHeader) {
+	fp, err := os.Open(distPath)
 	if err != nil {
 		panic(err)
 	}
@@ -67,13 +67,12 @@ func Decode() *decoder.Stream {
 	}
 
 	stream := &decoder.Stream{
-		Header:      header,
 		StartPoints: startPoints,
 		Flags:       flags,
 		Codes:       codes,
 	}
 
-	return stream
+	return stream, header
 }
 
 func newDecPmodel(freq []uint64, min, max uint) *Pmodel {

@@ -10,22 +10,18 @@ import (
 
 func main() {
 	start := time.Now()
-	relativePath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"
-	// 1062090 点のデータ
-	srcPath := relativePath[4:]
-	voxel, err := encoder.LoadPly(srcPath, encoder.YZX.Order())
-	if err != nil {
-		panic(err)
-	}
-	cb := encoder.NewContourBuffer(voxel)
+	srcPath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"[4:] // 1062090 点のデータ
+	distPath := "compressed"
 
-	encStream := encoder.NewStream(voxel, cb)
-	codec.Encode(encStream)
+	encVoxel, encVoxelHeader := encoder.LoadPly(srcPath, encoder.YZX.Order())
+	encContourBuffer := encoder.NewContourBuffer(encVoxel, encVoxelHeader)
+	encStream, encStreamHeader := encoder.NewStream(encContourBuffer, encVoxelHeader)
+	codec.Encode(encStream, encStreamHeader, distPath)
 
-	decStream := codec.Decode()
+	decStream, decStreamHeader := codec.Decode(distPath)
 
-	for i := range encStream.Header {
-		if encStream.Header[i] != decStream.Header[i] {
+	for i := range encStreamHeader {
+		if encStreamHeader[i] != decStreamHeader[i] {
 			fmt.Println("error header", i)
 		}
 	}

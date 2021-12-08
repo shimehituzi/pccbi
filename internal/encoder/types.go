@@ -6,12 +6,9 @@ type ply [][3]int
 type order [3]int
 type orderString int
 
-type header struct {
+type Voxel []bitmap
+type VoxelHeader struct {
 	axis, length, bias [3]int
-}
-type voxel struct {
-	Data   []bitmap
-	header header
 }
 
 type label [][]int
@@ -39,8 +36,8 @@ type direction struct {
 type contourBuffer [][]contour
 type contour []chainCode
 
+type StreamHeader []int
 type Stream struct {
-	Header      []int
 	StartPoints []int
 	Flags       []byte
 	Codes       []byte

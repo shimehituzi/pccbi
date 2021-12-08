@@ -7,8 +7,8 @@ import (
 	"github.com/shimehituzi/pccbi/internal/encoder"
 )
 
-func Encode(stream *encoder.Stream) {
-	fp, err := os.Create("compressed")
+func Encode(stream *encoder.Stream, streamHeader encoder.StreamHeader, distPath string) {
+	fp, err := os.Create(distPath)
 	if err != nil {
 		panic(err)
 	}
@@ -24,7 +24,7 @@ func Encode(stream *encoder.Stream) {
 	bigBitSize := 32
 
 	// ヘッダー情報
-	for i, header := range stream.Header {
+	for i, header := range streamHeader {
 		if i > 10 {
 			bb.putbits(w, bigBitSize, uint(header))
 		} else {

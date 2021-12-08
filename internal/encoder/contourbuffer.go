@@ -1,15 +1,15 @@
 package encoder
 
-func NewFrames(voxel *voxel) frames {
-	lv, numLabels := NewLabels(voxel)
+func NewFrames(voxel Voxel, header *VoxelHeader) frames {
+	lv, numLabels := NewLabels(voxel, header)
 
-	frames := make(frames, voxel.header.length[0])
+	frames := make(frames, header.length[0])
 	for i := range frames {
 		frames[i] = make(frame, numLabels[i])
 		for j := range frames[i] {
-			frames[i][j] = make(segment, voxel.header.length[1])
+			frames[i][j] = make(segment, header.length[1])
 			for k := range frames[i][j] {
-				frames[i][j][k] = make([]byte, voxel.header.length[2])
+				frames[i][j][k] = make([]byte, header.length[2])
 			}
 		}
 	}
@@ -28,8 +28,8 @@ func NewFrames(voxel *voxel) frames {
 	return frames
 }
 
-func NewContourBuffer(voxel *voxel) contourBuffer {
-	frames := NewFrames(voxel)
+func NewContourBuffer(voxel Voxel, header *VoxelHeader) contourBuffer {
+	frames := NewFrames(voxel, header)
 
 	cb := make(contourBuffer, len(frames))
 	for i := range cb {
@@ -45,12 +45,12 @@ func NewContourBuffer(voxel *voxel) contourBuffer {
 	return cb
 }
 
-func NewFyneContour(cb contourBuffer, voxel *voxel) labeledVoxel {
-	fc := make(labeledVoxel, voxel.header.length[0])
+func NewFyneContour(cb contourBuffer, header *VoxelHeader) labeledVoxel {
+	fc := make(labeledVoxel, header.length[0])
 	for f := range fc {
-		fc[f] = make(label, voxel.header.length[1])
+		fc[f] = make(label, header.length[1])
 		for y := range fc[f] {
-			fc[f][y] = make([]int, voxel.header.length[2])
+			fc[f][y] = make([]int, header.length[2])
 		}
 	}
 
