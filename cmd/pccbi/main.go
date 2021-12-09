@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/shimehituzi/pccbi/internal/codec"
+	"github.com/shimehituzi/pccbi/internal/bitstream"
 	"github.com/shimehituzi/pccbi/internal/decoder"
 	"github.com/shimehituzi/pccbi/internal/encoder"
 )
@@ -22,8 +22,8 @@ func main() {
 	encContourBuffer := encoder.NewContourBuffer(encVoxel, encHeader)
 	encStream := encoder.NewStream(encContourBuffer)
 
-	codec.Encode(encStream, encHeader, distPath)
-	decStream, decHeader := codec.Decode(distPath)
+	bitstream.Encode(encStream, encHeader, distPath)
+	decStream, decHeader := bitstream.Decode(distPath)
 
 	decoder.NewContourBuffer(decStream, decHeader)
 
