@@ -14,9 +14,9 @@ func DecStream(stream *Stream, header *Header) contour {
 			startY := int(stream.StartPoints[i][1])
 			startX := int(stream.StartPoints[i][2])
 			cc := chaincode{
-				start:  point{startX, startY},
-				code:   codes[i],
-				points: []point{},
+				Start:  point{startX, startY},
+				Code:   codes[i],
+				Points: []point{},
 			}
 			cs[j] = cc
 			i++
