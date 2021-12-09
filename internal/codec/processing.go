@@ -176,3 +176,18 @@ func (d direction) nextDirections() []direction {
 	}
 	return nextDirections
 }
+
+func getChainCodePoints(start point, code []byte) []point {
+	points := []point{start}
+	p := start
+	d := newDirection(0)
+
+	for i := range code {
+		nextCode := (d.code + newDirection(code[i]).code) % 8
+		d = newDirection(nextCode)
+		p = point{p.x + d.d.x, p.y + d.d.y}
+		points = append(points, p)
+	}
+
+	return points
+}

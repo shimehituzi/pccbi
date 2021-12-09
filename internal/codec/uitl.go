@@ -66,3 +66,11 @@ func (p point) in(points []point) bool {
 	}
 	return false
 }
+
+func uint2byte(uintSlice []uint) (byteSlice []byte) {
+	byteSlice = make([]byte, len(uintSlice))
+	for i, v := range uintSlice {
+		byteSlice[i] = byte(v % 256)
+	}
+	return
+}
