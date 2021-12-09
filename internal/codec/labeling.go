@@ -2,26 +2,9 @@ package codec
 
 import (
 	"math"
-	"sync"
 )
 
-func NewLabels(voxel Voxel, header *Header) (labeledVoxel, []int) {
-	lv := make(labeledVoxel, header.Length[0])
-	numLabels := make([]int, header.Length[0])
-	wg := &sync.WaitGroup{}
-	for i := range lv {
-		wg.Add(1)
-		go func(i int) {
-			lv[i], numLabels[i] = newLabel(voxel[i], i)
-			wg.Done()
-		}(i)
-	}
-	wg.Wait()
-
-	return lv, numLabels
-}
-
-func newLabel(bm bitmap, debug int) (label, int) {
+func newLabel(bm bitmap) (label, int) {
 	label := make(label, len(bm))
 	for y := range label {
 		label[y] = make([]int, len(bm[0]))
@@ -30,11 +13,21 @@ func newLabel(bm bitmap, debug int) (label, int) {
 	lookupTable := []int{}
 	counter := 0
 
+	mask := [4]point{
+		{-1, -1}, {0, -1}, {1, -1}, {-1, 0},
+	}
+
 	for y := range bm {
 		for x := range bm[y] {
 			if bm[y][x] == 1 {
 				// 周りの 0 以外の値を取得
-				al := arroundLavel(x, y, label)
+				al := []int{}
+				for _, m := range mask {
+					p := point{x + m.x, y + m.y}
+					if validPointInt(p, label) && label[p.y][p.x] != 0 {
+						al = append(al, label[p.y][p.x])
+					}
+				}
 				if len(al) == 0 {
 					// 新規ラベル作成
 					counter++
@@ -114,27 +107,4 @@ func newLabel(bm bitmap, debug int) (label, int) {
 	}
 
 	return label, numLabel
-}
-
-func arroundLavel(x, y int, label label) []int {
-	mask := [4]point{
-		{-1, -1}, {0, -1}, {1, -1}, {-1, 0},
-	}
-
-	al := []int{}
-	for _, m := range mask {
-		p := point{x + m.x, y + m.y}
-		if validPointInt(p, label) && label[p.y][p.x] != 0 {
-			al = append(al, label[p.y][p.x])
-		}
-	}
-
-	return al
-}
-
-func validPointInt(p point, img label) bool {
-	if p.y < 0 || p.x < 0 || len(img) <= p.y || len(img[0]) <= p.x {
-		return false
-	}
-	return true
 }

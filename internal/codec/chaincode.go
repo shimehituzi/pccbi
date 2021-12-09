@@ -1,18 +1,6 @@
 package codec
 
-func newChaincode(img bitmap, value byte, inner bool) *chaincode {
-	for y := range img {
-		for x, v := range img[y] {
-			if v == value {
-				start := point{x, y}
-				return contourTracking(img, start, value, inner)
-			}
-		}
-	}
-	return nil
-}
-
-func contourTracking(img bitmap, start point, value byte, inner bool) *chaincode {
+func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
 	cc := new(chaincode)
 	cc.start = start
 	cc.points = []point{start}
@@ -21,7 +9,7 @@ func contourTracking(img bitmap, start point, value byte, inner bool) *chaincode
 	currentP := point{start.x, start.y}
 
 	checkP := point{start.x - 1, start.y + 1}
-	if !(validPoint(checkP, img) && img[checkP.y][checkP.x] == value) {
+	if !(validPointByte(checkP, img) && img[checkP.y][checkP.x] == value) {
 		checkP = start
 	}
 
@@ -30,7 +18,7 @@ func contourTracking(img bitmap, start point, value byte, inner bool) *chaincode
 	for {
 		for _, nextD := range currentD.nextDirections() {
 			nextP := point{currentP.x + nextD.d.x, currentP.y + nextD.d.y}
-			if validPoint(nextP, img) && img[nextP.y][nextP.x] == value {
+			if validPointByte(nextP, img) && img[nextP.y][nextP.x] == value {
 				if inner && (nextD.code%2) == 1 {
 					beforeD := newDirection((nextD.code - 1) % 8)
 					beforeP := point{currentP.x + beforeD.d.x, currentP.y + beforeD.d.y}
@@ -76,20 +64,4 @@ func (d direction) nextDirections() []direction {
 		nextDirections[i] = newDirection(directionCodes[i])
 	}
 	return nextDirections
-}
-
-func validPoint(p point, img bitmap) bool {
-	if p.y < 0 || p.x < 0 || len(img) <= p.y || len(img[0]) <= p.x {
-		return false
-	}
-	return true
-}
-
-func (p point) in(points []point) bool {
-	for _, point := range points {
-		if p == point {
-			return true
-		}
-	}
-	return false
 }

@@ -1,7 +1,26 @@
 package codec
 
+import "sync"
+
+func NewContour(voxel Voxel, header *Header) contour {
+	frames := NewFrames(voxel, header)
+
+	contour := make(contour, len(frames))
+	for i := range contour {
+		contour[i] = make([][]chaincode, len(frames[i]))
+	}
+
+	for f, frame := range frames {
+		for l, img := range frame {
+			contour[f][l] = newContourSegment(bitmap(img))
+		}
+	}
+
+	return contour
+}
+
 func NewFrames(voxel Voxel, header *Header) frames {
-	lv, numLabels := NewLabels(voxel, header)
+	lv, numLabels := newLabels(voxel, header)
 
 	frames := make(frames, header.Length[0])
 	for i := range frames {
@@ -28,47 +47,82 @@ func NewFrames(voxel Voxel, header *Header) frames {
 	return frames
 }
 
-func NewContour(voxel Voxel, header *Header) contour {
-	frames := NewFrames(voxel, header)
-
-	contour := make(contour, len(frames))
-	for i := range contour {
-		contour[i] = make([][]chaincode, len(frames[i]))
+func newLabels(voxel Voxel, header *Header) (labeledVoxel, []int) {
+	lv := make(labeledVoxel, header.Length[0])
+	numLabels := make([]int, header.Length[0])
+	wg := &sync.WaitGroup{}
+	for i := range lv {
+		wg.Add(1)
+		go func(i int) {
+			lv[i], numLabels[i] = newLabel(voxel[i])
+			wg.Done()
+		}(i)
 	}
+	wg.Wait()
 
-	for f, frame := range frames {
-		for l, img := range frame {
-			contour[f][l] = newContourSegment(bitmap(img))
-		}
-	}
-
-	return contour
+	return lv, numLabels
 }
 
-func NewFyneContour(cb contour, header *Header) labeledVoxel {
-	fc := make(labeledVoxel, header.Length[0])
-	for f := range fc {
-		fc[f] = make(label, header.Length[1])
-		for y := range fc[f] {
-			fc[f][y] = make([]int, header.Length[2])
-		}
+func newContourSegment(orig bitmap) []chaincode {
+	img := make(bitmap, len(orig))
+	for i := range orig {
+		img[i] = make([]byte, len(orig[i]))
+		copy(img[i], orig[i])
 	}
 
-	for f := range cb {
-		for l := range cb[f] {
-			for c, cc := range cb[f][l] {
-				if c == 0 {
-					for _, point := range cc.points {
-						fc[f][point.y][point.x] = l*2 + 1
-					}
+	cs := []chaincode{}
+
+	// 外輪郭
+	outer := contourTracking(img, 1, false)
+	if outer == nil {
+		panic("cannot produce chaincode")
+	}
+	cs = append(cs, *outer)
+
+	// 塗り潰し
+	filledOutside := false
+	label := byte(2)
+
+	for y := range img {
+		for x, v := range img[y] {
+			if v == 0 {
+				p := point{x, y}
+				if filledOutside {
+					fillArea(img, p, 0, label)
+					label++
 				} else {
-					for _, point := range cc.points {
-						fc[f][point.y][point.x] = l*2 + 2
+					if closedAreaDesicion(p, *outer) {
+						fillArea(img, p, 0, label)
+						label++
+					} else {
+						fillArea(img, p, 0, 1)
+						filledOutside = true
 					}
 				}
 			}
 		}
 	}
 
-	return fc
+	// 内輪郭
+	for l := byte(2); l < label; l++ {
+		inner := contourTracking(img, l, true)
+		if outer == nil {
+			panic("cannot produce chainCode")
+		}
+		cs = append(cs, *inner)
+	}
+
+	return cs
+}
+
+func contourTracking(img bitmap, value byte, inner bool) *chaincode {
+	for y := range img {
+		for x, v := range img[y] {
+			if v == value {
+				start := point{x, y}
+				return newChaincode(img, start, value, inner)
+			}
+		}
+	}
+	return nil
 }
