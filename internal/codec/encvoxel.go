@@ -101,15 +101,15 @@ func NewEncHeader(ply ply, axis Axis) *Header {
 }
 
 func NewEncVoxel(ply ply, header *Header) Voxel {
-	voxel := make([]bitmap, header.Length[0])
+	voxel := make(Voxel, header.Length[0])
 	for i := range voxel {
 		voxel[i] = make(bitmap, header.Length[1])
 		for j := range voxel[i] {
 			voxel[i][j] = make([]byte, header.Length[2])
 		}
 	}
-	order := header.Axis.getOrder()
 
+	order := header.Axis.getOrder()
 	for _, point := range ply {
 		dim0 := point[order[0]] - header.Bias[0]
 		dim1 := point[order[1]] - header.Bias[1]
