@@ -36,7 +36,14 @@ func (axis Axis) getOrder() [3]int {
 	}
 }
 
-func NewPly(srcPath string) ply {
+func ReadPly(srcPath string, axis Axis) (Voxel, *Header) {
+	ply := NewEncPly(srcPath)
+	header := NewEncHeader(ply, axis)
+	voxel := NewEncVoxel(ply, header)
+	return voxel, header
+}
+
+func NewEncPly(srcPath string) ply {
 	fp, err := os.Open(srcPath)
 	if err != nil {
 		panic(err)
@@ -67,7 +74,7 @@ func NewPly(srcPath string) ply {
 	return ply
 }
 
-func NewHeader(ply ply, axis Axis) *Header {
+func NewEncHeader(ply ply, axis Axis) *Header {
 	var length, bias [3]int
 	order := axis.getOrder()
 	for d := 0; d < 3; d++ {
@@ -93,7 +100,7 @@ func NewHeader(ply ply, axis Axis) *Header {
 	}
 }
 
-func NewVoxel(ply ply, header *Header) Voxel {
+func NewEncVoxel(ply ply, header *Header) Voxel {
 	voxel := make([]bitmap, header.Length[0])
 	for i := range voxel {
 		voxel[i] = make(bitmap, header.Length[1])

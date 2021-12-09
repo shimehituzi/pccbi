@@ -2,7 +2,7 @@ package codec
 
 import "sync"
 
-func NewContour(voxel Voxel, header *Header) contour {
+func EncContour(voxel Voxel, header *Header) contour {
 	frames := NewFrames(voxel, header)
 
 	contour := make(contour, len(frames))

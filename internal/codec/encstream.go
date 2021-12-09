@@ -1,6 +1,6 @@
 package codec
 
-func NewStream(contour contour) *Stream {
+func EncStream(contour contour) *Stream {
 	startPoints := [][3]uint{}
 	codes := []uint{}
 	numCodesArray := []uint{}

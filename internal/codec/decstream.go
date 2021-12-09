@@ -2,7 +2,7 @@ package codec
 
 import "bytes"
 
-func NewDecContour(stream *Stream, header *Header) contour {
+func DecStream(stream *Stream, header *Header) contour {
 	codes := bytes.Split(uint2byte(stream.Codes), []byte{8})
 	contour := make(contour, header.Length[0])
 
