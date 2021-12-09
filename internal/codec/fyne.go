@@ -17,7 +17,7 @@ type DimensionLength struct {
 	D2 int
 }
 
-func NewFyneContour(cb contour, header *Header) labeledVoxel {
+func NewFyneContour(contour Contour, header *Header) labeledVoxel {
 	fc := make(labeledVoxel, header.Length[0])
 	for f := range fc {
 		fc[f] = make(label, header.Length[1])
@@ -26,9 +26,9 @@ func NewFyneContour(cb contour, header *Header) labeledVoxel {
 		}
 	}
 
-	for f := range cb {
-		for l := range cb[f] {
-			for c, cc := range cb[f][l] {
+	for f := range contour {
+		for l := range contour[f] {
+			for c, cc := range contour[f][l] {
 				if c == 0 {
 					for _, point := range cc.Points {
 						fc[f][point.y][point.x] = l*2 + 1

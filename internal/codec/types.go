@@ -34,7 +34,7 @@ type direction struct {
 	code byte
 }
 
-type contour [][][]chaincode
+type Contour [][][]chaincode
 
 type Stream struct {
 	StartPoints   [][3]uint

@@ -24,6 +24,13 @@ func main() {
 
 	decContour := codec.DecStream(decStream, decHeader)
 
+	Test(encContour, decContour)
+
+	end := time.Now()
+	fmt.Println(end.Sub(start).Seconds())
+}
+
+func Test(encContour, decContour codec.Contour) {
 	if len(encContour) != len(decContour) {
 		panic("The contour length is different")
 	}
@@ -60,7 +67,4 @@ func main() {
 			}
 		}
 	}
-
-	end := time.Now()
-	fmt.Println(end.Sub(start).Seconds())
 }
