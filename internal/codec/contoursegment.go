@@ -1,20 +1,20 @@
 package codec
 
-func newContour(orig bitmap) contour {
+func newContourSegment(orig bitmap) []chaincode {
 	img := make(bitmap, len(orig))
 	for i := range orig {
 		img[i] = make([]byte, len(orig[i]))
 		copy(img[i], orig[i])
 	}
 
-	cont := contour{}
+	cs := []chaincode{}
 
 	// 外輪郭
-	outer := newChainCode(img, 1, false)
+	outer := newChaincode(img, 1, false)
 	if outer == nil {
-		panic("cannot produce chainCode")
+		panic("cannot produce chaincode")
 	}
-	cont = append(cont, *outer)
+	cs = append(cs, *outer)
 
 	// 塗り潰し
 	filledOutside := false
@@ -42,17 +42,17 @@ func newContour(orig bitmap) contour {
 
 	// 内輪郭
 	for l := byte(2); l < label; l++ {
-		inner := newChainCode(img, l, true)
+		inner := newChaincode(img, l, true)
 		if outer == nil {
 			panic("cannot produce chainCode")
 		}
-		cont = append(cont, *inner)
+		cs = append(cs, *inner)
 	}
 
-	return cont
+	return cs
 }
 
-func closedAreaDesicion(p point, cc chainCode) bool {
+func closedAreaDesicion(p point, cc chaincode) bool {
 	ps := cc.points
 	wn := 0
 	for i := 0; i < len(ps)-1; i++ {

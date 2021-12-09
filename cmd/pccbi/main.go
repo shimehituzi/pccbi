@@ -18,13 +18,13 @@ func main() {
 	encPly := codec.NewPly(srcPath)
 	encHeader := codec.NewHeader(encPly, axis)
 	encVoxel := codec.NewVoxel(encPly, encHeader)
-	encContourBuffer := codec.NewContourBuffer(encVoxel, encHeader)
-	encStream := codec.NewStream(encContourBuffer)
+	encContour := codec.NewContour(encVoxel, encHeader)
+	encStream := codec.NewStream(encContour)
 
 	bitstream.Encode(encStream, encHeader, distPath)
 	decStream, decHeader := bitstream.Decode(distPath)
 
-	codec.ReconstructContourBuffer(decStream, decHeader)
+	codec.NewDecContour(decStream, decHeader)
 
 	end := time.Now()
 	fmt.Println(end.Sub(start).Seconds())

@@ -49,11 +49,11 @@ func Decode(distPath string) (*codec.Stream, *codec.Header) {
 	}
 	numCodesArrayPmodel := newDecPmodel(numCodesArrayFreq, 0, uint(numCodesArrayFreqMax))
 
-	codeFreq := make([]uint64, codeFreqMax+1)
-	for i := range codeFreq {
-		codeFreq[i] = uint64(bitbuf.getbits(r, bigBitSize))
+	codesFreq := make([]uint64, codeFreqMax+1)
+	for i := range codesFreq {
+		codesFreq[i] = uint64(bitbuf.getbits(r, bigBitSize))
 	}
-	codePmodel := newDecPmodel(codeFreq, 0, uint(codeFreqMax))
+	codesPmodel := newDecPmodel(codesFreq, 0, uint(codeFreqMax))
 
 	rc := newRangeCoder()
 	rc.startdec(r)
@@ -64,7 +64,7 @@ func Decode(distPath string) (*codec.Stream, *codec.Header) {
 	}
 	codes := make([]uint, codesLength)
 	for i := range codes {
-		codes[i] = uint(rc.decode(r, codePmodel))
+		codes[i] = uint(rc.decode(r, codesPmodel))
 	}
 
 	stream := &codec.Stream{

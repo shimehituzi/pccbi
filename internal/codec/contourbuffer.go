@@ -28,24 +28,24 @@ func NewFrames(voxel Voxel, header *Header) frames {
 	return frames
 }
 
-func NewContourBuffer(voxel Voxel, header *Header) contourBuffer {
+func NewContour(voxel Voxel, header *Header) contour {
 	frames := NewFrames(voxel, header)
 
-	cb := make(contourBuffer, len(frames))
-	for i := range cb {
-		cb[i] = make([]contour, len(frames[i]))
+	contour := make(contour, len(frames))
+	for i := range contour {
+		contour[i] = make([][]chaincode, len(frames[i]))
 	}
 
 	for f, frame := range frames {
 		for l, img := range frame {
-			cb[f][l] = newContour(bitmap(img))
+			contour[f][l] = newContourSegment(bitmap(img))
 		}
 	}
 
-	return cb
+	return contour
 }
 
-func NewFyneContour(cb contourBuffer, header *Header) labeledVoxel {
+func NewFyneContour(cb contour, header *Header) labeledVoxel {
 	fc := make(labeledVoxel, header.Length[0])
 	for f := range fc {
 		fc[f] = make(label, header.Length[1])

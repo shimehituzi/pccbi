@@ -1,6 +1,6 @@
 package codec
 
-func newChainCode(img bitmap, value byte, inner bool) *chainCode {
+func newChaincode(img bitmap, value byte, inner bool) *chaincode {
 	for y := range img {
 		for x, v := range img[y] {
 			if v == value {
@@ -12,8 +12,8 @@ func newChainCode(img bitmap, value byte, inner bool) *chainCode {
 	return nil
 }
 
-func contourTracking(img bitmap, start point, value byte, inner bool) *chainCode {
-	cc := new(chainCode)
+func contourTracking(img bitmap, start point, value byte, inner bool) *chaincode {
+	cc := new(chaincode)
 	cc.start = start
 	cc.points = []point{start}
 

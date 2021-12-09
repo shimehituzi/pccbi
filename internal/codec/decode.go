@@ -2,29 +2,29 @@ package codec
 
 import "bytes"
 
-func ReconstructContourBuffer(stream *Stream, header *Header) contourBuffer {
+func NewDecContour(stream *Stream, header *Header) contour {
 	codes := bytes.Split(uint2byte(stream.Codes), []byte{8})
-	cb := make(contourBuffer, header.Length[0])
+	contour := make(contour, header.Length[0])
 
 	i := 0
 	for _, numCodes := range stream.NumCodesArray {
-		contour := make(contour, numCodes)
+		cs := make([]chaincode, numCodes)
 		f := int(stream.StartPoints[i][0])
 		for j := 0; j < int(numCodes); j++ {
 			startY := int(stream.StartPoints[i][1])
 			startX := int(stream.StartPoints[i][2])
-			cc := chainCode{
+			cc := chaincode{
 				start:  point{startX, startY},
 				code:   codes[i],
 				points: []point{},
 			}
-			contour[j] = cc
+			cs[j] = cc
 			i++
 		}
-		cb[f] = append(cb[f], contour)
+		contour[f] = append(contour[f], cs)
 	}
 
-	return cb
+	return contour
 }
 
 func uint2byte(uintSlice []uint) (byteSlice []byte) {
