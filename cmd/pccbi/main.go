@@ -14,15 +14,19 @@ func main() {
 	axis := codec.YZX
 	srcPath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"[4:] // 1062090 点のデータ
 	distPath := "compressed"
+	recPath := "rec.ply"
 
+	// Encode
 	encVoxel, encHeader := codec.ReadPly(srcPath, axis)
 	encContour := codec.EncContour(encVoxel, encHeader)
 	encStream := codec.EncStream(encContour)
-
 	bitstream.Encode(encStream, encHeader, distPath)
-	decStream, decHeader := bitstream.Decode(distPath)
 
+	// Decode
+	decStream, decHeader := bitstream.Decode(distPath)
 	decContour := codec.DecStream(decStream, decHeader)
+	decVoxel := codec.DecContour(decContour, decHeader)
+	codec.WritePly(recPath, decVoxel, decHeader)
 
 	Test(encContour, decContour)
 
