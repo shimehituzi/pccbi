@@ -1,11 +1,15 @@
 package codec
 
-import "bytes"
+import (
+	"bytes"
+)
 
 func DecStream(stream *Stream, header *Header) contour {
+	// stream.Codes を 8 で split する
 	codes := bytes.Split(uint2byte(stream.Codes), []byte{8})
-	contour := make(contour, header.Length[0])
 
+	// contour[frame][segment][外輪郭or内輪郭] の形に整形
+	contour := make(contour, header.Length[0])
 	i := 0
 	for _, numCodes := range stream.NumCodesArray {
 		cs := make([]chaincode, numCodes)
@@ -14,9 +18,9 @@ func DecStream(stream *Stream, header *Header) contour {
 			startY := int(stream.StartPoints[i][1])
 			startX := int(stream.StartPoints[i][2])
 			cc := chaincode{
-				start:  point{startX, startY},
-				code:   codes[i],
-				points: []point{},
+				Start:  point{startX, startY},
+				Code:   codes[i],
+				Points: []point{},
 			}
 			cs[j] = cc
 			i++
@@ -24,13 +28,14 @@ func DecStream(stream *Stream, header *Header) contour {
 		contour[f] = append(contour[f], cs)
 	}
 
-	return contour
-}
-
-func uint2byte(uintSlice []uint) (byteSlice []byte) {
-	byteSlice = make([]byte, len(uintSlice))
-	for i, v := range uintSlice {
-		byteSlice[i] = byte(v % 256)
+	// chancode.Points を start と code から取得
+	for f := range contour {
+		for l := range contour[f] {
+			for i, v := range contour[f][l] {
+				contour[f][l][i].Points = getChainCodePoints(v.Start, v.Code)
+			}
+		}
 	}
-	return
+
+	return contour
 }

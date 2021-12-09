@@ -1,7 +1,15 @@
 package codec
 
+func ComparePoint(a, b point) bool {
+	if a.x == b.x && a.y == b.y {
+		return true
+	} else {
+		return false
+	}
+}
+
 func closedAreaDesicion(p point, cc chaincode) bool {
-	ps := cc.points
+	ps := cc.Points
 	wn := 0
 	for i := 0; i < len(ps)-1; i++ {
 		if (ps[i].y <= p.y) && (ps[i+1].y > p.y) {
@@ -57,4 +65,12 @@ func (p point) in(points []point) bool {
 		}
 	}
 	return false
+}
+
+func uint2byte(uintSlice []uint) (byteSlice []byte) {
+	byteSlice = make([]byte, len(uintSlice))
+	for i, v := range uintSlice {
+		byteSlice[i] = byte(v % 256)
+	}
+	return
 }

@@ -113,8 +113,8 @@ func newLabel(bm bitmap) (label, int) {
 // 輪郭追跡
 func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
 	cc := new(chaincode)
-	cc.start = start
-	cc.points = []point{start}
+	cc.Start = start
+	cc.Points = []point{start}
 
 	currentD := newDirection(0)
 	currentP := point{start.x, start.y}
@@ -139,14 +139,14 @@ func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
 						continue
 					}
 				}
-				cc.code = append(cc.code, (nextD.code-currentD.code)%divisor)
-				cc.points = append(cc.points, nextP)
+				cc.Code = append(cc.Code, (nextD.code-currentD.code)%divisor)
+				cc.Points = append(cc.Points, nextP)
 				currentD = nextD
 				currentP = nextP
 				break
 			}
 		}
-		if start == currentP && checkP.in(cc.points) {
+		if start == currentP && checkP.in(cc.Points) {
 			break
 		}
 	}
@@ -175,4 +175,19 @@ func (d direction) nextDirections() []direction {
 		nextDirections[i] = newDirection(directionCodes[i])
 	}
 	return nextDirections
+}
+
+func getChainCodePoints(start point, code []byte) []point {
+	points := []point{start}
+	p := start
+	d := newDirection(0)
+
+	for i := range code {
+		nextCode := (d.code + newDirection(code[i]).code) % 8
+		d = newDirection(nextCode)
+		p = point{p.x + d.d.x, p.y + d.d.y}
+		points = append(points, p)
+	}
+
+	return points
 }

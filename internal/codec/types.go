@@ -24,9 +24,9 @@ type point struct {
 }
 
 type chaincode struct {
-	start  point
-	code   []byte
-	points []point
+	Start  point
+	Code   []byte
+	Points []point
 }
 
 type direction struct {
