@@ -1,4 +1,4 @@
-package encoder
+package codec
 
 func newChainCode(img bitmap, value byte, inner bool) *chainCode {
 	for y := range img {

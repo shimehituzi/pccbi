@@ -1,4 +1,4 @@
-package decoder
+package codec
 
 type ply [][3]int
 

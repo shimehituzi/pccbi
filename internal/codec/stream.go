@@ -1,4 +1,4 @@
-package encoder
+package codec
 
 func NewStream(cb contourBuffer) *Stream {
 	startPoints := [][3]uint{}

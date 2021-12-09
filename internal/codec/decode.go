@@ -1,8 +1,8 @@
-package decoder
+package codec
 
 import "bytes"
 
-func NewContourBuffer(stream *Stream, header *Header) contourBuffer {
+func ReconstructContourBuffer(stream *Stream, header *Header) contourBuffer {
 	codes := bytes.Split(uint2byte(stream.Codes), []byte{8})
 	cb := make(contourBuffer, header.Length[0])
 

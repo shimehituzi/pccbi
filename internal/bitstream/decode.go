@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"os"
 
-	"github.com/shimehituzi/pccbi/internal/decoder"
+	"github.com/shimehituzi/pccbi/internal/codec"
 )
 
-func Decode(distPath string) (*decoder.Stream, *decoder.Header) {
+func Decode(distPath string) (*codec.Stream, *codec.Header) {
 	fp, err := os.Open(distPath)
 	if err != nil {
 		panic(err)
@@ -21,8 +21,8 @@ func Decode(distPath string) (*decoder.Stream, *decoder.Header) {
 	bitSize := 16
 	bigBitSize := 32
 
-	header := new(decoder.Header)
-	header.Axis = decoder.Axis(bitbuf.getbits(r, bitSize))
+	header := new(codec.Header)
+	header.Axis = codec.Axis(bitbuf.getbits(r, bitSize))
 	for i := range header.Length {
 		header.Length[i] = int(bitbuf.getbits(r, bitSize))
 	}
@@ -67,7 +67,7 @@ func Decode(distPath string) (*decoder.Stream, *decoder.Header) {
 		codes[i] = uint(rc.decode(r, codePmodel))
 	}
 
-	stream := &decoder.Stream{
+	stream := &codec.Stream{
 		StartPoints:   startPoints,
 		NumCodesArray: numCodesArray,
 		Codes:         codes,
