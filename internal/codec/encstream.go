@@ -1,13 +1,13 @@
-package encoder
+package codec
 
-func NewStream(cb contourBuffer) *Stream {
+func EncStream(contour contour) *Stream {
 	startPoints := [][3]uint{}
 	codes := []uint{}
 	numCodesArray := []uint{}
 
-	for f, contours := range cb {
-		for _, contour := range contours {
-			for _, chaincode := range contour {
+	for f, contourFrame := range contour {
+		for _, contourSegment := range contourFrame {
+			for _, chaincode := range contourSegment {
 				startPoint := [3]uint{uint(f), uint(chaincode.start.y), uint(chaincode.start.x)}
 				startPoints = append(startPoints, startPoint)
 				for _, code := range chaincode.code {
@@ -15,7 +15,7 @@ func NewStream(cb contourBuffer) *Stream {
 				}
 				codes = append(codes, 8)
 			}
-			numCodesArray = append(numCodesArray, uint(len(contour)))
+			numCodesArray = append(numCodesArray, uint(len(contourSegment)))
 		}
 	}
 

@@ -4,28 +4,25 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/shimehituzi/pccbi/internal/bitstream"
 	"github.com/shimehituzi/pccbi/internal/codec"
-	"github.com/shimehituzi/pccbi/internal/decoder"
-	"github.com/shimehituzi/pccbi/internal/encoder"
 )
 
 func main() {
 	start := time.Now()
 
+	axis := codec.YZX
 	srcPath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"[4:] // 1062090 点のデータ
-	axis := encoder.YZX
 	distPath := "compressed"
 
-	encPly := encoder.NewPly(srcPath)
-	encHeader := encoder.NewHeader(encPly, axis)
-	encVoxel := encoder.NewVoxel(encPly, encHeader)
-	encContourBuffer := encoder.NewContourBuffer(encVoxel, encHeader)
-	encStream := encoder.NewStream(encContourBuffer)
+	encVoxel, encHeader := codec.ReadPly(srcPath, axis)
+	encContour := codec.EncContour(encVoxel, encHeader)
+	encStream := codec.EncStream(encContour)
 
-	codec.Encode(encStream, encHeader, distPath)
-	decStream, decHeader := codec.Decode(distPath)
+	bitstream.Encode(encStream, encHeader, distPath)
+	decStream, decHeader := bitstream.Decode(distPath)
 
-	decoder.NewContourBuffer(decStream, decHeader)
+	codec.DecStream(decStream, decHeader)
 
 	end := time.Now()
 	fmt.Println(end.Sub(start).Seconds())

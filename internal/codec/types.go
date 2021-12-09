@@ -1,4 +1,4 @@
-package decoder
+package codec
 
 type ply [][3]int
 
@@ -23,7 +23,7 @@ type point struct {
 	x, y int
 }
 
-type chainCode struct {
+type chaincode struct {
 	start  point
 	code   []byte
 	points []point
@@ -34,8 +34,7 @@ type direction struct {
 	code byte
 }
 
-type contourBuffer [][]contour
-type contour []chainCode
+type contour [][][]chaincode
 
 type Stream struct {
 	StartPoints   [][3]uint

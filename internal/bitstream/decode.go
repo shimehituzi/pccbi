@@ -1,13 +1,13 @@
-package codec
+package bitstream
 
 import (
 	"bufio"
 	"os"
 
-	"github.com/shimehituzi/pccbi/internal/decoder"
+	"github.com/shimehituzi/pccbi/internal/codec"
 )
 
-func Decode(distPath string) (*decoder.Stream, *decoder.Header) {
+func Decode(distPath string) (*codec.Stream, *codec.Header) {
 	fp, err := os.Open(distPath)
 	if err != nil {
 		panic(err)
@@ -21,8 +21,8 @@ func Decode(distPath string) (*decoder.Stream, *decoder.Header) {
 	bitSize := 16
 	bigBitSize := 32
 
-	header := new(decoder.Header)
-	header.Axis = decoder.Axis(bitbuf.getbits(r, bitSize))
+	header := new(codec.Header)
+	header.Axis = codec.Axis(bitbuf.getbits(r, bitSize))
 	for i := range header.Length {
 		header.Length[i] = int(bitbuf.getbits(r, bitSize))
 	}
@@ -49,11 +49,11 @@ func Decode(distPath string) (*decoder.Stream, *decoder.Header) {
 	}
 	numCodesArrayPmodel := newDecPmodel(numCodesArrayFreq, 0, uint(numCodesArrayFreqMax))
 
-	codeFreq := make([]uint64, codeFreqMax+1)
-	for i := range codeFreq {
-		codeFreq[i] = uint64(bitbuf.getbits(r, bigBitSize))
+	codesFreq := make([]uint64, codeFreqMax+1)
+	for i := range codesFreq {
+		codesFreq[i] = uint64(bitbuf.getbits(r, bigBitSize))
 	}
-	codePmodel := newDecPmodel(codeFreq, 0, uint(codeFreqMax))
+	codesPmodel := newDecPmodel(codesFreq, 0, uint(codeFreqMax))
 
 	rc := newRangeCoder()
 	rc.startdec(r)
@@ -64,10 +64,10 @@ func Decode(distPath string) (*decoder.Stream, *decoder.Header) {
 	}
 	codes := make([]uint, codesLength)
 	for i := range codes {
-		codes[i] = uint(rc.decode(r, codePmodel))
+		codes[i] = uint(rc.decode(r, codesPmodel))
 	}
 
-	stream := &decoder.Stream{
+	stream := &codec.Stream{
 		StartPoints:   startPoints,
 		NumCodesArray: numCodesArray,
 		Codes:         codes,

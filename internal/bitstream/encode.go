@@ -1,13 +1,13 @@
-package codec
+package bitstream
 
 import (
 	"bufio"
 	"os"
 
-	"github.com/shimehituzi/pccbi/internal/encoder"
+	"github.com/shimehituzi/pccbi/internal/codec"
 )
 
-func Encode(stream *encoder.Stream, header *encoder.Header, distPath string) {
+func Encode(stream *codec.Stream, header *codec.Header, distPath string) {
 	fp, err := os.Create(distPath)
 	if err != nil {
 		panic(err)
