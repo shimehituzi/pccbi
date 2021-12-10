@@ -6,6 +6,7 @@ import (
 
 	"github.com/shimehituzi/pccbi/internal/bitstream"
 	"github.com/shimehituzi/pccbi/internal/codec"
+	"github.com/shimehituzi/pccbi/internal/tool"
 )
 
 func main() {
@@ -15,7 +16,12 @@ func main() {
 	axis := codec.YZX
 	srcPath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"[4:] // 1062090 点のデータ
 	distPath := "compressed"
+	etcPath := "etc"
 	recPath := "rec.ply"
+	sortedPath := "sorted.ply"
+
+	// Preprocessing
+	tool.Preprocessing(srcPath, sortedPath, etcPath)
 
 	// Encode
 	encPly, encHeader := codec.ReadPly(srcPath, axis)
