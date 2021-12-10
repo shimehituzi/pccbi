@@ -32,6 +32,7 @@ func main() {
 	codec.WritePly(recPath, decPly)
 
 	// Test
+	TestPly(encPly, decPly)
 	TestHeader(encHeader, decHeader)
 	TestVoxel(encVoxel, decVoxel)
 	TestContour(encContour, decContour)
@@ -48,7 +49,7 @@ func TestPly(encPly, decPly codec.Ply) {
 	for i := range encPly {
 		for j := range encPly[i] {
 			if encPly[i][j] != decPly[i][j] {
-				panic("The Ply Length is different")
+				panic("The Ply is different")
 			}
 		}
 	}
