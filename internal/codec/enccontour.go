@@ -2,10 +2,10 @@ package codec
 
 import "sync"
 
-func EncContour(voxel Voxel, header *Header) contour {
+func EncContour(voxel Voxel, header *Header) Contour {
 	frames := NewFrames(voxel, header)
 
-	contour := make(contour, len(frames))
+	contour := make(Contour, len(frames))
 	for i := range contour {
 		contour[i] = make([][]chaincode, len(frames[i]))
 	}

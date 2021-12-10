@@ -8,6 +8,7 @@ func ComparePoint(a, b point) bool {
 	}
 }
 
+// 閉曲線の内側なら true 線上は不定
 func closedAreaDesicion(p point, cc chaincode) bool {
 	ps := cc.Points
 	wn := 0
