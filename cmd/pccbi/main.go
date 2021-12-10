@@ -12,10 +12,13 @@ import (
 func main() {
 	start := time.Now()
 
-	// argument
+	// Arguments
 	axis := codec.YZX
+
 	srcPath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"[4:] // 1062090 点のデータ
-	distPath := "compressed"
+	pccPath := "compressed"
+	dstPath := "destination"
+
 	etcPath := "etc"
 	recPath := "rec.ply"
 	sortedPath := "sorted.ply"
@@ -28,14 +31,14 @@ func main() {
 	encVoxel := codec.EncVoxel(encPly, encHeader)
 	encContour := codec.EncContour(encVoxel, encHeader)
 	encStream := codec.EncStream(encContour)
-	bitstream.Encode(distPath, encStream, encHeader)
+	bitstream.Encode(pccPath, encStream, encHeader)
 
 	// Decode
-	decStream, decHeader := bitstream.Decode(distPath)
+	decStream, decHeader := bitstream.Decode(pccPath)
 	decContour := codec.DecStream(decStream, decHeader)
 	decVoxel := codec.DecContour(decContour, decHeader)
 	decPly := codec.DecVoxcel(decVoxel, decHeader)
-	codec.WritePly(recPath, decPly)
+	codec.WritePly(dstPath, decPly)
 
 	// Test
 	TestPly(encPly, decPly)
@@ -43,6 +46,9 @@ func main() {
 	TestVoxel(encVoxel, decVoxel)
 	TestContour(encContour, decContour)
 	TestStream(encStream, decStream)
+
+	// Postprocessing
+	tool.Postprocessing(dstPath, etcPath, recPath)
 
 	end := time.Now()
 	fmt.Println(end.Sub(start).Seconds())

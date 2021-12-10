@@ -6,8 +6,8 @@ import (
 	"os"
 )
 
-func WritePly(recPath string, ply Ply) {
-	fp, err := os.Create(recPath)
+func WritePly(dstPath string, ply Ply) {
+	fp, err := os.Create(dstPath)
 	if err != nil {
 		panic(err)
 	}
