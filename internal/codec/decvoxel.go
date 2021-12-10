@@ -1,7 +1,26 @@
 package codec
 
-func WritePly(recPath string, ply Ply) {
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
+func WritePly(recPath string, ply Ply) {
+	fp, err := os.Create(recPath)
+	if err != nil {
+		panic(err)
+	}
+	defer fp.Close()
+
+	w := bufio.NewWriter(fp)
+
+	for _, v := range ply {
+		line := fmt.Sprintf("%d %d %d\n", v[0], v[1], v[2])
+		w.WriteString(line)
+	}
+
+	w.Flush()
 }
 
 func DecVoxcel(voxel Voxel, header *Header) Ply {
