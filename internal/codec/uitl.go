@@ -1,5 +1,7 @@
 package codec
 
+import "sort"
+
 func ComparePoint(a, b point) bool {
 	if a.x == b.x && a.y == b.y {
 		return true
@@ -74,4 +76,37 @@ func uint2byte(uintSlice []uint) (byteSlice []byte) {
 		byteSlice[i] = byte(v % 256)
 	}
 	return
+}
+
+func (ply Ply) Sort() {
+	sort.Sort(ply)
+}
+
+func (ply Ply) Len() int { return len(ply) }
+
+func (ply Ply) Swap(i, j int) { ply[i], ply[j] = ply[j], ply[i] }
+
+func (ply Ply) Less(i, j int) bool {
+	switch {
+	case ply[i][0] < ply[j][0]:
+		return true
+	case ply[i][0] > ply[j][0]:
+		return false
+	default:
+		switch {
+		case ply[i][1] < ply[j][1]:
+			return true
+		case ply[i][1] > ply[j][1]:
+			return false
+		default:
+			switch {
+			case ply[i][2] < ply[j][2]:
+				return true
+			case ply[i][2] > ply[j][2]:
+				return false
+			default:
+				return false
+			}
+		}
+	}
 }

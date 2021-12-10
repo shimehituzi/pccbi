@@ -36,14 +36,13 @@ func (axis Axis) getOrder() [3]int {
 	}
 }
 
-func ReadPly(srcPath string, axis Axis) (Voxel, *Header) {
-	ply := NewEncPly(srcPath)
-	header := NewEncHeader(ply, axis)
-	voxel := NewEncVoxel(ply, header)
-	return voxel, header
+func ReadPly(srcPath string, axis Axis) (Ply, *Header) {
+	ply := encPly(srcPath)
+	header := encHeader(ply, axis)
+	return ply, header
 }
 
-func NewEncPly(srcPath string) ply {
+func encPly(srcPath string) Ply {
 	fp, err := os.Open(srcPath)
 	if err != nil {
 		panic(err)
@@ -52,7 +51,7 @@ func NewEncPly(srcPath string) ply {
 
 	sccaner := bufio.NewScanner(fp)
 
-	ply := ply{}
+	ply := Ply{}
 	for isData := false; sccaner.Scan(); {
 		if isData {
 			text := sccaner.Text()
@@ -71,10 +70,15 @@ func NewEncPly(srcPath string) ply {
 			isData = true
 		}
 	}
+
+	// エンコード時とデコード時の比較のために Sort している
+	// Voxel を作る上ではしてもしなくても関係ない
+	ply.Sort()
+
 	return ply
 }
 
-func NewEncHeader(ply ply, axis Axis) *Header {
+func encHeader(ply Ply, axis Axis) *Header {
 	var length, bias [3]int
 	order := axis.getOrder()
 	for d := 0; d < 3; d++ {
@@ -100,7 +104,7 @@ func NewEncHeader(ply ply, axis Axis) *Header {
 	}
 }
 
-func NewEncVoxel(ply ply, header *Header) Voxel {
+func EncVoxel(ply Ply, header *Header) Voxel {
 	voxel := make(Voxel, header.Length[0])
 	for i := range voxel {
 		voxel[i] = make(bitmap, header.Length[1])
