@@ -1,10 +1,6 @@
 /DATABASE
 /air
 /tmp
+/out
 
 .DS_Store
-compressed
-destination
-etc
-rec.ply
-sorted.ply

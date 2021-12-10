@@ -16,12 +16,12 @@ func main() {
 	axis := codec.YZX
 
 	srcPath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"[4:] // 1062090 点のデータ
-	pccPath := "compressed"
-	dstPath := "destination"
+	pccPath := "./out/compressed"
+	dstPath := "./out/destination"
 
-	etcPath := "etc"
-	recPath := "rec.ply"
-	sortedPath := "sorted.ply"
+	etcPath := "./out/etc"
+	recPath := "./out/rec.ply"
+	sortedPath := "./out/sorted.ply"
 
 	// Preprocessing
 	tool.Preprocessing(srcPath, sortedPath, etcPath)
