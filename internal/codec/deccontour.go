@@ -50,35 +50,36 @@ func fillSegment(img bitmap, outer chaincode, inners []chaincode) {
 	for _, p := range outer.Points {
 		img[p.y][p.x] = 1
 	}
+	for _, p := range outer.Points {
+		nearest4points := [4]point{
+			{p.x, p.y - 1},
+			{p.x - 1, p.y},
+			{p.x + 1, p.y},
+			{p.x, p.y + 1},
+		}
+		for _, p := range nearest4points {
+			if validPointByte(p, img) && img[p.y][p.x] == 0 && closedAreaDesicion(p, outer) {
+				fillArea(img, p, 0, 1)
+			}
+		}
+	}
 	for _, inner := range inners {
 		for _, p := range inner.Points {
 			img[p.y][p.x] = 2
 		}
 	}
-	for y := range img {
-		for x, v := range img[y] {
-			if v != 0 {
-				// すでに塗り潰した点は除外（線上も除外）
-				continue
+	for _, inner := range inners {
+		for _, p := range inner.Points {
+			nearest4points := [4]point{
+				{p.x, p.y - 1},
+				{p.x - 1, p.y},
+				{p.x + 1, p.y},
+				{p.x, p.y + 1},
 			}
-			p := point{x, y}
-			if closedAreaDesicion(p, outer) {
-				// もし内輪郭の内側なら 2 で塗り潰し
-				isInner := false
-				for _, inner := range inners {
-					if closedAreaDesicion(p, inner) {
-						fillArea(img, p, 0, 2)
-						isInner = true
-						break
-					}
+			for _, p := range nearest4points {
+				if validPointByte(p, img) && img[p.y][p.x] == 1 && closedAreaDesicion(p, inner) {
+					fillArea(img, p, 1, 2)
 				}
-				// 内輪郭の外側で外輪郭の内側ならば 1 になる
-				if !isInner {
-					img[y][x] = 1
-				}
-			} else {
-				// 外側なら 2 で塗り潰し
-				fillArea(img, p, 0, 2)
 			}
 		}
 	}
