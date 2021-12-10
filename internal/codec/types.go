@@ -1,6 +1,6 @@
 package codec
 
-type ply [][3]int
+type Ply [][3]int
 
 type Axis int
 

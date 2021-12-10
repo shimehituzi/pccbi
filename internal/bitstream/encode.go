@@ -7,7 +7,7 @@ import (
 	"github.com/shimehituzi/pccbi/internal/codec"
 )
 
-func Encode(stream *codec.Stream, header *codec.Header, distPath string) {
+func Encode(distPath string, stream *codec.Stream, header *codec.Header) {
 	fp, err := os.Create(distPath)
 	if err != nil {
 		panic(err)

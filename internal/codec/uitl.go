@@ -1,5 +1,7 @@
 package codec
 
+import "sort"
+
 func ComparePoint(a, b point) bool {
 	if a.x == b.x && a.y == b.y {
 		return true
@@ -74,4 +76,96 @@ func uint2byte(uintSlice []uint) (byteSlice []byte) {
 		byteSlice[i] = byte(v % 256)
 	}
 	return
+}
+
+const (
+	XYZ Axis = iota
+	XZY
+	YXZ
+	ZXY
+	ZYX
+	YZX
+)
+
+func (axis Axis) getOrder() [3]int {
+	switch axis {
+	case 0:
+		// XYZ
+		return [3]int{0, 1, 2}
+	case 1:
+		// XZY
+		return [3]int{0, 2, 1}
+	case 2:
+		// YXZ
+		return [3]int{1, 0, 2}
+	case 3:
+		// ZXY
+		return [3]int{2, 0, 1}
+	case 4:
+		// ZYX
+		return [3]int{2, 1, 0}
+	case 5:
+		// YZX
+		return [3]int{1, 2, 0}
+	default:
+		panic("axis is an invalid value")
+	}
+}
+
+func (axis Axis) getIndex() [3]int {
+	switch axis {
+	case 0:
+		// XYZ
+		return [3]int{0, 1, 2}
+	case 1:
+		// XZY
+		return [3]int{0, 2, 1}
+	case 2:
+		// YXZ
+		return [3]int{1, 0, 2}
+	case 3:
+		// ZXY
+		return [3]int{1, 2, 0}
+	case 4:
+		// ZYX
+		return [3]int{2, 1, 0}
+	case 5:
+		// YZX
+		return [3]int{2, 0, 1}
+	default:
+		panic("axis is an invalid value")
+	}
+}
+
+func (ply Ply) Sort() {
+	sort.Sort(ply)
+}
+
+func (ply Ply) Len() int { return len(ply) }
+
+func (ply Ply) Swap(i, j int) { ply[i], ply[j] = ply[j], ply[i] }
+
+func (ply Ply) Less(i, j int) bool {
+	switch {
+	case ply[i][0] < ply[j][0]:
+		return true
+	case ply[i][0] > ply[j][0]:
+		return false
+	default:
+		switch {
+		case ply[i][1] < ply[j][1]:
+			return true
+		case ply[i][1] > ply[j][1]:
+			return false
+		default:
+			switch {
+			case ply[i][2] < ply[j][2]:
+				return true
+			case ply[i][2] > ply[j][2]:
+				return false
+			default:
+				return false
+			}
+		}
+	}
 }

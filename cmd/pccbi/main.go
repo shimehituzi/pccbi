@@ -18,18 +18,21 @@ func main() {
 	recPath := "rec.ply"
 
 	// Encode
-	encVoxel, encHeader := codec.ReadPly(srcPath, axis)
+	encPly, encHeader := codec.ReadPly(srcPath, axis)
+	encVoxel := codec.EncVoxel(encPly, encHeader)
 	encContour := codec.EncContour(encVoxel, encHeader)
 	encStream := codec.EncStream(encContour)
-	bitstream.Encode(encStream, encHeader, distPath)
+	bitstream.Encode(distPath, encStream, encHeader)
 
 	// Decode
 	decStream, decHeader := bitstream.Decode(distPath)
 	decContour := codec.DecStream(decStream, decHeader)
 	decVoxel := codec.DecContour(decContour, decHeader)
-	codec.WritePly(recPath, decVoxel, decHeader)
+	decPly := codec.DecVoxcel(decVoxel, decHeader)
+	codec.WritePly(recPath, decPly)
 
 	// Test
+	TestPly(encPly, decPly)
 	TestHeader(encHeader, decHeader)
 	TestVoxel(encVoxel, decVoxel)
 	TestContour(encContour, decContour)
@@ -37,6 +40,19 @@ func main() {
 
 	end := time.Now()
 	fmt.Println(end.Sub(start).Seconds())
+}
+
+func TestPly(encPly, decPly codec.Ply) {
+	if len(encPly) != len(decPly) {
+		panic("The Ply Length is different")
+	}
+	for i := range encPly {
+		for j := range encPly[i] {
+			if encPly[i][j] != decPly[i][j] {
+				panic("The Ply is different")
+			}
+		}
+	}
 }
 
 func TestHeader(encHeader, decHeader *codec.Header) {

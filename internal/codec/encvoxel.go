@@ -8,42 +8,33 @@ import (
 	"strings"
 )
 
-const (
-	XYZ Axis = iota
-	XZY
-	YXZ
-	ZXY
-	ZYX
-	YZX
-)
+func ReadPly(srcPath string, axis Axis) (Ply, *Header) {
+	ply := encPly(srcPath)
+	header := encHeader(ply, axis)
+	return ply, header
+}
 
-func (axis Axis) getOrder() [3]int {
-	switch axis {
-	case 0:
-		return [3]int{0, 1, 2}
-	case 1:
-		return [3]int{0, 2, 1}
-	case 2:
-		return [3]int{1, 0, 2}
-	case 3:
-		return [3]int{2, 0, 1}
-	case 4:
-		return [3]int{2, 1, 0}
-	case 5:
-		return [3]int{1, 2, 0}
-	default:
-		return [3]int{2, 0, 1}
+func EncVoxel(ply Ply, header *Header) Voxel {
+	voxel := make(Voxel, header.Length[0])
+	for i := range voxel {
+		voxel[i] = make(bitmap, header.Length[1])
+		for j := range voxel[i] {
+			voxel[i][j] = make([]byte, header.Length[2])
+		}
 	}
+
+	order := header.Axis.getOrder()
+	for _, point := range ply {
+		dim0 := point[order[0]] - header.Bias[0]
+		dim1 := point[order[1]] - header.Bias[1]
+		dim2 := point[order[2]] - header.Bias[2]
+		voxel[dim0][dim1][dim2] = 1
+	}
+
+	return voxel
 }
 
-func ReadPly(srcPath string, axis Axis) (Voxel, *Header) {
-	ply := NewEncPly(srcPath)
-	header := NewEncHeader(ply, axis)
-	voxel := NewEncVoxel(ply, header)
-	return voxel, header
-}
-
-func NewEncPly(srcPath string) ply {
+func encPly(srcPath string) Ply {
 	fp, err := os.Open(srcPath)
 	if err != nil {
 		panic(err)
@@ -52,7 +43,7 @@ func NewEncPly(srcPath string) ply {
 
 	sccaner := bufio.NewScanner(fp)
 
-	ply := ply{}
+	ply := Ply{}
 	for isData := false; sccaner.Scan(); {
 		if isData {
 			text := sccaner.Text()
@@ -71,10 +62,15 @@ func NewEncPly(srcPath string) ply {
 			isData = true
 		}
 	}
+
+	// エンコード時とデコード時の比較のために Sort している
+	// Voxel を作る上ではしてもしなくても関係ない
+	ply.Sort()
+
 	return ply
 }
 
-func NewEncHeader(ply ply, axis Axis) *Header {
+func encHeader(ply Ply, axis Axis) *Header {
 	var length, bias [3]int
 	order := axis.getOrder()
 	for d := 0; d < 3; d++ {
@@ -98,24 +94,4 @@ func NewEncHeader(ply ply, axis Axis) *Header {
 		Length: length,
 		Bias:   bias,
 	}
-}
-
-func NewEncVoxel(ply ply, header *Header) Voxel {
-	voxel := make(Voxel, header.Length[0])
-	for i := range voxel {
-		voxel[i] = make(bitmap, header.Length[1])
-		for j := range voxel[i] {
-			voxel[i][j] = make([]byte, header.Length[2])
-		}
-	}
-
-	order := header.Axis.getOrder()
-	for _, point := range ply {
-		dim0 := point[order[0]] - header.Bias[0]
-		dim1 := point[order[1]] - header.Bias[1]
-		dim2 := point[order[2]] - header.Bias[2]
-		voxel[dim0][dim1][dim2] = 1
-	}
-
-	return voxel
 }
