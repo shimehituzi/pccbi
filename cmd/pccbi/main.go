@@ -28,7 +28,8 @@ func main() {
 	decStream, decHeader := bitstream.Decode(distPath)
 	decContour := codec.DecStream(decStream, decHeader)
 	decVoxel := codec.DecContour(decContour, decHeader)
-	codec.WritePly(recPath, decVoxel, decHeader)
+	decPly := codec.DecVoxcel(decVoxel, decHeader)
+	codec.WritePly(recPath, decPly)
 
 	// Test
 	TestHeader(encHeader, decHeader)

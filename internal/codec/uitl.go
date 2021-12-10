@@ -78,6 +78,65 @@ func uint2byte(uintSlice []uint) (byteSlice []byte) {
 	return
 }
 
+const (
+	XYZ Axis = iota
+	XZY
+	YXZ
+	ZXY
+	ZYX
+	YZX
+)
+
+func (axis Axis) getOrder() [3]int {
+	switch axis {
+	case 0:
+		// XYZ
+		return [3]int{0, 1, 2}
+	case 1:
+		// XZY
+		return [3]int{0, 2, 1}
+	case 2:
+		// YXZ
+		return [3]int{1, 0, 2}
+	case 3:
+		// ZXY
+		return [3]int{2, 0, 1}
+	case 4:
+		// ZYX
+		return [3]int{2, 1, 0}
+	case 5:
+		// YZX
+		return [3]int{1, 2, 0}
+	default:
+		panic("axis is an invalid value")
+	}
+}
+
+func (axis Axis) getIndex() [3]int {
+	switch axis {
+	case 0:
+		// XYZ
+		return [3]int{0, 1, 2}
+	case 1:
+		// XZY
+		return [3]int{0, 2, 1}
+	case 2:
+		// YXZ
+		return [3]int{1, 0, 2}
+	case 3:
+		// ZXY
+		return [3]int{1, 2, 0}
+	case 4:
+		// ZYX
+		return [3]int{2, 1, 0}
+	case 5:
+		// YZX
+		return [3]int{2, 0, 1}
+	default:
+		panic("axis is an invalid value")
+	}
+}
+
 func (ply Ply) Sort() {
 	sort.Sort(ply)
 }
