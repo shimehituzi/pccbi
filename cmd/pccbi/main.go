@@ -65,6 +65,15 @@ func TestVoxel(encVoxel, decVoxel codec.Voxel) {
 	if len(encVoxel[0][0]) != len(decVoxel[0][0]) {
 		panic("The Voxel[0][0] length is different")
 	}
+	for f := range encVoxel {
+		for y := range encVoxel[f] {
+			for x := range encVoxel[f][y] {
+				if encVoxel[f][y][x] != decVoxel[f][y][x] {
+					panic("The Voxel is different")
+				}
+			}
+		}
+	}
 }
 
 func TestContour(encContour, decContour codec.Contour) {
