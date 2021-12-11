@@ -19,7 +19,7 @@ func DecStream(stream *Stream, header *Header) Contour {
 			startX := int(stream.StartPoints[i][2])
 			cc := chaincode{
 				Start:  point{startX, startY},
-				Code:   codes[i],
+				Code:   decDecorrelation(codes[i]),
 				Points: []point{},
 			}
 			cs[j] = cc
@@ -31,8 +31,8 @@ func DecStream(stream *Stream, header *Header) Contour {
 	// chancode.Points を start と code から取得
 	for f := range contour {
 		for l := range contour[f] {
-			for i, v := range contour[f][l] {
-				contour[f][l][i].Points = getChainCodePoints(v.Start, v.Code)
+			for i, chaincode := range contour[f][l] {
+				contour[f][l][i].Points = getChainCodePoints(chaincode.Start, chaincode.Code)
 			}
 		}
 	}

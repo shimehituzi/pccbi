@@ -124,8 +124,6 @@ func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
 		checkP = start
 	}
 
-	divisor := byte(8)
-
 	for {
 		for _, nextD := range currentD.nextDirections() {
 			nextP := point{currentP.x + nextD.d.x, currentP.y + nextD.d.y}
@@ -139,7 +137,7 @@ func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
 						continue
 					}
 				}
-				cc.Code = append(cc.Code, (nextD.code-currentD.code)%divisor)
+				cc.Code = append(cc.Code, nextD.code)
 				cc.Points = append(cc.Points, nextP)
 				currentD = nextD
 				currentP = nextP
@@ -178,14 +176,13 @@ func (d direction) nextDirections() []direction {
 }
 
 func getChainCodePoints(start point, code []byte) []point {
-	points := []point{start}
+	d := newDirection(0).d
 	p := start
-	d := newDirection(0)
+	points := []point{p}
 
 	for i := range code {
-		nextCode := (d.code + newDirection(code[i]).code) % 8
-		d = newDirection(nextCode)
-		p = point{p.x + d.d.x, p.y + d.d.y}
+		d = newDirection(code[i]).d
+		p = point{p.x + d.x, p.y + d.y}
 		points = append(points, p)
 	}
 

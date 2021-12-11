@@ -10,8 +10,9 @@ func EncStream(contour Contour) *Stream {
 			for _, chaincode := range contourSegment {
 				startPoint := [3]uint{uint(f), uint(chaincode.Start.y), uint(chaincode.Start.x)}
 				startPoints = append(startPoints, startPoint)
-				for _, code := range chaincode.Code {
-					codes = append(codes, uint(code))
+				code := encDecorrelation(chaincode.Code)
+				for _, v := range code {
+					codes = append(codes, uint(v))
 				}
 				codes = append(codes, 8)
 			}
