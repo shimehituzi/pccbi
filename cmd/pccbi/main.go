@@ -32,7 +32,7 @@ func main() {
 	encVoxel := codec.EncVoxel(encPly, encHeader)
 	encContour := codec.EncContour(encVoxel, encHeader)
 	encStream := codec.EncStream(encContour)
-	bits := bitstream.Encode(pccPath, encStream, encHeader)
+	dataBits, headerBits := bitstream.Encode(pccPath, encStream, encHeader)
 	times[2] = time.Now()
 
 	// Decode
@@ -60,7 +60,7 @@ func main() {
 
 	// Report
 	times[5] = time.Now()
-	tool.Report(result, bits, numPoints, times)
+	tool.Report(result, dataBits, headerBits, numPoints, times)
 }
 
 func TestPly(encPly, decPly codec.Ply) {
