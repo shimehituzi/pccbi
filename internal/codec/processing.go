@@ -25,7 +25,7 @@ func newLabel(bm bitmap) (label, int) {
 				al := []int{}
 				for _, m := range mask {
 					p := point{x + m.x, y + m.y}
-					if validPointInt(p, label) && label[p.y][p.x] != 0 {
+					if p.validInt(label) && label[p.y][p.x] != 0 {
 						al = append(al, label[p.y][p.x])
 					}
 				}

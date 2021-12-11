@@ -59,7 +59,7 @@ func fillSegment(img bitmap, outer chaincode, inners []chaincode) {
 			{p.x, p.y + 1},
 		}
 		for _, p := range nearest4points {
-			if validPointByte(p, img) && img[p.y][p.x] == 0 && closedAreaDesicion(p, outerPoints) {
+			if p.checkValue(img, 0) && p.isInside(outerPoints) {
 				fillArea(img, p, 0, 1)
 			}
 		}
@@ -82,7 +82,7 @@ func fillSegment(img bitmap, outer chaincode, inners []chaincode) {
 				{p.x, p.y + 1},
 			}
 			for _, p := range nearest4points {
-				if validPointByte(p, img) && img[p.y][p.x] == 1 && closedAreaDesicion(p, innerPoints) {
+				if p.checkValue(img, 1) && p.isInside(innerPoints) {
 					fillArea(img, p, 1, 2)
 				}
 			}

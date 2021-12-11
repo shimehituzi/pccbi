@@ -78,6 +78,7 @@ func newContourSegment(orig bitmap) []chaincode {
 		panic("cannot produce chaincode")
 	}
 	cs = append(cs, *outer)
+	outerPoints := outer.getPoints()
 
 	// 塗り潰し
 	filledOutside := false
@@ -91,7 +92,7 @@ func newContourSegment(orig bitmap) []chaincode {
 					fillArea(img, p, 0, label)
 					label++
 				} else {
-					if closedAreaDesicion(p, outer.getPoints()) {
+					if p.isInside(outerPoints) {
 						fillArea(img, p, 0, label)
 						label++
 					} else {
