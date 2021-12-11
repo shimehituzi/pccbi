@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/shimehituzi/pccbi/internal/bitstream"
@@ -10,12 +9,13 @@ import (
 )
 
 func main() {
-	start := time.Now()
+	times := [6]time.Time{}
+	times[0] = time.Now()
 
 	// Arguments
 	axis := codec.YZX
 
-	srcPath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"[4:] // 1062090 点のデータ
+	srcPath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"[4:]
 	pccPath := "./out/compressed"
 	dstPath := "./out/destination"
 
@@ -24,21 +24,25 @@ func main() {
 	recPath := "./out/rec.ply"
 
 	// Preprocessing
-	tool.Preprocessing(srcPath, sortedPath, etcPath)
+	numPoints := tool.Preprocessing(srcPath, sortedPath, etcPath)
 
 	// Encode
+	times[1] = time.Now()
 	encPly, encHeader := codec.ReadPly(srcPath, axis)
 	encVoxel := codec.EncVoxel(encPly, encHeader)
 	encContour := codec.EncContour(encVoxel, encHeader)
 	encStream := codec.EncStream(encContour)
-	bitstream.Encode(pccPath, encStream, encHeader)
+	bits := bitstream.Encode(pccPath, encStream, encHeader)
+	times[2] = time.Now()
 
 	// Decode
+	times[3] = time.Now()
 	decStream, decHeader := bitstream.Decode(pccPath)
 	decContour := codec.DecStream(decStream, decHeader)
 	decVoxel := codec.DecContour(decContour, decHeader)
 	decPly := codec.DecVoxcel(decVoxel, decHeader)
 	codec.WritePly(dstPath, decPly)
+	times[4] = time.Now()
 
 	// Test
 	TestPly(encPly, decPly)
@@ -54,9 +58,9 @@ func main() {
 	result := tool.TestLossless(sortedPath, recPath)
 	tool.DeleteTmpFile(result, sortedPath, dstPath, etcPath)
 
-	// Print Time
-	end := time.Now()
-	fmt.Println(end.Sub(start).Seconds())
+	// Report
+	times[5] = time.Now()
+	tool.Report(result, bits, numPoints, times)
 }
 
 func TestPly(encPly, decPly codec.Ply) {

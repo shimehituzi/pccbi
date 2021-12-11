@@ -2,7 +2,7 @@ package tool
 
 import "sort"
 
-func Preprocessing(srcPath, sortedPath, etcPath string) {
+func Preprocessing(srcPath, sortedPath, etcPath string) int {
 	data, header := readPly(srcPath)
 
 	sort.Sort(data)
@@ -14,6 +14,8 @@ func Preprocessing(srcPath, sortedPath, etcPath string) {
 		etcData[i] = data[i][3:]
 	}
 	writePly(etcPath, etcData, header)
+
+	return len(data)
 }
 
 func (data plyData) Len() int { return len(data) }

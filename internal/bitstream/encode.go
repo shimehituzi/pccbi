@@ -7,7 +7,7 @@ import (
 	"github.com/shimehituzi/pccbi/internal/codec"
 )
 
-func Encode(pccPath string, stream *codec.Stream, header *codec.Header) {
+func Encode(pccPath string, stream *codec.Stream, header *codec.Header) int {
 	fp, err := os.Create(pccPath)
 	if err != nil {
 		panic(err)
@@ -29,33 +29,35 @@ func Encode(pccPath string, stream *codec.Stream, header *codec.Header) {
 	bitSize := 16
 	bigBitSize := 32
 
+	bits := 0
+
 	// ヘッダー情報
-	bb.putbits(w, bitSize, uint(header.Axis))
+	bits += bb.putbits(w, bitSize, uint(header.Axis))
 	for _, v := range header.Length {
-		bb.putbits(w, bitSize, uint(v))
+		bits += bb.putbits(w, bitSize, uint(v))
 	}
 	for _, v := range header.Bias {
-		bb.putbits(w, bitSize, uint(v))
+		bits += bb.putbits(w, bitSize, uint(v))
 	}
-	bb.putbits(w, bigBitSize, uint(len(stream.Codes)))
-	bb.putbits(w, bitSize, uint(len(stream.StartPoints)))
-	bb.putbits(w, bitSize, uint(len(stream.NumCodesArray)))
-	bb.putbits(w, bitSize, numCodesArrayFreqmax)
+	bits += bb.putbits(w, bigBitSize, uint(len(stream.Codes)))
+	bits += bb.putbits(w, bitSize, uint(len(stream.StartPoints)))
+	bits += bb.putbits(w, bitSize, uint(len(stream.NumCodesArray)))
+	bits += bb.putbits(w, bitSize, numCodesArrayFreqmax)
 
 	// チェーンコードのスタートポイントの符号化
 	for _, point := range stream.StartPoints {
 		for i := 0; i < 3; i++ {
-			bb.putbits(w, bitSize, uint(point[i]))
+			bits += bb.putbits(w, bitSize, uint(point[i]))
 		}
 	}
 
 	// セグメント内の輪郭数の確率モデル
 	for _, freq := range numCodesArrayPmodel.freq {
-		bb.putbits(w, bigBitSize, uint(freq))
+		bits += bb.putbits(w, bigBitSize, uint(freq))
 	}
 	// チェーンコードの確率モデル
 	for _, freq := range codePmodel.freq {
-		bb.putbits(w, bigBitSize, uint(freq))
+		bits += bb.putbits(w, bigBitSize, uint(freq))
 	}
 
 	rc := newRangeCoder()
@@ -67,9 +69,11 @@ func Encode(pccPath string, stream *codec.Stream, header *codec.Header) {
 	for _, code := range stream.Codes {
 		rc.encode(w, codePmodel, uint64(code))
 	}
-	rc.finishenc(w)
+	bits += int(rc.finishenc(w))
 
 	w.Flush()
+
+	return bits
 }
 
 func newEncPmodel(val []uint, min, max uint) *Pmodel {
