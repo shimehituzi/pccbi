@@ -19,9 +19,9 @@ func main() {
 	pccPath := "./out/compressed"
 	dstPath := "./out/destination"
 
+	sortedPath := "./out/sorted.ply"
 	etcPath := "./out/etc"
 	recPath := "./out/rec.ply"
-	sortedPath := "./out/sorted.ply"
 
 	// Preprocessing
 	tool.Preprocessing(srcPath, sortedPath, etcPath)
@@ -50,13 +50,18 @@ func main() {
 	// Postprocessing
 	tool.Postprocessing(dstPath, etcPath, recPath)
 
+	// Chack Lossless
+	result := tool.TestLossless(sortedPath, recPath)
+	tool.DeleteTmpFile(result, sortedPath, dstPath, etcPath)
+
+	// Print Time
 	end := time.Now()
 	fmt.Println(end.Sub(start).Seconds())
 }
 
 func TestPly(encPly, decPly codec.Ply) {
 	if len(encPly) != len(decPly) {
-		panic("The Ply Length is different")
+		panic("The Ply length is different")
 	}
 	for i := range encPly {
 		for j := range encPly[i] {
@@ -73,7 +78,7 @@ func TestHeader(encHeader, decHeader *codec.Header) {
 	}
 	for i := range encHeader.Length {
 		if encHeader.Length[i] != decHeader.Length[i] {
-			panic("The Header.Length is different")
+			panic("The Header.length is different")
 		}
 	}
 	for i := range encHeader.Bias {
@@ -145,13 +150,13 @@ func TestContour(encContour, decContour codec.Contour) {
 
 func TestStream(encStream, decStream *codec.Stream) {
 	if len(encStream.StartPoints) != len(decStream.StartPoints) {
-		panic("The Stream.StartPoints Length is different")
+		panic("The Stream.StartPoints length is different")
 	}
 	if len(encStream.Codes) != len(decStream.Codes) {
-		panic("The Stream.Codes Length is different")
+		panic("The Stream.Codes length is different")
 	}
 	if len(encStream.NumCodesArray) != len(decStream.NumCodesArray) {
-		panic("The Stream.NumCodesArray Length is different")
+		panic("The Stream.NumCodesArray length is different")
 	}
 	for i := range encStream.StartPoints {
 		for j := range encStream.StartPoints[i] {
