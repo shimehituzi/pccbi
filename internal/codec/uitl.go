@@ -2,14 +2,6 @@ package codec
 
 import "sort"
 
-func ComparePoint(a, b point) bool {
-	if a.x == b.x && a.y == b.y {
-		return true
-	} else {
-		return false
-	}
-}
-
 // 閉曲線の内側なら true 線上は不定
 func closedAreaDesicion(p point, cc chaincode) bool {
 	ps := cc.Points
@@ -61,13 +53,16 @@ func validPointByte(p point, img bitmap) bool {
 	return true
 }
 
-func (p point) in(points []point) bool {
-	for _, point := range points {
-		if p == point {
-			return true
-		}
+func (p point) checkValue(img bitmap, value byte) bool {
+	return validPointByte(p, img) && img[p.y][p.x] == value
+}
+
+func ComparePoint(a, b point) bool {
+	if a.x == b.x && a.y == b.y {
+		return true
+	} else {
+		return false
 	}
-	return false
 }
 
 func uint2byte(uintSlice []uint) (byteSlice []byte) {

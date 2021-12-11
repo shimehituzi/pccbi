@@ -111,22 +111,6 @@ func newLabel(bm bitmap) (label, int) {
 }
 
 // 輪郭追跡
-type orientedPoint struct {
-	p    point
-	code byte
-}
-
-func (p orientedPoint) candidatePoints() [8]orientedPoint {
-	firstDirection := byte(p.code + 5)
-	nextP := [8]orientedPoint{}
-	for i := range nextP {
-		d := newDirection((firstDirection + byte(i)) % 8)
-		nextP[i].code = d.code
-		nextP[i].p = point{p.p.x + d.d.x, p.p.y + d.d.y}
-	}
-	return nextP
-}
-
 func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
 	current := orientedPoint{start, newDirection(0).code}
 
@@ -173,72 +157,6 @@ func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
 	}
 }
 
-func (p point) checkValue(img bitmap, value byte) bool {
-	return validPointByte(p, img) && img[p.y][p.x] == value
-}
-
-func newChaincode0(img bitmap, start point, value byte, inner bool) *chaincode {
-	currentD := newDirection(0)
-	currentP := start
-
-	checkP := point{start.x - 1, start.y + 1}
-	if !(validPointByte(checkP, img) && img[checkP.y][checkP.x] == value) {
-		checkP = start
-	}
-
-	code := []byte{}
-	points := []point{start}
-	for {
-		for _, nextD := range currentD.nextDirections() {
-			nextP := point{currentP.x + nextD.d.x, currentP.y + nextD.d.y}
-			if validPointByte(nextP, img) && img[nextP.y][nextP.x] == value {
-				if inner && (nextD.code%2) == 1 {
-					beforeD := newDirection((nextD.code - 1) % 8)
-					beforeP := point{currentP.x + beforeD.d.x, currentP.y + beforeD.d.y}
-					afterD := newDirection((nextD.code + 1) % 8)
-					afterP := point{currentP.x + afterD.d.x, currentP.y + afterD.d.y}
-					if img[beforeP.y][beforeP.x] == 1 && img[afterP.y][afterP.x] == 1 {
-						continue
-					}
-				}
-				code = append(code, nextD.code)
-				points = append(points, nextP)
-				currentD = nextD
-				currentP = nextP
-				break
-			}
-		}
-		if start == currentP && checkP.in(points) {
-			break
-		}
-	}
-
-	return &chaincode{
-		Start:  start,
-		Code:   code,
-		Points: points,
-	}
-}
-
-func newDirection(code byte) direction {
-	directions := [8]point{
-		{1, 0}, {1, 1}, {0, 1}, {-1, 1},
-		{-1, 0}, {-1, -1}, {0, -1}, {1, -1},
-	}
-	d := directions[code]
-	return direction{d, code}
-}
-
-func (d direction) nextDirections() [8]direction {
-	firstDirection := byte(d.code + 5)
-	nextDirections := [8]direction{}
-	for i := range nextDirections {
-		directionCode := (firstDirection + byte(i)) % 8
-		nextDirections[i] = newDirection(directionCode)
-	}
-	return nextDirections
-}
-
 func getChainCodePoints(start point, code []byte) []point {
 	d := newDirection(0).d
 	p := start
@@ -251,4 +169,24 @@ func getChainCodePoints(start point, code []byte) []point {
 	}
 
 	return points
+}
+
+func newDirection(code byte) direction {
+	directions := [8]point{
+		{1, 0}, {1, 1}, {0, 1}, {-1, 1},
+		{-1, 0}, {-1, -1}, {0, -1}, {1, -1},
+	}
+	d := directions[code]
+	return direction{d, code}
+}
+
+func (p orientedPoint) candidatePoints() [8]orientedPoint {
+	firstDirection := byte(p.code + 5)
+	nextP := [8]orientedPoint{}
+	for i := range nextP {
+		d := newDirection((firstDirection + byte(i)) % 8)
+		nextP[i].code = d.code
+		nextP[i].p = point{p.p.x + d.d.x, p.p.y + d.d.y}
+	}
+	return nextP
 }
