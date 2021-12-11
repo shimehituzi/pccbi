@@ -32,7 +32,7 @@ func main() {
 	encVoxel := codec.EncVoxel(encPly, encHeader)
 	encContour := codec.EncContour(encVoxel, encHeader)
 	encStream := codec.EncStream(encContour)
-	bits := bitstream.Encode(pccPath, encStream, encHeader)
+	dataBits, headerBits := bitstream.Encode(pccPath, encStream, encHeader)
 	times[2] = time.Now()
 
 	// Decode
@@ -60,7 +60,7 @@ func main() {
 
 	// Report
 	times[5] = time.Now()
-	tool.Report(result, bits, numPoints, times)
+	tool.Report(result, dataBits, headerBits, numPoints, times)
 }
 
 func TestPly(encPly, decPly codec.Ply) {
@@ -128,23 +128,15 @@ func TestContour(encContour, decContour codec.Contour) {
 			for i := range encContour[f][l] {
 				encChaincode := encContour[f][l][i]
 				decChainCode := decContour[f][l][i]
-				if !codec.ComparePoint(encChaincode.Start, decChainCode.Start) {
+				if encChaincode.Start != decChainCode.Start {
 					panic("The start point is different")
 				}
 				if len(encChaincode.Code) != len(decChainCode.Code) {
 					panic("The chaincode.code length is different")
 				}
-				if len(encChaincode.Points) != len(decChainCode.Points) {
-					panic("The chaincode.points length is different")
-				}
 				for j := range encChaincode.Code {
 					if encChaincode.Code[j] != decChainCode.Code[j] {
 						panic("The Chaincode is different")
-					}
-				}
-				for j := range encChaincode.Points {
-					if !codec.ComparePoint(encChaincode.Points[j], decChainCode.Points[j]) {
-						panic("The Points is different")
 					}
 				}
 			}

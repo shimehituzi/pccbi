@@ -23,15 +23,19 @@ type point struct {
 	x, y int
 }
 
-type chaincode struct {
-	Start  point
-	Code   []byte
-	Points []point
-}
-
 type direction struct {
 	d    point
 	code byte
+}
+
+type orientedPoint struct {
+	p    point
+	code byte
+}
+
+type chaincode struct {
+	Start point
+	Code  []byte
 }
 
 type Contour [][][]chaincode

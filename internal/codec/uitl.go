@@ -2,17 +2,25 @@ package codec
 
 import "sort"
 
-func ComparePoint(a, b point) bool {
-	if a.x == b.x && a.y == b.y {
-		return true
-	} else {
-		return false
+func fillArea(img bitmap, p point, prev, value byte) {
+	img[p.y][p.x] = value
+
+	nearest4points := [4]point{
+		{p.x, p.y - 1},
+		{p.x - 1, p.y},
+		{p.x + 1, p.y},
+		{p.x, p.y + 1},
+	}
+
+	for _, p := range nearest4points {
+		if p.checkValue(img, prev) {
+			fillArea(img, p, prev, value)
+		}
 	}
 }
 
 // 閉曲線の内側なら true 線上は不定
-func closedAreaDesicion(p point, cc chaincode) bool {
-	ps := cc.Points
+func (p point) isInside(ps []point) bool {
 	wn := 0
 	for i := 0; i < len(ps)-1; i++ {
 		if (ps[i].y <= p.y) && (ps[i+1].y > p.y) {
@@ -30,44 +38,22 @@ func closedAreaDesicion(p point, cc chaincode) bool {
 	return wn != 0
 }
 
-func fillArea(img bitmap, p point, prev, value byte) {
-	img[p.y][p.x] = value
-
-	nearest4points := [4]point{
-		{p.x, p.y - 1},
-		{p.x - 1, p.y},
-		{p.x + 1, p.y},
-		{p.x, p.y + 1},
-	}
-
-	for _, p := range nearest4points {
-		if validPointByte(p, img) && img[p.y][p.x] == prev {
-			fillArea(img, p, prev, value)
-		}
-	}
-}
-
-func validPointInt(p point, img label) bool {
-	if p.y < 0 || p.x < 0 || len(img) <= p.y || len(img[0]) <= p.x {
-		return false
-	}
-	return true
-}
-
-func validPointByte(p point, img bitmap) bool {
-	if p.y < 0 || p.x < 0 || len(img) <= p.y || len(img[0]) <= p.x {
-		return false
-	}
-	return true
-}
-
-func (p point) in(points []point) bool {
-	for _, point := range points {
-		if p == point {
-			return true
-		}
+func (p point) validInt(img [][]int) bool {
+	if p.y >= 0 && p.x >= 0 && len(img) > p.y && len(img[0]) > p.x {
+		return true
 	}
 	return false
+}
+
+func (p point) validByte(img [][]byte) bool {
+	if p.y >= 0 && p.x >= 0 && len(img) > p.y && len(img[0]) > p.x {
+		return true
+	}
+	return false
+}
+
+func (p point) checkValue(img [][]byte, value byte) bool {
+	return p.validByte(img) && img[p.y][p.x] == value
 }
 
 func uint2byte(uintSlice []uint) (byteSlice []byte) {

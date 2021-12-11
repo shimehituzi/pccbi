@@ -47,10 +47,11 @@ func getFrame(contourFrame [][]chaincode, height, width int) bitmap {
 }
 
 func fillSegment(img bitmap, outer chaincode, inners []chaincode) {
-	for _, p := range outer.Points {
+	outerPoints := outer.getPoints()
+	for _, p := range outerPoints {
 		img[p.y][p.x] = 1
 	}
-	for _, p := range outer.Points {
+	for _, p := range outerPoints {
 		nearest4points := [4]point{
 			{p.x, p.y - 1},
 			{p.x - 1, p.y},
@@ -58,18 +59,22 @@ func fillSegment(img bitmap, outer chaincode, inners []chaincode) {
 			{p.x, p.y + 1},
 		}
 		for _, p := range nearest4points {
-			if validPointByte(p, img) && img[p.y][p.x] == 0 && closedAreaDesicion(p, outer) {
+			if p.checkValue(img, 0) && p.isInside(outerPoints) {
 				fillArea(img, p, 0, 1)
 			}
 		}
 	}
-	for _, inner := range inners {
-		for _, p := range inner.Points {
+	innerPointsArray := make([][]point, len(inners))
+	for i, inner := range inners {
+		innerPointsArray[i] = inner.getPoints()
+	}
+	for _, innerPoints := range innerPointsArray {
+		for _, p := range innerPoints {
 			img[p.y][p.x] = 2
 		}
 	}
-	for _, inner := range inners {
-		for _, p := range inner.Points {
+	for _, innerPoints := range innerPointsArray {
+		for _, p := range innerPoints {
 			nearest4points := [4]point{
 				{p.x, p.y - 1},
 				{p.x - 1, p.y},
@@ -77,7 +82,7 @@ func fillSegment(img bitmap, outer chaincode, inners []chaincode) {
 				{p.x, p.y + 1},
 			}
 			for _, p := range nearest4points {
-				if validPointByte(p, img) && img[p.y][p.x] == 1 && closedAreaDesicion(p, inner) {
+				if p.checkValue(img, 1) && p.isInside(innerPoints) {
 					fillArea(img, p, 1, 2)
 				}
 			}
