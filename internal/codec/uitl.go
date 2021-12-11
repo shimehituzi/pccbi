@@ -3,8 +3,7 @@ package codec
 import "sort"
 
 // 閉曲線の内側なら true 線上は不定
-func closedAreaDesicion(p point, cc chaincode) bool {
-	ps := cc.Points
+func closedAreaDesicion(p point, ps []point) bool {
 	wn := 0
 	for i := 0; i < len(ps)-1; i++ {
 		if (ps[i].y <= p.y) && (ps[i+1].y > p.y) {
@@ -55,14 +54,6 @@ func validPointByte(p point, img bitmap) bool {
 
 func (p point) checkValue(img bitmap, value byte) bool {
 	return validPointByte(p, img) && img[p.y][p.x] == value
-}
-
-func ComparePoint(a, b point) bool {
-	if a.x == b.x && a.y == b.y {
-		return true
-	} else {
-		return false
-	}
 }
 
 func uint2byte(uintSlice []uint) (byteSlice []byte) {

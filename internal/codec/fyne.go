@@ -30,11 +30,11 @@ func NewFyneContour(contour Contour, header *Header) labeledVoxel {
 		for l := range contour[f] {
 			for c, cc := range contour[f][l] {
 				if c == 0 {
-					for _, point := range cc.Points {
+					for _, point := range cc.getPoints() {
 						fc[f][point.y][point.x] = l*2 + 1
 					}
 				} else {
-					for _, point := range cc.Points {
+					for _, point := range cc.getPoints() {
 						fc[f][point.y][point.x] = l*2 + 2
 					}
 				}

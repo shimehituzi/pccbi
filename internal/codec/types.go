@@ -34,9 +34,8 @@ type orientedPoint struct {
 }
 
 type chaincode struct {
-	Start  point
-	Code   []byte
-	Points []point
+	Start point
+	Code  []byte
 }
 
 type Contour [][][]chaincode

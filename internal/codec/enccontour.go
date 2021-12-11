@@ -91,7 +91,7 @@ func newContourSegment(orig bitmap) []chaincode {
 					fillArea(img, p, 0, label)
 					label++
 				} else {
-					if closedAreaDesicion(p, *outer) {
+					if closedAreaDesicion(p, outer.getPoints()) {
 						fillArea(img, p, 0, label)
 						label++
 					} else {

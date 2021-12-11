@@ -121,7 +121,6 @@ func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
 	}
 
 	code := []byte{}
-	points := []point{start}
 	for {
 		ps := current.candidatePoints()
 		for i, candidate := range ps {
@@ -134,7 +133,6 @@ func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
 					}
 				}
 				code = append(code, candidate.code)
-				points = append(points, candidate.p)
 				current = candidate
 				if checkP == current.p {
 					checkFlag = true
@@ -151,19 +149,18 @@ func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
 	}
 
 	return &chaincode{
-		Start:  start,
-		Code:   code,
-		Points: points,
+		Start: start,
+		Code:  code,
 	}
 }
 
-func getChainCodePoints(start point, code []byte) []point {
+func (cc chaincode) getPoints() []point {
 	d := newDirection(0).d
-	p := start
+	p := cc.Start
 	points := []point{p}
 
-	for i := range code {
-		d = newDirection(code[i]).d
+	for i := range cc.Code {
+		d = newDirection(cc.Code[i]).d
 		p = point{p.x + d.x, p.y + d.y}
 		points = append(points, p)
 	}
