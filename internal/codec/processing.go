@@ -111,19 +111,83 @@ func newLabel(bm bitmap) (label, int) {
 }
 
 // 輪郭追跡
-func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
-	cc := new(chaincode)
-	cc.Start = start
-	cc.Points = []point{start}
+type orientedPoint struct {
+	p    point
+	code byte
+}
 
+func (p orientedPoint) candidatePoints() [8]orientedPoint {
+	firstDirection := byte(p.code + 5)
+	nextP := [8]orientedPoint{}
+	for i := range nextP {
+		d := newDirection((firstDirection + byte(i)) % 8)
+		nextP[i].code = d.code
+		nextP[i].p = point{p.p.x + d.d.x, p.p.y + d.d.y}
+	}
+	return nextP
+}
+
+func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
+	current := orientedPoint{start, newDirection(0).code}
+
+	checkP := point{start.x - 1, start.y + 1}
+	checkFlag := false
+	if !checkP.checkValue(img, value) {
+		checkP = start
+	}
+
+	code := []byte{}
+	points := []point{start}
+	for {
+		ps := current.candidatePoints()
+		for i, candidate := range ps {
+			if candidate.p.checkValue(img, value) {
+				if inner && (candidate.code%2 == 1) {
+					prev := ps[(i-1)%8]
+					next := ps[(i+1)%8]
+					if prev.p.checkValue(img, 1) && next.p.checkValue(img, 1) {
+						continue
+					}
+				}
+				code = append(code, candidate.code)
+				points = append(points, candidate.p)
+				current = candidate
+				if checkP == current.p {
+					checkFlag = true
+				}
+				break
+			}
+			if i == len(ps)-1 {
+				checkFlag = true
+			}
+		}
+		if checkFlag && start == current.p {
+			break
+		}
+	}
+
+	return &chaincode{
+		Start:  start,
+		Code:   code,
+		Points: points,
+	}
+}
+
+func (p point) checkValue(img bitmap, value byte) bool {
+	return validPointByte(p, img) && img[p.y][p.x] == value
+}
+
+func newChaincode0(img bitmap, start point, value byte, inner bool) *chaincode {
 	currentD := newDirection(0)
-	currentP := point{start.x, start.y}
+	currentP := start
 
 	checkP := point{start.x - 1, start.y + 1}
 	if !(validPointByte(checkP, img) && img[checkP.y][checkP.x] == value) {
 		checkP = start
 	}
 
+	code := []byte{}
+	points := []point{start}
 	for {
 		for _, nextD := range currentD.nextDirections() {
 			nextP := point{currentP.x + nextD.d.x, currentP.y + nextD.d.y}
@@ -137,19 +201,23 @@ func newChaincode(img bitmap, start point, value byte, inner bool) *chaincode {
 						continue
 					}
 				}
-				cc.Code = append(cc.Code, nextD.code)
-				cc.Points = append(cc.Points, nextP)
+				code = append(code, nextD.code)
+				points = append(points, nextP)
 				currentD = nextD
 				currentP = nextP
 				break
 			}
 		}
-		if start == currentP && checkP.in(cc.Points) {
+		if start == currentP && checkP.in(points) {
 			break
 		}
 	}
 
-	return cc
+	return &chaincode{
+		Start:  start,
+		Code:   code,
+		Points: points,
+	}
 }
 
 func newDirection(code byte) direction {
@@ -161,16 +229,12 @@ func newDirection(code byte) direction {
 	return direction{d, code}
 }
 
-func (d direction) nextDirections() []direction {
-	numOfDirection := byte(8)
+func (d direction) nextDirections() [8]direction {
 	firstDirection := byte(d.code + 5)
-	directionCodes := make([]byte, numOfDirection)
-	for i := range directionCodes {
-		directionCodes[i] = (firstDirection + byte(i)) % numOfDirection
-	}
-	nextDirections := make([]direction, numOfDirection)
+	nextDirections := [8]direction{}
 	for i := range nextDirections {
-		nextDirections[i] = newDirection(directionCodes[i])
+		directionCode := (firstDirection + byte(i)) % 8
+		nextDirections[i] = newDirection(directionCode)
 	}
 	return nextDirections
 }
