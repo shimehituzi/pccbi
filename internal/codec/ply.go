@@ -2,39 +2,18 @@ package codec
 
 import (
 	"bufio"
+	"fmt"
 	"math"
 	"os"
 	"strconv"
 	"strings"
 )
 
+// =================
+//      encode
+// =================
+
 func ReadPly(srcPath string, axis Axis) (Ply, *Header) {
-	ply := encPly(srcPath)
-	header := encHeader(ply, axis)
-	return ply, header
-}
-
-func EncVoxel(ply Ply, header *Header) Voxel {
-	voxel := make(Voxel, header.Length[0])
-	for i := range voxel {
-		voxel[i] = make(bitmap, header.Length[1])
-		for j := range voxel[i] {
-			voxel[i][j] = make([]byte, header.Length[2])
-		}
-	}
-
-	order := header.Axis.getOrder()
-	for _, point := range ply {
-		dim0 := point[order[0]] - header.Bias[0]
-		dim1 := point[order[1]] - header.Bias[1]
-		dim2 := point[order[2]] - header.Bias[2]
-		voxel[dim0][dim1][dim2] = 1
-	}
-
-	return voxel
-}
-
-func encPly(srcPath string) Ply {
 	fp, err := os.Open(srcPath)
 	if err != nil {
 		panic(err)
@@ -63,14 +42,8 @@ func encPly(srcPath string) Ply {
 		}
 	}
 
-	// エンコード時とデコード時の比較のために Sort している
-	// Voxel を作る上ではしてもしなくても関係ない
 	ply.Sort()
 
-	return ply
-}
-
-func encHeader(ply Ply, axis Axis) *Header {
 	var length, bias [3]int
 	order := axis.getOrder()
 	for d := 0; d < 3; d++ {
@@ -88,10 +61,31 @@ func encHeader(ply Ply, axis Axis) *Header {
 		length[d] = max - min + 1
 		bias[d] = min
 	}
-
-	return &Header{
+	header := &Header{
 		Axis:   axis,
 		Length: length,
 		Bias:   bias,
 	}
+	return ply, header
+}
+
+// =================
+//      decode
+// =================
+
+func WritePly(dstPath string, ply Ply) {
+	fp, err := os.Create(dstPath)
+	if err != nil {
+		panic(err)
+	}
+	defer fp.Close()
+
+	w := bufio.NewWriter(fp)
+
+	for _, v := range ply {
+		line := fmt.Sprintf("%d %d %d\n", v[0], v[1], v[2])
+		w.WriteString(line)
+	}
+
+	w.Flush()
 }
