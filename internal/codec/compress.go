@@ -15,8 +15,8 @@ const codeFreqMax = 8
 //      encode
 // =================
 
-func Encode(pccPath string, stream *Stream, header *Header) (int, int) {
-	fp, err := os.Create(pccPath)
+func Encode(dstPath string, stream *Stream, header *Header) (int, int) {
+	fp, err := os.Create(dstPath)
 	if err != nil {
 		panic(err)
 	}
@@ -84,8 +84,8 @@ func Encode(pccPath string, stream *Stream, header *Header) (int, int) {
 //      decode
 // =================
 
-func Decode(pccPath string) (*Stream, *Header) {
-	fp, err := os.Open(pccPath)
+func Decode(dstPath string) (*Stream, *Header) {
+	fp, err := os.Open(dstPath)
 	if err != nil {
 		panic(err)
 	}

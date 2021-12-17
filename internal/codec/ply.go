@@ -13,8 +13,8 @@ import (
 //      encode
 // =================
 
-func ReadPly(srcPath string, axis Axis) (Ply, *Header) {
-	fp, err := os.Open(srcPath)
+func ReadPly(srcPlyPath string, axis Axis) (Ply, *Header) {
+	fp, err := os.Open(srcPlyPath)
 	if err != nil {
 		panic(err)
 	}
@@ -41,8 +41,6 @@ func ReadPly(srcPath string, axis Axis) (Ply, *Header) {
 			isData = true
 		}
 	}
-
-	ply.Sort()
 
 	var length, bias [3]int
 	order := axis.getOrder()
@@ -73,8 +71,8 @@ func ReadPly(srcPath string, axis Axis) (Ply, *Header) {
 //      decode
 // =================
 
-func WritePly(dstPath string, ply Ply) {
-	fp, err := os.Create(dstPath)
+func WritePly(recPath string, ply Ply) {
+	fp, err := os.Create(recPath)
 	if err != nil {
 		panic(err)
 	}

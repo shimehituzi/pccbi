@@ -14,39 +14,52 @@ func main() {
 	// Arguments
 	axis := codec.YZX
 
-	srcPath := "../../DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"[4:]
-	pccPath := "./out/compressed"
-	dstPath := "./out/destination"
-
-	sortedPath := "./out/sorted.ply"
-	etcPath := "./out/etc"
-	recPath := "./out/rec.ply"
-
 	// Preprocessing
-	numPoints := tool.Preprocessing(srcPath, sortedPath, etcPath)
+	numPoints := tool.Preprocessing(origPath, srcPlyPath, etcPath)
 
 	// Encode
 	times[1] = time.Now()
-	encPly, eh := codec.ReadPly(srcPath, axis)
+	encPly, eh := codec.ReadPly(srcPlyPath, axis)
 	encStream := encPly.ConvertVoxel(eh).ConvertContour(eh).ConvertStream()
-	dataBits, headerBits := codec.Encode(pccPath, encStream, eh)
+	dataBits, headerBits := codec.Encode(dstPath, encStream, eh)
 	times[2] = time.Now()
 
 	// Decode
 	times[3] = time.Now()
-	decStream, dh := codec.Decode(pccPath)
+	decStream, dh := codec.Decode(dstPath)
 	decPly := decStream.ConvertContour(dh).ConvertVoxel(dh).ConvertPly(dh)
-	codec.WritePly(dstPath, decPly)
+	codec.WritePly(recPath, decPly)
 	times[4] = time.Now()
 
 	// Postprocessing
-	tool.Postprocessing(dstPath, etcPath, recPath)
+	tool.Postprocessing(recPath, etcPath, recPlyPath)
 
 	// Chack Lossless
-	result := tool.TestLossless(sortedPath, recPath)
-	tool.DeleteTmpFile(result, sortedPath, dstPath, etcPath)
+	result := tool.TestLossless(srcPlyPath, recPlyPath)
+	tool.DeleteTmpFile(result, srcPlyPath, recPath, etcPath)
 
 	// Report
 	times[5] = time.Now()
 	tool.Report(result, dataBits, headerBits, numPoints, times)
 }
+
+// 座標でソートされていないオリジナルの ply
+const origPath = "./DATABASE/orig/soldier/soldier/Ply/soldier_vox10_0537.ply"
+
+// 座標でソートした ply
+const srcPlyPath = "./out/src.ply"
+
+// 復元した ply
+const recPlyPath = "./out/rec.ply"
+
+// 座標以外の元データ
+const etcPath = "./out/attributes_and_header"
+
+// 座標のみの元データ
+const srcPath = "./out/coordinates_source"
+
+// 圧縮データ
+const dstPath = "./out/coordinates_compressed"
+
+// 座標のみの復元データ
+const recPath = "./out/coordinates_reconstructed"

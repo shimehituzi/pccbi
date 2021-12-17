@@ -6,8 +6,8 @@ import (
 	"os/exec"
 )
 
-func TestLossless(sortedPath, recPath string) bool {
-	out, err := exec.Command("cmp", sortedPath, recPath).Output()
+func TestLossless(srcPlyPath, recPlyPath string) bool {
+	out, err := exec.Command("cmp", srcPlyPath, recPlyPath).Output()
 	if err != nil {
 		fmt.Println("ERROR", err)
 		fmt.Printf("%s\n", out)
@@ -18,14 +18,14 @@ func TestLossless(sortedPath, recPath string) bool {
 	}
 }
 
-func DeleteTmpFile(isLossless bool, sortedPath, dstPath, etcPath string) {
+func DeleteTmpFile(isLossless bool, srcPlyPath, recPath, etcPath string) {
 	if !isLossless {
 		return
 	}
-	if err := os.Remove(sortedPath); err != nil {
+	if err := os.Remove(srcPlyPath); err != nil {
 		panic(err)
 	}
-	if err := os.Remove(dstPath); err != nil {
+	if err := os.Remove(recPath); err != nil {
 		panic(err)
 	}
 	if err := os.Remove(etcPath); err != nil {
