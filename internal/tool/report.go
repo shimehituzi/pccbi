@@ -14,9 +14,10 @@ func Report(isLossless bool, dataBits, headerBits, numPoints int, times [6]time.
 	decTime := times[4].Sub(times[3]).Seconds()
 	totalBits := dataBits + headerBits
 	fmt.Println("=====================================")
-	fmt.Printf("     all time\t: %10.2f sec.\n", allTime)
 	fmt.Printf("  encode time\t: %10.2f sec.\n", encTime)
 	fmt.Printf("  decode time\t: %10.2f sec.\n", decTime)
+	fmt.Printf("   other time\t: %10.2f sec.\n", allTime-encTime-decTime)
+	fmt.Printf("   total time\t: %10.2f sec.\n", allTime)
 	fmt.Println("-------------------------------------")
 	fmt.Printf("  header bits\t: %10d bits\n", headerBits)
 	fmt.Printf("    data bits\t: %10d bits\n", dataBits)
