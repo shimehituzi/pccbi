@@ -13,8 +13,8 @@ import (
 //      encode
 // =================
 
-func ReadPly(srcPlyPath string, axis Axis) (Ply, *Header) {
-	fp, err := os.Open(srcPlyPath)
+func ReadPly(srcPath string, axis Axis) (Ply, *Header) {
+	fp, err := os.Open(srcPath)
 	if err != nil {
 		panic(err)
 	}
@@ -23,23 +23,17 @@ func ReadPly(srcPlyPath string, axis Axis) (Ply, *Header) {
 	sccaner := bufio.NewScanner(fp)
 
 	ply := Ply{}
-	for isData := false; sccaner.Scan(); {
-		if isData {
-			text := sccaner.Text()
-			line := strings.Split(text, " ")
-			data := [3]int{}
-			for i := 0; i < 3; i++ {
-				data[i], err = strconv.Atoi(line[i])
-				if err != nil {
-					panic(err)
-				}
+	for sccaner.Scan() {
+		text := sccaner.Text()
+		line := strings.Split(text, " ")
+		data := [3]int{}
+		for i := 0; i < 3; i++ {
+			data[i], err = strconv.Atoi(line[i])
+			if err != nil {
+				panic(err)
 			}
-			ply = append(ply, data)
 		}
-
-		if "end_header" == sccaner.Text() {
-			isData = true
-		}
+		ply = append(ply, data)
 	}
 
 	var length, bias [3]int

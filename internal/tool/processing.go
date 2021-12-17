@@ -1,23 +1,25 @@
 package tool
 
-func Preprocessing(origPath, srcPlyPath, etcPath string) int {
+func Preprocessing(origPath, srcPlyPath, srcPath, etcPath string) int {
 	data, header := readPly(origPath)
 	data.Sort()
 
 	writePly(srcPlyPath, data, header)
 
-	etcData := make(plyData, len(data))
-	for i := range etcData {
-		etcData[i] = data[i][3:]
+	coodinatesData := make(plyData, len(data))
+	attributesData := make(plyData, len(data))
+	for i := range data {
+		coodinatesData[i] = data[i][:3]
+		attributesData[i] = data[i][3:]
 	}
-
-	writePly(etcPath, etcData, header)
+	writeCoordinates(srcPath, coodinatesData)
+	writePly(etcPath, attributesData, header)
 
 	return len(data)
 }
 
 func Postprocessing(recPath, etcPath, recPlyPath string) {
-	dstData := readCoordinatesFile(recPath)
+	dstData := readCoordinates(recPath)
 	etcData, header := readPly(etcPath)
 
 	if len(dstData) != len(etcData) {

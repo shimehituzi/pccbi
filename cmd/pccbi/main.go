@@ -15,11 +15,11 @@ func main() {
 	axis := codec.YZX
 
 	// Preprocessing
-	numPoints := tool.Preprocessing(origPath, srcPlyPath, etcPath)
+	numPoints := tool.Preprocessing(origPath, srcPlyPath, srcPath, etcPath)
 
 	// Encode
 	times[1] = time.Now()
-	encPly, eh := codec.ReadPly(srcPlyPath, axis)
+	encPly, eh := codec.ReadPly(srcPath, axis)
 	encStream := encPly.ConvertVoxel(eh).ConvertContour(eh).ConvertStream()
 	dataBits, headerBits := codec.Encode(dstPath, encStream, eh)
 	times[2] = time.Now()
@@ -35,8 +35,8 @@ func main() {
 	tool.Postprocessing(recPath, etcPath, recPlyPath)
 
 	// Chack Lossless
-	result := tool.TestLossless(srcPlyPath, recPlyPath)
-	tool.DeleteTmpFile(result, srcPlyPath, recPath, etcPath)
+	result := tool.TestLossless(srcPath, recPath, srcPlyPath, recPlyPath)
+	tool.DeleteTmpFile(result, srcPath, recPath, srcPlyPath, recPlyPath, etcPath)
 
 	// Report
 	times[5] = time.Now()
