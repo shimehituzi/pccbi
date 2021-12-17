@@ -2,25 +2,13 @@ package tool
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
 )
 
-func Postprocessing(dstPath, etcPath, recPath string) {
-	dstData := readDst(dstPath)
-	etcData, header := readPly(etcPath)
-	if len(dstData) != len(etcData) {
-		panic("The plyData length is different")
-	}
-	data := make(plyData, len(dstData))
-	for i := range data {
-		data[i] = append(dstData[i], etcData[i]...)
-	}
-	writePly(recPath, data, header)
-}
-
-func readDst(path string) plyData {
+func readCoordinates(path string) plyData {
 	fp, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -43,4 +31,21 @@ func readDst(path string) plyData {
 	}
 
 	return data
+}
+
+func writeCoordinates(path string, data plyData) {
+	fp, err := os.Create(path)
+	if err != nil {
+		panic(err)
+	}
+	defer fp.Close()
+
+	w := bufio.NewWriter(fp)
+
+	for _, v := range data {
+		line := fmt.Sprintf("%d %d %d\n", v[0], v[1], v[2])
+		w.WriteString(line)
+	}
+
+	w.Flush()
 }

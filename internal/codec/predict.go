@@ -2,34 +2,26 @@ package codec
 
 const divisor = 8
 
-func encDecorrelation(code []byte) []byte {
-	return encDiff(code)
-}
-
-func decDecorrelation(code []byte) []byte {
-	return decDiff(code)
-}
-
-func encDiff(code []byte) (diff []byte) {
+func encDecorrelation(code []byte) (diff []byte) {
 	diff = make([]byte, len(code))
-	for i := range code {
-		if i == 0 {
-			diff[i] = code[i]
-		} else {
-			diff[i] = (code[i] - code[i-1]) % divisor
-		}
+	for i := range diff {
+		diff[i] = (code[i] - naivePredict(code[:i])) % divisor
 	}
 	return
 }
 
-func decDiff(diff []byte) (code []byte) {
+func decDecorrelation(diff []byte) (code []byte) {
 	code = make([]byte, len(diff))
-	for i := range diff {
-		if i == 0 {
-			code[i] = diff[i]
-		} else {
-			code[i] = (diff[i] + code[i-1]) % divisor
-		}
+	for i := range code {
+		code[i] = (diff[i] + naivePredict(code[:i])) % divisor
 	}
+	return
+}
+
+func naivePredict(data []byte) (pred byte) {
+	if len(data) == 0 {
+		return byte(0)
+	}
+	pred = data[len(data)-1]
 	return
 }

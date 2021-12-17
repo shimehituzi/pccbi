@@ -24,7 +24,7 @@ func NewBitbuf(enc bool) *bitbuf {
 	return bit
 }
 
-func (bit *bitbuf) putbits(w *bufio.Writer, n int, x uint) int {
+func (bit *bitbuf) Putbits(w *bufio.Writer, n int, x uint) int {
 	bits := n
 	if bits <= 0 {
 		return 0
@@ -43,7 +43,7 @@ func (bit *bitbuf) putbits(w *bufio.Writer, n int, x uint) int {
 	return bits
 }
 
-func (bit *bitbuf) getbits(r *bufio.Reader, n int) uint {
+func (bit *bitbuf) Getbits(r *bufio.Reader, n int) uint {
 	x := uint(0)
 	if n <= 0 {
 		return 0
@@ -91,7 +91,7 @@ func testBitsioEncode(filename string, val []uint) int {
 
 	bits := 0
 	for _, elem := range val {
-		bits += bitbuf.putbits(w, bitsize, elem)
+		bits += bitbuf.Putbits(w, bitsize, elem)
 	}
 	w.Flush()
 
@@ -111,7 +111,7 @@ func testBitsioDecode(filename string, length int) (val []uint) {
 
 	val = make([]uint, length)
 	for i := range val {
-		val[i] = bitbuf.getbits(r, bitsize)
+		val[i] = bitbuf.Getbits(r, bitsize)
 	}
 
 	return val
