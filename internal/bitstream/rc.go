@@ -16,12 +16,7 @@ type RangeCoder struct {
 	range_, low, code uint64
 }
 
-type Pmodel struct {
-	freq, cumfreq   []uint64
-	totfreq, offset uint64
-}
-
-func newRangeCoder() *RangeCoder {
+func NewRangeCoder() *RangeCoder {
 	return &RangeCoder{
 		range_: math.MaxUint64,
 		low:    0,
@@ -29,7 +24,7 @@ func newRangeCoder() *RangeCoder {
 	}
 }
 
-func (rc *RangeCoder) encode(w *bufio.Writer, pm *Pmodel, val uint64) {
+func (rc *RangeCoder) Encode(w *bufio.Writer, pm *Pmodel, val uint64) {
 	rc.range_ /= pm.totfreq
 	rc.low += pm.cumfreq[val] * rc.range_
 	rc.range_ *= pm.freq[val]
@@ -55,7 +50,7 @@ func (rc *RangeCoder) encode(w *bufio.Writer, pm *Pmodel, val uint64) {
 	}
 }
 
-func (rc *RangeCoder) finishenc(w *bufio.Writer) (bits uint64) {
+func (rc *RangeCoder) Finishenc(w *bufio.Writer) (bits uint64) {
 	for i := 0; i < SIZE; i += 8 {
 		w.WriteByte(byte(rc.low >> (SIZE - 8)))
 		rc.code += 8
@@ -67,7 +62,7 @@ func (rc *RangeCoder) finishenc(w *bufio.Writer) (bits uint64) {
 	return
 }
 
-func (rc *RangeCoder) startdec(r *bufio.Reader) {
+func (rc *RangeCoder) Startdec(r *bufio.Reader) {
 	for i := 0; i < SIZE; i += 8 {
 		buf, err := r.ReadByte()
 		if err != nil && err != io.EOF {
@@ -77,7 +72,7 @@ func (rc *RangeCoder) startdec(r *bufio.Reader) {
 	}
 }
 
-func (rc *RangeCoder) decode(r *bufio.Reader, pm *Pmodel) (val uint64) {
+func (rc *RangeCoder) Decode(r *bufio.Reader, pm *Pmodel) (val uint64) {
 	var rfreq uint64
 	rc.range_ /= pm.totfreq
 	rfreq = (rc.code - rc.low) / rc.range_
@@ -190,7 +185,7 @@ func testEnc() {
 	val, _, _, _, _ := getTestData()
 
 	pm := newTestEncPmodel(val)
-	rc := newRangeCoder()
+	rc := NewRangeCoder()
 
 	filename := "compressed"
 	fp, err := os.Create(filename)
@@ -201,10 +196,10 @@ func testEnc() {
 	w := bufio.NewWriter(fp)
 
 	for _, v := range val {
-		rc.encode(w, pm, v)
+		rc.Encode(w, pm, v)
 	}
 
-	bits := rc.finishenc(w)
+	bits := rc.Finishenc(w)
 
 	fmt.Println(bits)
 }
@@ -213,7 +208,7 @@ func testDec() {
 	_, freq, min, max, length := getTestData()
 
 	pm := newTestDecPmodel(freq, min, max)
-	rc := newRangeCoder()
+	rc := NewRangeCoder()
 
 	filename := "compressed"
 	fp, err := os.Open(filename)
@@ -223,11 +218,11 @@ func testDec() {
 	defer fp.Close()
 	r := bufio.NewReader(fp)
 
-	rc.startdec(r)
+	rc.Startdec(r)
 
 	val := make([]uint64, length)
 	for i := 0; i < length; i++ {
-		val[i] = rc.decode(r, pm)
+		val[i] = rc.Decode(r, pm)
 	}
 
 	fmt.Println(val)

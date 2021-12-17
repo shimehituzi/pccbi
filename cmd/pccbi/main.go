@@ -3,7 +3,6 @@ package main
 import (
 	"time"
 
-	"github.com/shimehituzi/pccbi/internal/bitstream"
 	"github.com/shimehituzi/pccbi/internal/codec"
 	"github.com/shimehituzi/pccbi/internal/tool"
 )
@@ -30,12 +29,12 @@ func main() {
 	times[1] = time.Now()
 	encPly, eh := codec.ReadPly(srcPath, axis)
 	encStream := encPly.ConvertVoxel(eh).ConvertContour(eh).ConvertStream()
-	dataBits, headerBits := bitstream.Encode(pccPath, encStream, eh)
+	dataBits, headerBits := codec.Encode(pccPath, encStream, eh)
 	times[2] = time.Now()
 
 	// Decode
 	times[3] = time.Now()
-	decStream, dh := bitstream.Decode(pccPath)
+	decStream, dh := codec.Decode(pccPath)
 	decPly := decStream.ConvertContour(dh).ConvertVoxel(dh).ConvertPly(dh)
 	codec.WritePly(dstPath, decPly)
 	times[4] = time.Now()
