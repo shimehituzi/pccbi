@@ -6,7 +6,7 @@ import "sync"
 //      encode
 // =================
 
-func EncContour(voxel Voxel, header *Header) Contour {
+func (voxel Voxel) ConvertContour(header *Header) Contour {
 	frames := NewFrames(voxel, header)
 
 	contour := make(Contour, len(frames))
@@ -136,7 +136,7 @@ func contourTracking(img bitmap, value byte, inner bool) *chaincode {
 //      decode
 // =================
 
-func DecContour(contour Contour, header *Header) Voxel {
+func (contour Contour) ConvertVoxel(header *Header) Voxel {
 	voxel := make(Voxel, header.Length[0])
 	for f := range contour {
 		voxel[f] = getFrame(contour[f], header.Length[1], header.Length[2])

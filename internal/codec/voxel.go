@@ -4,7 +4,7 @@ package codec
 //      encode
 // =================
 
-func EncVoxel(ply Ply, header *Header) Voxel {
+func (ply Ply) ConvertVoxel(header *Header) Voxel {
 	voxel := make(Voxel, header.Length[0])
 	for i := range voxel {
 		voxel[i] = make(bitmap, header.Length[1])
@@ -28,7 +28,7 @@ func EncVoxel(ply Ply, header *Header) Voxel {
 //      decode
 // =================
 
-func DecVoxcel(voxel Voxel, header *Header) Ply {
+func (voxel Voxel) ConvertPly(header *Header) Ply {
 	ply := Ply{}
 	index := header.Axis.getIndex()
 	bias := header.Bias

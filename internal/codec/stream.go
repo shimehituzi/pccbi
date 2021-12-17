@@ -6,7 +6,7 @@ import "bytes"
 //      encode
 // =================
 
-func EncStream(contour Contour) *Stream {
+func (contour Contour) ConvertStream() *Stream {
 	startPoints := [][3]uint{}
 	codes := []uint{}
 	numCodesArray := []uint{}
@@ -39,7 +39,7 @@ func EncStream(contour Contour) *Stream {
 //      decode
 // =================
 
-func DecStream(stream *Stream, header *Header) Contour {
+func (stream *Stream) ConvertContour(header *Header) Contour {
 	// stream.Codes を 8 で split する
 	codes := bytes.Split(uint2byte(stream.Codes), []byte{8})
 
